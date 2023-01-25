@@ -51,6 +51,7 @@ public class ConsoleClient {
             var client = new ConsoleClient(socketChannel, reader, writer, scanner);
 
             //Send initial request to server so that the server can identify which client belongs to which socket!
+            //...
 
             var currentScreenHandler = new ScreenHandler(client, client.session.currentScreen);
 
@@ -160,19 +161,21 @@ public class ConsoleClient {
         }
 
         //Do something here to make this user sleep until another user joins the game
-        var serverResponseRaw = receiveFromServer();
+        var serverResponseRaw = receiveFromServer(socketChannel);
 
         printlnClean("\nOoooh we found someone haha. Awesome!");
 
-        var serverResponse = sendAndReceive();
+//        var serverResponse = sendAndReceive();
+
+        var serverResponse = gson.fromJson(serverResponseRaw, ServerResponse.class);
 
         if (serverResponse.message() != null) {
             printlnClean(serverResponse.message());
         }
 
-        if (serverResponse.status() == ResponseStatus.LOGOUT) {
-            this.session.username = null;
-        }
+//        if (serverResponse.status() == ResponseStatus.LOGOUT) {
+//            this.session.username = null;
+//        }
 
         return serverResponse;
     }
@@ -187,8 +190,8 @@ public class ConsoleClient {
         var request = new ClientRequest(userInput, session);
         var requestJson = gson.toJson(request);
 
-        this.sendToServer(socketChannel, writer, requestJson);
-        var serverResponseRaw = receiveFromServer();
+        this.sendToServer(writer, requestJson);
+        var serverResponseRaw = receiveFromServer(socketChannel);
 
         var serverResponse = gson.fromJson(serverResponseRaw, ServerResponse.class);
 
@@ -199,17 +202,17 @@ public class ConsoleClient {
         return scanner.nextLine();
     }
 
-    private void sendToServer(SocketChannel socketChannel, PrintWriter writer, String input) throws IOException {
+    private void sendToServer(PrintWriter writer, String input) throws IOException {
 //        printlnClean("Sending message <" + input + "> to the server...");
         writer.print(input);
         writer.flush();
+    }
 
+    private String receiveFromServer(SocketChannel socketChannel) throws IOException {
         buffer.clear(); // switch to writing mode
 
         socketChannel.read(buffer);
-    }
 
-    private String receiveFromServer() throws UnsupportedEncodingException {
         buffer.flip(); // switch to reading mode
 
         if (!buffer.hasRemaining()) {
@@ -220,6 +223,8 @@ public class ConsoleClient {
         buffer.get(byteArray);
 
         String reply = new String(byteArray, "UTF-8");
+
+//        buffer.clear();
 
         return reply;
     }

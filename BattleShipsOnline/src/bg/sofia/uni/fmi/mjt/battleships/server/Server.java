@@ -40,8 +40,6 @@ public class Server {
     private GuestHomeController guestHomeController;
     private GameController gameController;
 
-    private Map<ConsoleClient, SocketChannel>
-
     public Server(int port, CommandExecutor commandExecutor, Database db) {
         this.port = port;
         this.commandExecutor = commandExecutor;
@@ -90,8 +88,20 @@ public class Server {
                             // Get server response
                             var serverResponse = getServerResponse(clientRequest);
 
-                            if (serverResponse.status() == ResponseStatus.JOINING_GAME) {
+                            //Attach the session object to the selectionKey
+                            key.attach(serverResponse.session());
 
+                            if (serverResponse.status() == ResponseStatus.JOINING_GAME) {
+                                for (var selectionKey : selector.keys()) {
+                                    var keySession = (SessionCookie)selectionKey.attachment();
+                                    if (keySession != null && keySession.username.equals("roskata")) {
+                                        var newServerResponse = new ServerResponse(
+                                            ResponseStatus.OK, null, "asdasdasd finally", keySession);
+
+                                        writeClientOutput((SocketChannel) selectionKey.channel(), gson.toJson(newServerResponse));
+                                    }
+
+                                }
                             }
 
                             //Print the server response for debug purposes

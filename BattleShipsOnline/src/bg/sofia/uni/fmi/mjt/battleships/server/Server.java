@@ -56,6 +56,8 @@ public class Server {
             this.buffer = ByteBuffer.allocate(BUFFER_SIZE);
             isServerWorking = true;
 
+            System.out.println("The server is working!");
+
             while (isServerWorking) {
                 try {
                     int readyChannels = selector.select();

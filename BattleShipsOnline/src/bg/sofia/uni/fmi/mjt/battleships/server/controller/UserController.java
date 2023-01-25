@@ -8,6 +8,8 @@ import bg.sofia.uni.fmi.mjt.battleships.server.database.models.User;
 
 public class UserController extends Controller {
 
+    private static final String VALID_REGISTRATION_REGEX = "^\\w{1,}$";
+
     private Database db;
 
     public UserController(Database db) {
@@ -32,7 +34,7 @@ public class UserController extends Controller {
         var user = new User(username, password);
 
         //Validate that user exists
-        if (password != null && !db.getUsers().contains(user)) {
+        if (password != null && !db.userTable.getUsers().contains(user)) {
             serverResponse = invalidCommandResponse(ScreenUI.INVALID_USER_DOES_NOT_EXIST);
             return serverResponse;
         }
@@ -74,25 +76,38 @@ public class UserController extends Controller {
 
         //Validate password
         if (password != null) {
+
+            //Check if password length is valid
             if (password.length() < 8) {
                 serverResponse = invalidCommandResponse(ScreenUI.INVALID_PASSWORD_LENGTH);
                 return serverResponse;
             }
 
-            if (db.getUsers().stream().anyMatch(x -> x.username().equals(username))) {
+            //Check if the username or password contains unallowed characters
+            if (!username.matches(VALID_REGISTRATION_REGEX)) {
+
+                return invalidCommandResponse(ScreenUI.INVALID_USERNAME_FORBIDDEN_CHARS);
+            }
+            else if (!password.matches(VALID_REGISTRATION_REGEX)) {
+
+                return invalidCommandResponse(ScreenUI.INVALID_PASSWORD_FORBIDDEN_CHARS);
+            }
+
+            //Check if username is taken
+            if (db.userTable.userExistWithName(username)) {
                 serverResponse = invalidCommandResponse(ScreenUI.INVALID_USERNAME_TAKEN);
                 return serverResponse;
             }
 
-            if (db.getUsers().stream().anyMatch(x -> x.password().equals(password))) {
+            //Check if password is taken
+            if (db.userTable.userExistWithPassword(password)) {
                 serverResponse = invalidCommandResponse(ScreenUI.INVALID_PASSWORD_TAKEN);
                 return serverResponse;
             }
         }
 
         if (password != null) {
-
-            db.addUser(username, password);
+            db.userTable.addUser(username, password);
 
             serverResponse = new ServerResponse(ResponseStatus.REDIRECT, ScreenInfo.GUEST_HOME_SCREEN,
                 ScreenUI.SUCCESSFUL_REGISTRATION);

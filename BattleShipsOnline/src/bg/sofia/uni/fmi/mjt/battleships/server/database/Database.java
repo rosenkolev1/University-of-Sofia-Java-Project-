@@ -1,101 +1,32 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.database;
 
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.Game;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.User;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.table.GameTable;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.table.UserTable;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.Buffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class Database {
+    private static final String defaultEntrySeparator = "\n";
+    private static final String defaultFieldSeparator = " ";
 
-    private String entrySeparator = "\n";
-    private String fieldSeparator = " ";
+    public UserTable userTable;
 
-    private Path usersTablePath = Path.of("users.txt");
+    public GameTable gameTable;
 
-    private List<User> users;
-
-    private List<Game> games;
-
-    public Database(String usersPath) {
-        this.entrySeparator = "\n";
-
-        usersTablePath = Path.of(usersPath);
-        this.users = new ArrayList<>();
-        initializeUsers();
-
-
+    public Database(String usersPath, String gamesPath, String entrySeparator, String fieldSeparator) {
+        this.userTable = new UserTable(usersPath, entrySeparator, fieldSeparator);
+        this.gameTable = new GameTable(gamesPath, entrySeparator, fieldSeparator);
     }
 
-    public User getUser(String username) {
-        for (var user : users) {
-            if (user.username().equals(username)) {
-                return user;
-            }
-        }
-
-        return null;
+    public Database(String usersPath, String gamesPath) {
+        this(usersPath, gamesPath, defaultEntrySeparator, defaultFieldSeparator);
     }
 
-    public List<User> getUsers() {
-        var copyList = new ArrayList<User>();
-
-        for (var user : users) {
-            copyList.add(user.clone());
-        }
-
-        return copyList;
-    }
-
-    public void addUser(String username, String password) {
-        try (var bufferedWriter = Files.newBufferedWriter(usersTablePath, StandardOpenOption.APPEND)) {
-            //TODO: Add hashing with salt to passwords
-            var newUser = new User(username, password);
-            this.users.add(newUser);
-
-            bufferedWriter.append(username + " " + password + entrySeparator);
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void initializeUsers() {
-        if (!Files.isRegularFile(usersTablePath)) {
-            try {
-                Files.createFile(usersTablePath);
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        try (var bufferedReader = Files.newBufferedReader(usersTablePath)) {
-
-            while(true) {
-                var line = bufferedReader.readLine();
-
-                if (line == null) {
-                    break;
-                }
-
-                //TODO: Add hashing with salt to passwords
-
-                var fields = line.split(fieldSeparator);
-                var username = fields[0];
-                var password = fields[1];
-
-                this.users.add(new User(username, password));
-            }
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

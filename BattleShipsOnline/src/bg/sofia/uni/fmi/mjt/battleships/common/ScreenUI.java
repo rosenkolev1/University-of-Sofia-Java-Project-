@@ -34,10 +34,12 @@ public class ScreenUI {
         """
         \nPlease register by entering your username and password, seperated by a space in between:
         Password should be at least 8 characters long and cannot contain whitespaces! 
-        """;
+        """ + "The username and password can only contain numbers, letters and underscores";
 
+    public static final String INVALID_USERNAME_FORBIDDEN_CHARS = "\nThis username contains forbidden characters! Choose a different one!";
     public static final String INVALID_USERNAME_TAKEN = "\nThis username already exists! Choose a different one!";
     public static final String INVALID_PASSWORD_LENGTH = "\nInvalid password! The password should be at least 8 characters long!";
+    public static final String INVALID_PASSWORD_FORBIDDEN_CHARS = "\nThis password contains forbidden characters! Choose a different one!";
     public static final String INVALID_PASSWORD_TAKEN = "\nThis password already exists! Choose a different one!";
 
     public static final String SUCCESSFUL_REGISTRATION = "\nSuccessful registration! You can now log in to your account and start playing!";

@@ -1,10 +1,12 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.controller;
 
 import bg.sofia.uni.fmi.mjt.battleships.common.*;
-import bg.sofia.uni.fmi.mjt.battleships.server.command.Command;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.Game;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.Game;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.GameStatus;
+
+import java.util.List;
 
 public class HomeController extends Controller {
 
@@ -20,11 +22,7 @@ public class HomeController extends Controller {
         var command = CommandCreator.newCommand(request.input());
         var args = command.arguments();
 
-        if (request.input().equals(request.username())) {
-            serverResponse = new ServerResponse(ResponseStatus.OK, null,
-                ScreenUI.PLACEHOLDER);
-        }
-        else if (command.command().equals(CommandInfo.CREATE_GAME)) {
+        if (command.command().equals(CommandInfo.CREATE_GAME)) {
 
             //Validate command
             if (args.length != 1) {
@@ -39,13 +37,14 @@ public class HomeController extends Controller {
                 return serverResponse;
             }
 
+            var curUser = db.userTable.getUser(request.username());
 
+            var game = new Game(1, gameName, List.of(curUser), GameStatus.PENDING, true);
 
-//            var user1 = db.getUser(request.username());
-//            var game = new Game(user1, user1, true);
-//
-//            serverResponse = new ServerResponse(ResponseStatus.OK, null,
-//                game.players.get(0).board.toString() + "\n" + game.players.get(1).board.toString());
+            db.gameTable.addGame(game);
+
+            serverResponse = new ServerResponse(ResponseStatus.OK, null,
+                game.players.get(0).board.toString());
 
         }
         else if (request.input().equals(CommandInfo.LOG_OUT)) {
@@ -61,6 +60,10 @@ public class HomeController extends Controller {
         }
         else {
             serverResponse = new ServerResponse(ResponseStatus.INVALID_COMMAND, null, ScreenUI.invalidWithHelp(ScreenUI.INVALID_COMMAND));
+        }
+
+        if (serverResponse == null) {
+            throw new RuntimeException("Invalid server response exception!");
         }
 
         return serverResponse;

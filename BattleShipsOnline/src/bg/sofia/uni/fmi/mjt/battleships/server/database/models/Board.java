@@ -211,7 +211,7 @@ public class Board {
             lastRank = curRank;
         }
 
-        stringBuilder.append("|\n");
+        stringBuilder.append("|");
 
         return stringBuilder.toString();
     }

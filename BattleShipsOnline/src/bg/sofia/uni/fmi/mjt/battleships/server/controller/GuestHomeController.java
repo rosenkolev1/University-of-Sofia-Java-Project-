@@ -10,25 +10,26 @@ public class GuestHomeController {
 
         if (request.input().equals(CommandInfo.EXIT)) {
             serverResponse = new ServerResponse(ResponseStatus.EXIT, null,
-                ScreenUI.EXIT_SUCCESS);
+                ScreenUI.EXIT_SUCCESS, request.session());
         }
         else if (request.input().equals(CommandInfo.LOGIN) || request.input().equals(CommandInfo.LOGIN_SHORTHAND)) {
             serverResponse = new ServerResponse(ResponseStatus.REDIRECT, ScreenInfo.LOGIN_SCREEN,
-                null);
+                null, request.session());
         }
         else if (request.input().equals(CommandInfo.REGISTER) || request.input().equals(CommandInfo.REGISTER_SHORTHAND)) {
             serverResponse = new ServerResponse(ResponseStatus.REDIRECT, ScreenInfo.REGISTER_SCREEN,
-                null);
+                null, request.session());
         }
         else if (request.input().equals(CommandInfo.HELP)) {
             serverResponse = new ServerResponse(ResponseStatus.OK, null,
                 ScreenUI.getAvailableCommands(
                     CommandInfo.REGISTER, CommandInfo.REGISTER_SHORTHAND,
                     CommandInfo.LOGIN, CommandInfo.LOGIN_SHORTHAND,
-                    CommandInfo.EXIT, CommandInfo.HELP));
+                    CommandInfo.EXIT, CommandInfo.HELP), request.session());
         }
         else {
-            serverResponse = new ServerResponse(ResponseStatus.INVALID_COMMAND, null, ScreenUI.invalidWithHelp(ScreenUI.INVALID_COMMAND));
+            serverResponse = new ServerResponse(ResponseStatus.INVALID_COMMAND, null,
+                ScreenUI.invalidWithHelp(ScreenUI.INVALID_COMMAND), request.session());
         }
 
         return serverResponse;

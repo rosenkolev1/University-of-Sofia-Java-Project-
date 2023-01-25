@@ -110,16 +110,16 @@ public class Server {
     private ServerResponse getServerResponse(ClientRequest clientRequest) {
         ServerResponse serverResponse = null;
 
-        if (clientRequest.currentScreen().equals(ScreenInfo.LOGIN_SCREEN)) {
+        if (clientRequest.session().currentScreen.equals(ScreenInfo.LOGIN_SCREEN)) {
             return userController.loginResponse(clientRequest);
         }
-        else if (clientRequest.currentScreen().equals(ScreenInfo.REGISTER_SCREEN)) {
+        else if (clientRequest.session().currentScreen.equals(ScreenInfo.REGISTER_SCREEN)) {
             return userController.registerResponse(clientRequest);
         }
-        else if (clientRequest.currentScreen().equals(ScreenInfo.HOME_SCREEN)) {
+        else if (clientRequest.session().currentScreen.equals(ScreenInfo.HOME_SCREEN)) {
             return homeController.respond(clientRequest);
         }
-        else if (clientRequest.currentScreen().equals(ScreenInfo.GUEST_HOME_SCREEN)) {
+        else if (clientRequest.session().currentScreen.equals(ScreenInfo.GUEST_HOME_SCREEN)) {
             return guestHomeController.respond(clientRequest);
         }
 

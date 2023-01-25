@@ -24,7 +24,7 @@ public class UserController extends Controller {
 
         //Validate command
         if (args.length > 1) {
-            serverResponse = invalidCommandResponse();
+            serverResponse = invalidCommandResponse(request.session());
             return serverResponse;
         }
 
@@ -35,25 +35,27 @@ public class UserController extends Controller {
 
         //Validate that user exists
         if (password != null && !db.userTable.getUsers().contains(user)) {
-            serverResponse = invalidCommandResponse(ScreenUI.INVALID_USER_DOES_NOT_EXIST);
+            serverResponse = invalidCommandResponse(ScreenUI.INVALID_USER_DOES_NOT_EXIST, request.session());
             return serverResponse;
         }
 
         if (password != null) {
+            request.session().username = username;
+
             serverResponse = new ServerResponse(ResponseStatus.LOGIN, ScreenInfo.HOME_SCREEN,
-                ScreenUI.SUCCESSFUL_LOGIN, username);
+                ScreenUI.SUCCESSFUL_LOGIN, request.session());
         }
         else if (request.input().equals(CommandInfo.BACK)) {
             serverResponse = new ServerResponse(ResponseStatus.REDIRECT, ScreenInfo.GUEST_HOME_SCREEN,
-                null);
+                null, request.session());
         }
         else if (request.input().equals(CommandInfo.HELP)) {
             serverResponse = new ServerResponse(ResponseStatus.OK, null,
                 ScreenUI.getAvailableCommands(
-                    CommandInfo.LOGIN_CREDENTIALS, CommandInfo.BACK));
+                    CommandInfo.LOGIN_CREDENTIALS, CommandInfo.BACK), request.session());
         }
         else {
-            serverResponse = invalidCommandResponse();
+            serverResponse = invalidCommandResponse(request.session());
         }
 
         return serverResponse;
@@ -67,7 +69,7 @@ public class UserController extends Controller {
 
         //Validate command
         if (args.length > 1) {
-            serverResponse = invalidCommandResponse();
+            serverResponse = invalidCommandResponse(request.session());
             return serverResponse;
         }
 
@@ -79,29 +81,29 @@ public class UserController extends Controller {
 
             //Check if password length is valid
             if (password.length() < 8) {
-                serverResponse = invalidCommandResponse(ScreenUI.INVALID_PASSWORD_LENGTH);
+                serverResponse = invalidCommandResponse(ScreenUI.INVALID_PASSWORD_LENGTH, request.session());
                 return serverResponse;
             }
 
             //Check if the username or password contains unallowed characters
             if (!username.matches(VALID_REGISTRATION_REGEX)) {
 
-                return invalidCommandResponse(ScreenUI.INVALID_USERNAME_FORBIDDEN_CHARS);
+                return invalidCommandResponse(ScreenUI.INVALID_USERNAME_FORBIDDEN_CHARS, request.session());
             }
             else if (!password.matches(VALID_REGISTRATION_REGEX)) {
 
-                return invalidCommandResponse(ScreenUI.INVALID_PASSWORD_FORBIDDEN_CHARS);
+                return invalidCommandResponse(ScreenUI.INVALID_PASSWORD_FORBIDDEN_CHARS, request.session());
             }
 
             //Check if username is taken
             if (db.userTable.userExistWithName(username)) {
-                serverResponse = invalidCommandResponse(ScreenUI.INVALID_USERNAME_TAKEN);
+                serverResponse = invalidCommandResponse(ScreenUI.INVALID_USERNAME_TAKEN, request.session());
                 return serverResponse;
             }
 
             //Check if password is taken
             if (db.userTable.userExistWithPassword(password)) {
-                serverResponse = invalidCommandResponse(ScreenUI.INVALID_PASSWORD_TAKEN);
+                serverResponse = invalidCommandResponse(ScreenUI.INVALID_PASSWORD_TAKEN, request.session());
                 return serverResponse;
             }
         }
@@ -110,18 +112,18 @@ public class UserController extends Controller {
             db.userTable.addUser(username, password);
 
             serverResponse = new ServerResponse(ResponseStatus.REDIRECT, ScreenInfo.GUEST_HOME_SCREEN,
-                ScreenUI.SUCCESSFUL_REGISTRATION);
+                ScreenUI.SUCCESSFUL_REGISTRATION, request.session());
         }
         else if (request.input().equals(CommandInfo.BACK)) {
             serverResponse = new ServerResponse(ResponseStatus.REDIRECT, ScreenInfo.GUEST_HOME_SCREEN,
-                null);
+                null, request.session());
         }
         else if (request.input().equals(CommandInfo.HELP)) {
             serverResponse = new ServerResponse(ResponseStatus.OK, null,
-                ScreenUI.getAvailableCommands(CommandInfo.REGISTER_CREDENTIALS, CommandInfo.BACK, CommandInfo.HELP));
+                ScreenUI.getAvailableCommands(CommandInfo.REGISTER_CREDENTIALS, CommandInfo.BACK, CommandInfo.HELP), request.session());
         }
         else {
-            serverResponse = invalidCommandResponse();
+            serverResponse = invalidCommandResponse(request.session());
         }
 
         return serverResponse;

@@ -27,8 +27,7 @@ public class ConsoleClient {
     private final Scanner scanner;
     private final Gson gson;
 
-    private String currentScreen;
-    private String username;
+    private SessionCookie session;
 
     public ConsoleClient(SocketChannel socketChannel, BufferedReader reader, PrintWriter writer, Scanner scanner) {
         this.socketChannel = socketChannel;
@@ -36,8 +35,7 @@ public class ConsoleClient {
         this.writer = writer;
         this.scanner = scanner;
         this.gson = new Gson();
-        this.currentScreen = ScreenInfo.GUEST_HOME_SCREEN;
-        this.username = null;
+        this.session = new SessionCookie(ScreenInfo.GUEST_HOME_SCREEN, null);
     }
 
     public static void main(String[] args) {
@@ -52,7 +50,7 @@ public class ConsoleClient {
 
             var client = new ConsoleClient(socketChannel, reader, writer, scanner);
 
-            var currentScreenHandler = new ScreenHandler(client, client.currentScreen);
+            var currentScreenHandler = new ScreenHandler(client, client.session.currentScreen);
 
             while (true) {
                 var currentScreenResponse = currentScreenHandler.executeHandler();
@@ -66,11 +64,11 @@ public class ConsoleClient {
                          currentScreenResponse.status() == ResponseStatus.LOGIN ||
                          currentScreenResponse.status() == ResponseStatus.LOGOUT) {
 
-                    var fromScreen = client.currentScreen;
+                    var fromScreen = client.session.currentScreen;
                     var toScreen = currentScreenResponse.redirect();
 
                     if (ScreenInfo.validRedirect(fromScreen, toScreen)) {
-                        client.currentScreen = toScreen;
+                        client.session.currentScreen = toScreen;
                         currentScreenHandler.setHandler(toScreen);
                     }
                     else {
@@ -79,8 +77,6 @@ public class ConsoleClient {
                 }
                 //Handle invalid command
                 else if (currentScreenResponse.status() == ResponseStatus.INVALID_COMMAND) {
-//                    printlnClean(ScreenUI.INVALID_COMMAND);
-//                    printlnClean(ScreenUI.HELP_PROMPT);
 
                 }
             }
@@ -123,14 +119,14 @@ public class ConsoleClient {
         }
 
         if (serverResponse.status() == ResponseStatus.LOGIN) {
-            this.username = serverResponse.username();
+            this.session.username = serverResponse.session().username;
         }
 
         return serverResponse;
     }
 
     public ServerResponse homeScreen() throws IOException {
-        printlnClean(ScreenUI.homePrompt(username) +
+        printlnClean(ScreenUI.homePrompt(session.username) +
             ScreenUI.getAvailableCommands(
                 CommandInfo.CREATE_GAME_VERBOSE, CommandInfo.JOIN_GAME_VERBOSE, CommandInfo.SAVED_GAMES,
                 CommandInfo.LOAD_GAME_VERBOSE, CommandInfo.DELETE_GAME,
@@ -145,7 +141,7 @@ public class ConsoleClient {
         }
 
         if (serverResponse.status() == ResponseStatus.LOGOUT) {
-            this.username = null;
+            this.session.username = null;
         }
 
         return serverResponse;
@@ -158,7 +154,7 @@ public class ConsoleClient {
     private ServerResponse sendAndReceive() throws IOException {
         var userInput = this.getConsoleInput();
 
-        var request = new ClientRequest(userInput, currentScreen, username);
+        var request = new ClientRequest(userInput, session);
         var requestJson = gson.toJson(request);
 
         this.sendToServer(socketChannel, writer, requestJson);

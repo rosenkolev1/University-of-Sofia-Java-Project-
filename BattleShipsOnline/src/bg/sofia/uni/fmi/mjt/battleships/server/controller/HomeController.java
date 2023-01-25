@@ -26,40 +26,41 @@ public class HomeController extends Controller {
 
             //Validate command
             if (args.length != 1) {
-                serverResponse = invalidCommandResponse();
+                serverResponse = invalidCommandResponse(request.session());
                 return serverResponse;
             }
 
             var gameName = args[0];
 
             if (gameName.isBlank()) {
-                serverResponse = invalidCommandResponse("The name of the game is null, empty or blank!");
+                serverResponse = invalidCommandResponse("The name of the game is null, empty or blank!", request.session());
                 return serverResponse;
             }
 
-            var curUser = db.userTable.getUser(request.username());
+            var curUser = db.userTable.getUser(request.session().username);
 
             var game = new Game(1, gameName, List.of(curUser), GameStatus.PENDING, true);
 
             db.gameTable.addGame(game);
 
             serverResponse = new ServerResponse(ResponseStatus.OK, null,
-                game.players.get(0).board.toString());
+                game.players.get(0).board.toString(), request.session());
 
         }
         else if (request.input().equals(CommandInfo.LOG_OUT)) {
             serverResponse = new ServerResponse(ResponseStatus.LOGOUT, ScreenInfo.GUEST_HOME_SCREEN,
-                null);
+                null, request.session());
         }
         else if (request.input().equals(CommandInfo.HELP)) {
             serverResponse = new ServerResponse(ResponseStatus.OK, null,
                 ScreenUI.getAvailableCommands(
                     CommandInfo.CREATE_GAME_VERBOSE, CommandInfo.JOIN_GAME_VERBOSE, CommandInfo.SAVED_GAMES,
                     CommandInfo.LOAD_GAME_VERBOSE, CommandInfo.DELETE_GAME,
-                    CommandInfo.LOG_OUT, CommandInfo.HELP));
+                    CommandInfo.LOG_OUT, CommandInfo.HELP), request.session());
         }
         else {
-            serverResponse = new ServerResponse(ResponseStatus.INVALID_COMMAND, null, ScreenUI.invalidWithHelp(ScreenUI.INVALID_COMMAND));
+            serverResponse = new ServerResponse(ResponseStatus.INVALID_COMMAND, null,
+                ScreenUI.invalidWithHelp(ScreenUI.INVALID_COMMAND), request.session());
         }
 
         if (serverResponse == null) {

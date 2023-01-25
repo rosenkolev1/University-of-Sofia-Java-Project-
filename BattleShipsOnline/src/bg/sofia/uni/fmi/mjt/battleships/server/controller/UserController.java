@@ -6,7 +6,7 @@ import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.User;
 
-public class UserController {
+public class UserController extends Controller {
 
     private Database db;
 
@@ -112,11 +112,4 @@ public class UserController {
         return serverResponse;
     }
 
-    private ServerResponse invalidCommandResponse() {
-        return invalidCommandResponse(ScreenUI.invalidWithHelp(ScreenUI.INVALID_COMMAND));
-    }
-
-    private ServerResponse invalidCommandResponse(String message) {
-        return new ServerResponse(ResponseStatus.INVALID_COMMAND, null, message);
-    }
 }

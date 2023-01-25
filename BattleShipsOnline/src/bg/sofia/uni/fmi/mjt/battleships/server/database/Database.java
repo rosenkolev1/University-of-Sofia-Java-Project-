@@ -21,12 +21,26 @@ public class Database {
 
     private List<User> users;
 
+    private List<Game> games;
+
     public Database(String usersPath) {
-        usersTablePath = Path.of(usersPath);
-        this.users = new ArrayList<>();
         this.entrySeparator = "\n";
 
+        usersTablePath = Path.of(usersPath);
+        this.users = new ArrayList<>();
         initializeUsers();
+
+
+    }
+
+    public User getUser(String username) {
+        for (var user : users) {
+            if (user.username().equals(username)) {
+                return user;
+            }
+        }
+
+        return null;
     }
 
     public List<User> getUsers() {

@@ -44,7 +44,7 @@ public class Server {
         this.db = db;
         this.gson = new Gson();
         this.userController = new UserController(db);
-        this.homeController = new HomeController();
+        this.homeController = new HomeController(db);
         this.guestHomeController = new GuestHomeController();
     }
 

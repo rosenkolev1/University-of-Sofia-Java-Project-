@@ -132,8 +132,8 @@ public class ConsoleClient {
     public ServerResponse homeScreen() throws IOException {
         printlnClean(ScreenUI.homePrompt(username) +
             ScreenUI.getAvailableCommands(
-                CommandInfo.CREATE_GAME, CommandInfo.JOIN_GAME, CommandInfo.SAVED_GAMES,
-                CommandInfo.LOAD_GAME, CommandInfo.DELETE_GAME,
+                CommandInfo.CREATE_GAME_VERBOSE, CommandInfo.JOIN_GAME_VERBOSE, CommandInfo.SAVED_GAMES,
+                CommandInfo.LOAD_GAME_VERBOSE, CommandInfo.DELETE_GAME,
                 CommandInfo.LOG_OUT, CommandInfo.HELP
             ) +
             ScreenUI.enterCommandPrompt());

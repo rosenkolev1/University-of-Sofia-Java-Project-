@@ -12,6 +12,11 @@ public class SessionCookie {
         this.username = username;
     }
 
+    public SessionCookie(SessionCookie other) {
+        this.currentScreen = other.currentScreen;
+        this.username = other.username;
+    }
+
     @Override
     public boolean equals(Object other) {
 

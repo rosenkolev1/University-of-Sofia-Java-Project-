@@ -10,6 +10,7 @@ public class ScreenInfo {
     public static final String REGISTER_SCREEN = "registerScreen";
     public static final String LOGIN_SCREEN = "loginScreen";
     public static final String HOME_SCREEN = "homeScreen";
+    public static final String GAME_SCREEN = "gameScreen";
 
     public static final String[] SCREEN_NAMES = {
         GUEST_HOME_SCREEN,
@@ -23,7 +24,8 @@ public class ScreenInfo {
         new ScreenRedirect(REGISTER_SCREEN, GUEST_HOME_SCREEN),
         new ScreenRedirect(LOGIN_SCREEN, GUEST_HOME_SCREEN),
         new ScreenRedirect(LOGIN_SCREEN, HOME_SCREEN),
-        new ScreenRedirect(HOME_SCREEN, GUEST_HOME_SCREEN)
+        new ScreenRedirect(HOME_SCREEN, GUEST_HOME_SCREEN),
+        new ScreenRedirect(HOME_SCREEN, GAME_SCREEN)
     );
 
     public static boolean validRedirect(String from, String to) {

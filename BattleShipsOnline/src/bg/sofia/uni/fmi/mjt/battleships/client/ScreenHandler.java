@@ -41,11 +41,21 @@ public class ScreenHandler {
         }
     };
 
+    private static final Function<ConsoleClient, ServerResponse> GAME_HANDLER = (client) -> {
+        try {
+            return client.gameScreen();
+        }
+        catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    };
+
     private static final Map<String, Function<ConsoleClient, ServerResponse>> SCREEN_HANDLERS = Map.of(
         ScreenInfo.GUEST_HOME_SCREEN, GUEST_HOME_HANDLER,
         ScreenInfo.REGISTER_SCREEN, REGISTER_HANDLER,
         ScreenInfo.LOGIN_SCREEN, LOGIN_HANDLER,
-        ScreenInfo.HOME_SCREEN, HOME_HANDLER
+        ScreenInfo.HOME_SCREEN, HOME_HANDLER,
+        ScreenInfo.GAME_SCREEN, GAME_HANDLER
     );
 
     private ConsoleClient client;

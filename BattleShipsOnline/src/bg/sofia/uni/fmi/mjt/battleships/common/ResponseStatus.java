@@ -6,6 +6,8 @@ public enum ResponseStatus {
     INVALID_COMMAND,
     LOGIN,
     LOGOUT,
+    PENDING_GAME,
+    JOINING_GAME,
     UNEXPECTED_ERROR,
     EXIT
 }

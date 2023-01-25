@@ -1,3 +1,4 @@
 {"username":"roskata","password":"12345678"}
 {"username":"stefan","password":"abcdefgh"}
 {"username":"kur","password":"kur_kur_kur"}
+{"username":"new","password":"newnewnew"}

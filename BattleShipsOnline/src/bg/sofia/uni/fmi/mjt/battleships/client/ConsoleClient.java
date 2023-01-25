@@ -50,6 +50,8 @@ public class ConsoleClient {
 
             var client = new ConsoleClient(socketChannel, reader, writer, scanner);
 
+            //Send initial request to server so that the server can identify which client belongs to which socket!
+
             var currentScreenHandler = new ScreenHandler(client, client.session.currentScreen);
 
             while (true) {
@@ -62,7 +64,8 @@ public class ConsoleClient {
                 //Handle redirect
                 else if (currentScreenResponse.status() == ResponseStatus.REDIRECT ||
                          currentScreenResponse.status() == ResponseStatus.LOGIN ||
-                         currentScreenResponse.status() == ResponseStatus.LOGOUT) {
+                         currentScreenResponse.status() == ResponseStatus.LOGOUT ||
+                         currentScreenResponse.status() == ResponseStatus.PENDING_GAME) {
 
                     var fromScreen = client.session.currentScreen;
                     var toScreen = currentScreenResponse.redirect();
@@ -143,6 +146,33 @@ public class ConsoleClient {
         if (serverResponse.status() == ResponseStatus.LOGOUT) {
             this.session.username = null;
         }
+        else if (serverResponse.status() == ResponseStatus.JOINING_GAME) {
+            //
+//            socketChannel.notifyAll();
+        }
+
+        return serverResponse;
+    }
+
+    public ServerResponse gameScreen() throws IOException, InterruptedException {
+        if (true) {
+            printlnClean("\nheyy this is a game. Sick right!");
+        }
+
+        //Do something here to make this user sleep until another user joins the game
+        var serverResponseRaw = receiveFromServer();
+
+        printlnClean("\nOoooh we found someone haha. Awesome!");
+
+        var serverResponse = sendAndReceive();
+
+        if (serverResponse.message() != null) {
+            printlnClean(serverResponse.message());
+        }
+
+        if (serverResponse.status() == ResponseStatus.LOGOUT) {
+            this.session.username = null;
+        }
 
         return serverResponse;
     }
@@ -191,7 +221,6 @@ public class ConsoleClient {
 
         String reply = new String(byteArray, "UTF-8");
 
-//        printlnClean(reply);
         return reply;
     }
 }

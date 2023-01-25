@@ -53,6 +53,9 @@ public class ScreenUI {
     public static final String HOME_PROMPT = "\nHello %s! You can start playing!";
     public static final String SUCCESSFUL_LOGOUT = "\nSuccessful logout!";
 
+    public static final String CURRENT_GAME_TEMPLATE = "\nCurrent game room: %s";
+    public static final String GAME_PENDING_PROMPT = "\nCurrently waiting for a second opponent...";
+
     public static String redirectMessage(String from, String to) {
         return String.format(REDIRECT_TEMPLATE, from, to);
     }
@@ -73,6 +76,11 @@ public class ScreenUI {
 
     public static String homePrompt(String username) {
         return String.format(HOME_PROMPT, username);
+    }
+
+    public static String currentGame (String gameName) {
+        var res = String.format(CURRENT_GAME_TEMPLATE, gameName);
+        return res;
     }
 
     public static String cleanText(String text) {

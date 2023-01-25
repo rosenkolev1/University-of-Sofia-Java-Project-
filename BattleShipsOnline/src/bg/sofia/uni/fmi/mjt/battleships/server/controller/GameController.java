@@ -8,10 +8,10 @@ import bg.sofia.uni.fmi.mjt.battleships.server.database.models.GameStatus;
 
 import java.util.List;
 
-public class HomeController extends Controller {
+public class GameController extends Controller {
     private Database db;
 
-    public HomeController(Database db) {
+    public GameController(Database db) {
         this.db = db;
     }
 
@@ -21,37 +21,8 @@ public class HomeController extends Controller {
         var command = CommandCreator.newCommand(request.input());
         var args = command.arguments();
 
-        if (command.command().equals(CommandInfo.CREATE_GAME)) {
-
-            //Validate command
-            if (args.length != 1) {
-                serverResponse = invalidCommandResponse(request.session());
-                return serverResponse;
-            }
-
-            var gameName = args[0];
-
-            if (gameName.isBlank()) {
-                serverResponse = invalidCommandResponse("The name of the game is null, empty or blank!", request.session());
-                return serverResponse;
-            }
-
-            var curUser = db.userTable.getUser(request.session().username);
-
-            var game = new Game(1, gameName, List.of(curUser), GameStatus.PENDING, true);
-
-            db.gameTable.addGame(game);
-
-            serverResponse = new ServerResponse(ResponseStatus.PENDING_GAME, ScreenInfo.GAME_SCREEN,
-                ScreenUI.currentGame(gameName) + ScreenUI.GAME_PENDING_PROMPT, request.session());
-
-        }
-        else if (command.command().equals(CommandInfo.DELETE_GAME)) {
-            serverResponse = new ServerResponse(ResponseStatus.JOINING_GAME, null,
-                ScreenUI.PLACEHOLDER, request.session());
-        }
-        else if (request.input().equals(CommandInfo.LOG_OUT)) {
-            serverResponse = new ServerResponse(ResponseStatus.LOGOUT, ScreenInfo.GUEST_HOME_SCREEN,
+        if (request.input().equals(CommandInfo.LOG_OUT)) {
+            serverResponse = new ServerResponse(ResponseStatus.REDIRECT, ScreenInfo.GUEST_HOME_SCREEN,
                 null, request.session());
         }
         else if (request.input().equals(CommandInfo.HELP)) {

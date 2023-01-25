@@ -2,6 +2,7 @@ package bg.sofia.uni.fmi.mjt.battleships.server;
 
 import bg.sofia.uni.fmi.mjt.battleships.common.*;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandExecutor;
+import bg.sofia.uni.fmi.mjt.battleships.server.controller.GameController;
 import bg.sofia.uni.fmi.mjt.battleships.server.controller.GuestHomeController;
 import bg.sofia.uni.fmi.mjt.battleships.server.controller.HomeController;
 import bg.sofia.uni.fmi.mjt.battleships.server.controller.UserController;
@@ -37,6 +38,9 @@ public class Server {
     private UserController userController;
     private HomeController homeController;
     private GuestHomeController guestHomeController;
+    private GameController gameController;
+
+    private Map<ConsoleClient, SocketChannel>
 
     public Server(int port, CommandExecutor commandExecutor, Database db) {
         this.port = port;
@@ -46,6 +50,7 @@ public class Server {
         this.userController = new UserController(db);
         this.homeController = new HomeController(db);
         this.guestHomeController = new GuestHomeController();
+        this.gameController = new GameController(db);
     }
 
     public void start() {
@@ -85,6 +90,10 @@ public class Server {
                             // Get server response
                             var serverResponse = getServerResponse(clientRequest);
 
+                            if (serverResponse.status() == ResponseStatus.JOINING_GAME) {
+
+                            }
+
                             //Print the server response for debug purposes
                             System.out.println(serverResponse);
 
@@ -98,7 +107,8 @@ public class Server {
 
                         keyIterator.remove();
                     }
-                } catch (IOException e) {
+                }
+                catch (IOException e) {
                     System.out.println("Error occurred while processing client request: " + e.getMessage());
                 }
             }
@@ -110,6 +120,9 @@ public class Server {
     private ServerResponse getServerResponse(ClientRequest clientRequest) {
         ServerResponse serverResponse = null;
 
+        if (clientRequest.session().currentScreen.equals(ScreenInfo.GUEST_HOME_SCREEN)) {
+            return guestHomeController.respond(clientRequest);
+        }
         if (clientRequest.session().currentScreen.equals(ScreenInfo.LOGIN_SCREEN)) {
             return userController.loginResponse(clientRequest);
         }
@@ -119,8 +132,8 @@ public class Server {
         else if (clientRequest.session().currentScreen.equals(ScreenInfo.HOME_SCREEN)) {
             return homeController.respond(clientRequest);
         }
-        else if (clientRequest.session().currentScreen.equals(ScreenInfo.GUEST_HOME_SCREEN)) {
-            return guestHomeController.respond(clientRequest);
+        else if (clientRequest.session().currentScreen.equals(ScreenInfo.GAME_SCREEN)) {
+            return gameController.respond(clientRequest);
         }
 
         throw new RuntimeException("An fatal error has occurred! The client's current screen does not exist!");
@@ -171,5 +184,7 @@ public class Server {
 
         accept.configureBlocking(false);
         accept.register(selector, SelectionKey.OP_READ);
+
+
     }
 }

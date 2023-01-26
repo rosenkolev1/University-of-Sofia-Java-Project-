@@ -13,4 +13,16 @@ public class Tile {
     public TilePos pos() {
         return this.pos;
     }
+
+    public boolean isHit() {
+        return this.status.equals(TileStatus.HIT_EMPTY) ||
+            this.status.equals(TileStatus.HIT_SHIP);
+    }
+
+    public void hitTile() {
+        switch (this.status) {
+            case EMPTY, HIT_EMPTY -> this.status = TileStatus.HIT_EMPTY;
+            case SHIP, HIT_SHIP -> this.status = TileStatus.HIT_SHIP;
+        }
+    }
 }

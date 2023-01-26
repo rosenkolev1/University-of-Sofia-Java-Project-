@@ -1,6 +1,7 @@
 package bg.sofia.uni.fmi.mjt.battleships.common;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class ScreenUI {
     public static final String PLACEHOLDER = "\nPLACEHOLDER STRING HERE";
@@ -55,11 +56,32 @@ public class ScreenUI {
 
     public static final String INVALID_GAME_NAME_NULL_EMPTY_BLANK = "\nThe name of the game is null, empty or blank!";
     public static final String INVALID_GAME_ALREADY_EXISTS = "\nA game with this name already exists! Choose a different name!";
+    public static final String INVALID_NO_GAMES_AVAILABLE = "\nThere are no pending games available at this time!";
 
     public static final String SUCCESSFUL_LOGOUT = "\nSuccessful logout!";
 
     public static final String CURRENT_GAME_TEMPLATE = "\nCurrent game room: %s";
-    public static final String GAME_PENDING_PROMPT = "\nCurrently waiting for a second opponent...";
+    public static final String GAME_PENDING_PROMPT = "\nCurrently waiting for a second enemy...";
+    public static final String GAME_FOUND_OPPONENT = "\nAn opponent has been found!";
+    public static final String GAME_STARTING = "\nGame is starting...";
+    public static final String GAME_JOINED_TEMPLATE = "\nJoined game \"%s\"";
+    public static final String GAME_ENEMY_LAST_TURN_TEMPLATE = "\n%s's last turn: %s";
+    public static final String GAME_MY_TURN = "\nIt's your turn now! Enter your turn:";
+    public static final String GAME_ENEMY_TURN_TEMPLATE = "\nWaiting for %s's turn now!";
+
+    public static final String GAME_TILE_HIT_MISS = "\nYour attack missed :(";
+    public static final String GAME_TILE_HIT_SUCCESS = "\nSuccessful hit!";
+    public static final String GAME_SHIP_HIT_SUNK = " You have managed to sink a ship! Good job!";
+
+    public static final String GAME_DEFENDER_HIT_MISSED_TEMPLATE = "\nYour attacker missed on tile \"%s\" :)";
+    public static final String GAME_DEFENDER_SHIP_HIT_TEMPLATE = "\nYour ship on tile \"%s\" has been hit :(";
+    public static final String GAME_DEFENDER_SHIP_SUNK_TEMPLATE = "\nYour ship on tile \"%s\" has been hit and it has sunk :( :(";
+
+    public static final String GAME_YOUR_BOARD = "\nYOUR BOARD\n";
+    public static final String GAME_ENEMY_BOARD = "\nENEMY BOARD\n";
+
+    public static final String INVALID_GAME_HIT_TILE_TEMPLATE = "\nThe coordinates for the tile are incorrect!" +
+        "\nPossible rank values: %s" + "\nPossible file values: %s";
 
     public static String redirectMessage(String from, String to) {
         return String.format(REDIRECT_TEMPLATE, from, to);
@@ -83,9 +105,41 @@ public class ScreenUI {
         return String.format(HOME_PROMPT, username);
     }
 
-    public static String currentGame (String gameName) {
+    public static String gameJoined(String name) {
+        return String.format(GAME_JOINED_TEMPLATE, name);
+    }
+
+    public static String myTurnPrompt(List<PlayerCookie> enemyInfo) {
+        return String.join("", enemyInfo.stream()
+                .filter(x -> x.move != null)
+                .map(x -> String.format(GAME_ENEMY_LAST_TURN_TEMPLATE, x.player, x.move)).toList())
+            + GAME_MY_TURN;
+    }
+
+    public static String enemyTurnPrompt(String enemy) {
+        return String.format(GAME_ENEMY_TURN_TEMPLATE, enemy);
+    }
+
+    public static String invalidHitTile(List<String> ranks, List<String> files) {
+        return String.format(INVALID_GAME_HIT_TILE_TEMPLATE,
+            String.join(", ", ranks), String.join(", ", files));
+    }
+
+    public static String currentGame(String gameName) {
         var res = String.format(CURRENT_GAME_TEMPLATE, gameName);
         return res;
+    }
+
+    public static String defenderHitMiss(String tilePos) {
+        return String.format(GAME_DEFENDER_HIT_MISSED_TEMPLATE, tilePos);
+    }
+
+    public static String defenderShipHit(String tilePos) {
+        return String.format(GAME_DEFENDER_SHIP_HIT_TEMPLATE, tilePos);
+    }
+
+    public static String defenderShipSunk(String tilePos) {
+        return String.format(GAME_DEFENDER_SHIP_SUNK_TEMPLATE, tilePos);
     }
 
     public static String cleanText(String text) {

@@ -3,7 +3,7 @@ package bg.sofia.uni.fmi.mjt.battleships.server.controller;
 import bg.sofia.uni.fmi.mjt.battleships.common.*;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.Command;
 
-public class GuestHomeController {
+public class GuestHomeController extends Controller {
 
     public ServerResponse respond(ClientRequest request) {
         ServerResponse serverResponse = null;
@@ -32,8 +32,8 @@ public class GuestHomeController {
                     CommandInfo.EXIT, CommandInfo.HELP), request.session());
         }
         else {
-            serverResponse = new ServerResponse(ResponseStatus.INVALID_COMMAND, null,
-                ScreenUI.invalidWithHelp(ScreenUI.INVALID_COMMAND), request.session());
+            serverResponse = invalidCommandResponse(request);
+            return serverResponse;
         }
 
         return serverResponse;

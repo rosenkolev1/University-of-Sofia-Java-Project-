@@ -18,9 +18,13 @@ public class Board {
 
     private List<Ship> ships;
 
-    private Board() {
-        initialiseBoard();
+    private Board(BoardOption option) {
+        initialiseBoard(option);
         this.ships = new ArrayList<>();
+    }
+
+    private Board() {
+        this(BoardOption.NO_FOG);
     }
 
     public Board(boolean randomizedBoard) {
@@ -31,14 +35,21 @@ public class Board {
         }
     }
 
-    private void initialiseBoard() {
+    private void initialiseBoard(BoardOption option) {
         this.board = new ArrayList<>();
 
         for (var rank : BoardRank.values()) {
             for (int file = 1; file <= FILES_COUNT; file++) {
-                board.add(new Tile(rank, file, TileStatus.EMPTY));
+                board.add(new Tile(rank, file, option.defaultStatus()));
             }
         }
+    }
+
+    public List<Tile> board() {
+        return Collections.unmodifiableList(board);
+    }
+    public List<Ship> ships() {
+        return Collections.unmodifiableList(ships);
     }
 
     public void addShip(Ship ship) {
@@ -46,7 +57,7 @@ public class Board {
     }
 
     public void changeTile(TilePos pos, TileStatus status) {
-        Tile tile = this.board.stream().filter(x -> x.pos().equals(pos)).findFirst().orElseGet(() -> null);
+        Tile tile = this.board.stream().filter(x -> x.pos().equals(pos)).findFirst().orElse(null);
 
         if (tile != null) {
             tile.status = status;
@@ -62,17 +73,135 @@ public class Board {
     }
 
     public Tile getTile(TilePos pos) {
-        var tile = this.board.stream().filter(x -> x.pos().equals(pos)).findFirst().orElseGet(() -> null);
+        var tile = this.board.stream().filter(x -> x.pos().equals(pos)).findFirst().orElse(null);
 
         return tile;
     }
 
-    public List<Tile> board() {
-        return Collections.unmodifiableList(board);
+    public Ship getShipForTile(TilePos pos) {
+        return this.ships.stream().filter(x -> x.tiles.contains(pos)).findFirst().orElse(null);
     }
 
-    public List<Ship> ships() {
-        return Collections.unmodifiableList(ships);
+    public Board boardWithFogOfWar() {
+        var board = new Board(BoardOption.FOG);
+
+        for (var tile : this.board) {
+            if (tile.isHit()) {
+                board.changeTile(tile.pos(), tile.status);
+            }
+        }
+
+        return board;
+    }
+
+    public void hitTile(TilePos pos) {
+        var targetTile = this.getTile(pos);
+        targetTile.hitTile();
+
+        var targetShip = this.getShipForTile(pos);
+
+        if (targetShip != null && this.shipHasSunk(targetShip)) {
+            targetShip.status = ShipStatus.SUNKEN;
+        }
+    }
+
+    public boolean shipHasSunk(Ship ship) {
+        for (var tilePos : ship.tiles) {
+
+            var tileStatus = this.getTile(tilePos).status;
+            if (!tileStatus.equals(TileStatus.HIT_SHIP)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public TilePos getTilePosFrom(String tilePos) {
+        var rank = BoardRank.getBoardRankFrom(String.valueOf(tilePos.charAt(0)));
+        var file = Integer.valueOf(tilePos.substring(1));
+
+        return new TilePos(rank, file);
+    }
+
+    public List<String> possibleRankValues() {
+        return Arrays.stream(BoardRank.values()).filter(x -> x.rank <= RANKS_COUNT).map(x -> x.toString()).toList();
+    }
+
+    public List<String> possibleFileValues() {
+        List<String> res = new ArrayList<>();
+
+        for (int i = 1; i <= FILES_COUNT; i++) {
+            res.add(Integer.toString(i));
+        }
+
+        return res;
+    }
+
+    public boolean validTilePos(String tilePos) {
+        if (tilePos.length() < 2 || tilePos.length() > 3) {
+            return false;
+        }
+
+        var rank = tilePos.charAt(0);
+        var file = tilePos.substring(1);
+
+        //Invalid rank
+        if (!possibleRankValues().stream().anyMatch(x -> x.equals(String.valueOf(rank)))) {
+            return false;
+        }
+
+        //Invalid file
+        if (!possibleFileValues().stream().anyMatch(x -> x.equals(String.valueOf(file)))) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public void randomizeBoard() {
+        randomizeBoard(this);
+    }
+
+    @Override
+    public String toString() {
+        var stringBuilder = new StringBuilder();
+
+        var orderedBoard = this.board.stream()
+            .sorted((first, second) -> {
+                var firstRank = first.pos().rank().ordinal();
+                var secondRank = second.pos().rank().ordinal();
+
+                var compareRanks = Integer.compare(firstRank, secondRank);
+
+                if (compareRanks != 0) {
+                    return compareRanks;
+                }
+
+                var firstFile = first.pos().file();
+                var secondFile = second.pos().file();
+
+                return Integer.compare(firstFile, secondFile);
+            })
+            .toList();
+
+        BoardRank lastRank = null;
+
+        for (var tile : orderedBoard) {
+            var curRank = tile.pos().rank();
+
+            if (curRank != lastRank && lastRank != null) {
+                stringBuilder.append("|\n");
+            }
+
+            stringBuilder.append("|" + tile.status.toString());
+
+            lastRank = curRank;
+        }
+
+        stringBuilder.append("|");
+
+        return stringBuilder.toString();
     }
 
     private boolean shipTilesAreTaken(List<TilePos> shipTiles, Board board) {
@@ -169,51 +298,6 @@ public class Board {
                 }
             }
         }
-    }
-
-    public void randomizeBoard() {
-        randomizeBoard(this);
-    }
-
-    @Override
-    public String toString() {
-        var stringBuilder = new StringBuilder();
-
-        var orderedBoard = this.board.stream()
-            .sorted((first, second) -> {
-                var firstRank = first.pos().rank().ordinal();
-                var secondRank = second.pos().rank().ordinal();
-
-                var compareRanks = Integer.compare(firstRank, secondRank);
-
-                if (compareRanks != 0) {
-                    return compareRanks;
-                }
-
-                var firstFile = first.pos().file();
-                var secondFile = second.pos().file();
-
-                return Integer.compare(firstFile, secondFile);
-            })
-            .toList();
-
-        BoardRank lastRank = null;
-
-        for (var tile : orderedBoard) {
-            var curRank = tile.pos().rank();
-
-            if (curRank != lastRank && lastRank != null) {
-                stringBuilder.append("|\n");
-            }
-
-            stringBuilder.append("|" + tile.status.toString());
-
-            lastRank = curRank;
-        }
-
-        stringBuilder.append("|");
-
-        return stringBuilder.toString();
     }
 
 }

@@ -20,6 +20,7 @@ public class CommandInfo {
 
     public static final String CREATE_GAME_VERBOSE = "create-game <game-name>";
     public static final String CREATE_GAME = "create-game";
+    public static final String LIST_GAMES = "list-games";
     public static final String JOIN_GAME_VERBOSE = "join-game [<game-name>]";
     public static final String JOIN_GAME = "join-game";
     public static final String SAVED_GAMES = "saved-games";
@@ -27,4 +28,8 @@ public class CommandInfo {
     public static final String LOAD_GAME = "load-game";
     public static final String DELETE_GAME = "delete-game";
 
+    public static final String GAME_HIT_VERBOSE = "hit <rank><file>";
+    public static final String GAME_HIT = "hit";
+    public static final String GAME_ABANDON = "abandon";
+    public static final String GAME_SAVE_AND_QUIT = "sq";
 }

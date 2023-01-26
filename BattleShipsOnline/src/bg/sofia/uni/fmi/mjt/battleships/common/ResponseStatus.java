@@ -7,6 +7,7 @@ public enum ResponseStatus {
     LOGIN,
     LOGOUT,
     PENDING_GAME,
+    STARTING_GAME,
     JOINING_GAME,
     UNEXPECTED_ERROR,
     EXIT

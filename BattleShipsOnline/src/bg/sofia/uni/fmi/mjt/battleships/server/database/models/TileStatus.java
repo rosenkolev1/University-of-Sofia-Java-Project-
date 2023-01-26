@@ -4,7 +4,8 @@ public enum TileStatus {
     EMPTY("_"),
     SHIP("*"),
     HIT_SHIP("X"),
-    HIT_EMPTY("O");
+    HIT_EMPTY("O"),
+    FOG("~");
 
     private final String tile;
 

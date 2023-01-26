@@ -1,6 +1,7 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.database.table;
 
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.Game;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.GameStatus;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.User;
 import com.google.gson.Gson;
 
@@ -32,6 +33,10 @@ public class GameTable extends Table {
 
     public boolean gameExists(String name) {
         return getGame(name) != null;
+    }
+
+    public List<Game> pendingGames() {
+        return this.games.stream().filter(x -> x.status == GameStatus.PENDING).toList();
     }
 
     public Game getGame(String name) {

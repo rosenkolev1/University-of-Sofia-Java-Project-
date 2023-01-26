@@ -21,8 +21,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
 public class Server {
-    private static final int BUFFER_SIZE = 1024;
+    private static final int BUFFER_SIZE = 512;
     private static final String HOST = "localhost";
+    //This string signifies that there is more to read from the socket channel than there is space for in the buffer
+    private static final String BUFFER_CONTINUES_STRING = "#c";
 
     private final CommandExecutor commandExecutor;
 
@@ -91,16 +93,17 @@ public class Server {
                             //Attach the session object to the selectionKey so that this client can be identified by other clients
                             key.attach(serverResponse.session());
 
-                            if (serverResponse.status() == ResponseStatus.JOINING_GAME) {
-                                for (var selectionKey : selector.keys()) {
-                                    var keySession = (SessionCookie)selectionKey.attachment();
-                                    if (keySession != null && keySession.username.equals("roskata")) {
-                                        var newServerResponse = new ServerResponse(
-                                            ResponseStatus.OK, null, "asdasdasd finally", keySession);
+                            //Send any resulting signals to the target clients
+                            if (serverResponse.signals() != null) {
+                                for (var signalResponse : serverResponse.signals()) {
+                                    for (var selectionKey : selector.keys()) {
+                                        var keySession = (SessionCookie)selectionKey.attachment();
 
-                                        writeClientOutput((SocketChannel) selectionKey.channel(), gson.toJson(newServerResponse));
+                                        if (keySession != null && keySession.username.equals(signalResponse.session().username)) {
+                                            writeClientOutput((SocketChannel) selectionKey.channel(), gson.toJson(signalResponse));
+                                        }
+
                                     }
-
                                 }
                             }
 
@@ -181,11 +184,30 @@ public class Server {
     }
 
     private void writeClientOutput(SocketChannel clientChannel, String output) throws IOException {
-        buffer.clear();
-        buffer.put(output.getBytes());
-        buffer.flip();
 
-        clientChannel.write(buffer);
+        int remainingOutput = output.length();
+        int outputIndex = 0;
+
+        while(remainingOutput != 0) {
+            boolean bufferHasEnoughSpace = remainingOutput <= BUFFER_SIZE;
+
+            var nextReadCount = bufferHasEnoughSpace ? remainingOutput : (BUFFER_SIZE - BUFFER_CONTINUES_STRING.length());
+            remainingOutput -= nextReadCount;
+
+            String chunk = output.substring(outputIndex, outputIndex + nextReadCount);
+
+            outputIndex += nextReadCount;
+
+            if (!bufferHasEnoughSpace) {
+                chunk += BUFFER_CONTINUES_STRING;
+            }
+
+            buffer.clear();
+            buffer.put(chunk.getBytes());
+            buffer.flip();
+
+            clientChannel.write(buffer);
+        }
     }
 
     private void accept(Selector selector, SelectionKey key) throws IOException {

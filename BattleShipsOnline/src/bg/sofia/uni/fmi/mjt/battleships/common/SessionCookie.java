@@ -12,11 +12,6 @@ public class SessionCookie {
         this.username = username;
     }
 
-    public SessionCookie(SessionCookie other) {
-        this.currentScreen = other.currentScreen;
-        this.username = other.username;
-    }
-
     @Override
     public boolean equals(Object other) {
 
@@ -24,11 +19,9 @@ public class SessionCookie {
             return true;
         }
 
-        if (!(other instanceof SessionCookie)) {
+        if (!(other instanceof SessionCookie castOther)) {
             return false;
         }
-
-        SessionCookie castOther = (SessionCookie) other;
 
         return Objects.equals(this.username, castOther.username) && Objects.equals(this.currentScreen, castOther.currentScreen);
     }

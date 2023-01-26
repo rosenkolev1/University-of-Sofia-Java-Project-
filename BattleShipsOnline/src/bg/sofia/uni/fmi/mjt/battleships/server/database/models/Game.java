@@ -7,21 +7,38 @@ import java.util.*;
 public class Game {
 
     public String name;
-    public List<Player> players;
+    public int playerCount;
     public int turn;
-    private GameStatus status;
+    public GameStatus status;
+    public boolean randomizedBoards;
+    public List<Player> players;
 
-    public Game(long id, String name, List<User> users, GameStatus status, boolean randomizedBoards) {
+    public Game(String name, int playerCount, GameStatus status, boolean randomizedBoards, List<User> users) {
         this.name = name;
-        this.players = new ArrayList<>();
+        this.playerCount = playerCount;
         this.status = status;
+        this.randomizedBoards = randomizedBoards;
+        this.turn = 0;
+
+        this.players = new ArrayList<>();
 
         for (var user : users) {
-            var board = new Board(randomizedBoards);
-
-            this.players.add(new Player(user, board));
+            addPlayer(user);
         }
 
-        this.turn = 0;
+    }
+
+    public Player getPlayer(String playerName) {
+        return this.players.stream().filter(x -> x.user.username().equals(playerName)).findFirst().orElse(null);
+    }
+
+    public void addPlayer(User user) {
+        var board = new Board(randomizedBoards);
+
+        this.players.add(new Player(user, board));
+
+        if (this.status.equals(GameStatus.PENDING) && this.players.size() == playerCount) {
+            this.status = GameStatus.IN_PROGRESS;
+        }
     }
 }

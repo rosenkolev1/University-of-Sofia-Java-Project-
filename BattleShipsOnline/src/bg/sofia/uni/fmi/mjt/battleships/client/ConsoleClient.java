@@ -118,12 +118,10 @@ public class ConsoleClient {
 
         var serverResponse = sendAndReceive();
 
+        this.session = serverResponse.session();
+
         if (serverResponse.message() != null) {
             printlnClean(serverResponse.message());
-        }
-
-        if (serverResponse.status() == ResponseStatus.LOGIN) {
-            this.session.username = serverResponse.session().username;
         }
 
         return serverResponse;
@@ -140,13 +138,12 @@ public class ConsoleClient {
 
         var serverResponse = sendAndReceive();
 
+        this.session = serverResponse.session();
+
         if (serverResponse.message() != null) {
             printlnClean(serverResponse.message());
         }
-
-        if (serverResponse.status() == ResponseStatus.LOGOUT) {
-            this.session.username = null;
-        }
+        
         else if (serverResponse.status() == ResponseStatus.JOINING_GAME) {
             //
 //            socketChannel.notifyAll();

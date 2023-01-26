@@ -88,7 +88,7 @@ public class Server {
                             // Get server response
                             var serverResponse = getServerResponse(clientRequest);
 
-                            //Attach the session object to the selectionKey
+                            //Attach the session object to the selectionKey so that this client can be identified by other clients
                             key.attach(serverResponse.session());
 
                             if (serverResponse.status() == ResponseStatus.JOINING_GAME) {

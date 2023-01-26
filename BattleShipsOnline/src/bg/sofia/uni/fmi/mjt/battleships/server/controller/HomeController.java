@@ -51,6 +51,8 @@ public class HomeController extends Controller {
                 ScreenUI.PLACEHOLDER, request.session());
         }
         else if (request.input().equals(CommandInfo.LOG_OUT)) {
+            request.session().username = null;
+
             serverResponse = new ServerResponse(ResponseStatus.LOGOUT, ScreenInfo.GUEST_HOME_SCREEN,
                 null, request.session());
         }

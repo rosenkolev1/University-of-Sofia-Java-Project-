@@ -39,10 +39,10 @@ public class UserController extends Controller {
             return serverResponse;
         }
 
+        //Validate that the user has not logged in already
+
+
         if (password != null) {
-            //TODO: Debating whether or not make a copy of the session cookie instead of an object, so that the client and the server are less coupled together!
-//            var updatedSession = new SessionCookie(request.session());
-//            updatedSession.username = username;
             request.session().username = username;
 
             serverResponse = new ServerResponse(ResponseStatus.LOGIN, ScreenInfo.HOME_SCREEN,

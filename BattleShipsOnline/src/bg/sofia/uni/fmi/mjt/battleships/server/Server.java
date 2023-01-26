@@ -86,7 +86,7 @@ public class Server {
                             var clientRequest = this.gson.fromJson(clientInput, ClientRequest.class);
 
                             // Get server response
-                            var serverResponse = getServerResponse(clientRequest);
+                            var serverResponse = getServerResponse(selector, key, clientRequest);
 
                             //Attach the session object to the selectionKey so that this client can be identified by other clients
                             key.attach(serverResponse.session());
@@ -127,14 +127,14 @@ public class Server {
         }
     }
 
-    private ServerResponse getServerResponse(ClientRequest clientRequest) {
+    private ServerResponse getServerResponse(Selector selector, SelectionKey key, ClientRequest clientRequest) {
         ServerResponse serverResponse = null;
 
         if (clientRequest.session().currentScreen.equals(ScreenInfo.GUEST_HOME_SCREEN)) {
             return guestHomeController.respond(clientRequest);
         }
         if (clientRequest.session().currentScreen.equals(ScreenInfo.LOGIN_SCREEN)) {
-            return userController.loginResponse(clientRequest);
+            return userController.loginResponse(selector, clientRequest);
         }
         else if (clientRequest.session().currentScreen.equals(ScreenInfo.REGISTER_SCREEN)) {
             return userController.registerResponse(clientRequest);

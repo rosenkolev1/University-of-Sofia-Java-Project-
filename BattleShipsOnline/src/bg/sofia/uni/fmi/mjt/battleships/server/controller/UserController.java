@@ -6,6 +6,9 @@ import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.User;
 
+import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
+
 public class UserController extends Controller {
 
     private static final String VALID_REGISTRATION_REGEX = "^\\w{1,}$";
@@ -16,7 +19,7 @@ public class UserController extends Controller {
         this.db = db;
     }
 
-    public ServerResponse loginResponse(ClientRequest request) {
+    public ServerResponse loginResponse(Selector selector, ClientRequest request) {
         ServerResponse serverResponse = null;
 
         var command = CommandCreator.newCommand(request.input());
@@ -40,7 +43,14 @@ public class UserController extends Controller {
         }
 
         //Validate that the user has not logged in already
+        for (var selectionKey : selector.keys()) {
+            var keySession = (SessionCookie)selectionKey.attachment();
 
+            if (keySession != null && keySession.username != null && keySession.username.equals(username)) {
+                serverResponse = invalidCommandResponse(ScreenUI.INVALID_USER_ALREADY_LOGGED_IN, request.session());
+                return serverResponse;
+            }
+        }
 
         if (password != null) {
             request.session().username = username;

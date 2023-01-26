@@ -47,6 +47,7 @@ public class ScreenUI {
     public static final String LOGIN_PROMPT = "\nPlease enter your username and password, seperated by a space in between:";
 
     public static final String INVALID_USER_DOES_NOT_EXIST = "\nA user with these username and password doesn't exist!";
+    public static final String INVALID_USER_ALREADY_LOGGED_IN = "\nThis user has already logged in!";
 
     public static final String SUCCESSFUL_LOGIN = "\nSuccessful login!";
 

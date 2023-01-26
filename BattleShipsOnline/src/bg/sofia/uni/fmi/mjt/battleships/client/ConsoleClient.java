@@ -58,26 +58,11 @@ public class ConsoleClient {
             while (true) {
                 var currentScreenResponse = currentScreenHandler.executeHandler();
 
+                currentScreenHandler.setHandler(currentScreenResponse.session().currentScreen);
+
                 //Handle call to exit the application
                 if (currentScreenResponse.status() == ResponseStatus.EXIT) {
                     break;
-                }
-                //Handle redirect
-                else if (currentScreenResponse.status() == ResponseStatus.REDIRECT ||
-                         currentScreenResponse.status() == ResponseStatus.LOGIN ||
-                         currentScreenResponse.status() == ResponseStatus.LOGOUT ||
-                         currentScreenResponse.status() == ResponseStatus.PENDING_GAME) {
-
-                    var fromScreen = client.session.currentScreen;
-                    var toScreen = currentScreenResponse.redirect();
-
-                    if (ScreenInfo.validRedirect(fromScreen, toScreen)) {
-                        client.session.currentScreen = toScreen;
-                        currentScreenHandler.setHandler(toScreen);
-                    }
-                    else {
-                        throw new RuntimeException("Unexpected error has occurred, the redirect is invalid!");
-                    }
                 }
                 //Handle invalid command
                 else if (currentScreenResponse.status() == ResponseStatus.INVALID_COMMAND) {
@@ -94,6 +79,8 @@ public class ConsoleClient {
 
         var serverResponse = sendAndReceive();
 
+        this.session = serverResponse.session();
+
         if (serverResponse.message() != null) {
             printlnClean(serverResponse.message());
         }
@@ -105,6 +92,8 @@ public class ConsoleClient {
         printlnClean(ScreenUI.REGISTER_PROMPT);
 
         var serverResponse = sendAndReceive();
+
+        this.session = serverResponse.session();
 
         if (serverResponse.message() != null) {
             printlnClean(serverResponse.message());
@@ -143,7 +132,7 @@ public class ConsoleClient {
         if (serverResponse.message() != null) {
             printlnClean(serverResponse.message());
         }
-        
+
         else if (serverResponse.status() == ResponseStatus.JOINING_GAME) {
             //
 //            socketChannel.notifyAll();

@@ -42,6 +42,8 @@ public class HomeController extends Controller {
 
             db.gameTable.addGame(game);
 
+            request.session().currentScreen = ScreenInfo.GAME_SCREEN;
+
             serverResponse = new ServerResponse(ResponseStatus.PENDING_GAME, ScreenInfo.GAME_SCREEN,
                 ScreenUI.currentGame(gameName) + ScreenUI.GAME_PENDING_PROMPT, request.session());
 
@@ -52,6 +54,7 @@ public class HomeController extends Controller {
         }
         else if (request.input().equals(CommandInfo.LOG_OUT)) {
             request.session().username = null;
+            request.session().currentScreen = ScreenInfo.GUEST_HOME_SCREEN;
 
             serverResponse = new ServerResponse(ResponseStatus.LOGOUT, ScreenInfo.GUEST_HOME_SCREEN,
                 null, request.session());

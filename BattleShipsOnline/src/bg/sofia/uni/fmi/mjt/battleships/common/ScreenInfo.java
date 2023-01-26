@@ -14,25 +14,9 @@ public class ScreenInfo {
 
     public static final String[] SCREEN_NAMES = {
         GUEST_HOME_SCREEN,
+        REGISTER_SCREEN,
         LOGIN_SCREEN,
         HOME_SCREEN,
+        GAME_SCREEN
     };
-
-    private static final List<ScreenRedirect> SCREEN_REDIRECTS = List.of(
-        new ScreenRedirect(GUEST_HOME_SCREEN, LOGIN_SCREEN),
-        new ScreenRedirect(GUEST_HOME_SCREEN, REGISTER_SCREEN),
-        new ScreenRedirect(REGISTER_SCREEN, GUEST_HOME_SCREEN),
-        new ScreenRedirect(LOGIN_SCREEN, GUEST_HOME_SCREEN),
-        new ScreenRedirect(LOGIN_SCREEN, HOME_SCREEN),
-        new ScreenRedirect(HOME_SCREEN, GUEST_HOME_SCREEN),
-        new ScreenRedirect(HOME_SCREEN, GAME_SCREEN)
-    );
-
-    public static boolean validRedirect(String from, String to) {
-        var desiredRedirect = new ScreenRedirect(from, to);
-
-        return SCREEN_REDIRECTS.stream().anyMatch(x -> x.equals(desiredRedirect));
-    }
-
-
 }

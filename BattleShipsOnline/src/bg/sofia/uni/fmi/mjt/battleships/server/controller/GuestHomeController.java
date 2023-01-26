@@ -13,10 +13,14 @@ public class GuestHomeController {
                 ScreenUI.EXIT_SUCCESS, request.session());
         }
         else if (request.input().equals(CommandInfo.LOGIN) || request.input().equals(CommandInfo.LOGIN_SHORTHAND)) {
+            request.session().currentScreen = ScreenInfo.LOGIN_SCREEN;
+
             serverResponse = new ServerResponse(ResponseStatus.REDIRECT, ScreenInfo.LOGIN_SCREEN,
                 null, request.session());
         }
         else if (request.input().equals(CommandInfo.REGISTER) || request.input().equals(CommandInfo.REGISTER_SHORTHAND)) {
+            request.session().currentScreen = ScreenInfo.REGISTER_SCREEN;
+
             serverResponse = new ServerResponse(ResponseStatus.REDIRECT, ScreenInfo.REGISTER_SCREEN,
                 null, request.session());
         }

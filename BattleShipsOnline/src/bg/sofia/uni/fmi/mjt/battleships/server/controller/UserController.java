@@ -44,11 +44,14 @@ public class UserController extends Controller {
 
         if (password != null) {
             request.session().username = username;
+            request.session().currentScreen = ScreenInfo.HOME_SCREEN;
 
             serverResponse = new ServerResponse(ResponseStatus.LOGIN, ScreenInfo.HOME_SCREEN,
                 ScreenUI.SUCCESSFUL_LOGIN, request.session());
         }
         else if (request.input().equals(CommandInfo.BACK)) {
+            request.session().currentScreen = ScreenInfo.GUEST_HOME_SCREEN;
+
             serverResponse = new ServerResponse(ResponseStatus.REDIRECT, ScreenInfo.GUEST_HOME_SCREEN,
                 null, request.session());
         }
@@ -114,10 +117,14 @@ public class UserController extends Controller {
         if (password != null) {
             db.userTable.addUser(username, password);
 
+            request.session().currentScreen = ScreenInfo.GUEST_HOME_SCREEN;
+
             serverResponse = new ServerResponse(ResponseStatus.REDIRECT, ScreenInfo.GUEST_HOME_SCREEN,
                 ScreenUI.SUCCESSFUL_REGISTRATION, request.session());
         }
         else if (request.input().equals(CommandInfo.BACK)) {
+            request.session().currentScreen = ScreenInfo.GUEST_HOME_SCREEN;
+
             serverResponse = new ServerResponse(ResponseStatus.REDIRECT, ScreenInfo.GUEST_HOME_SCREEN,
                 null, request.session());
         }

@@ -33,14 +33,8 @@ public class UserTable extends Table {
         return null;
     }
 
-    public List<User> getUsers() {
-        var copyList = new ArrayList<User>();
-
-        for (var user : users) {
-            copyList.add(user.clone());
-        }
-
-        return copyList;
+    public List<User> users() {
+        return users;
     }
 
     public void addUser(User user) {
@@ -59,6 +53,10 @@ public class UserTable extends Table {
         addUser(new User(username, password));
     }
 
+    public boolean userExists(User user) {
+        return this.users.contains(user);
+    }
+
     public boolean userExistWithName(String username) {
         return this.users.stream().anyMatch(x -> x.username().equals(username));
     }
@@ -69,15 +67,6 @@ public class UserTable extends Table {
 
     private void initialiseUsers() {
         this.users = new ArrayList<>();
-
-        if (!Files.isRegularFile(tablePath)) {
-            try {
-                Files.createFile(tablePath);
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
 
         try (var bufferedReader = Files.newBufferedReader(tablePath)) {
 

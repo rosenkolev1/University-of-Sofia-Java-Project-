@@ -37,7 +37,7 @@ public class UserController extends Controller {
         var user = new User(username, password);
 
         //Validate that user exists
-        if (password != null && !db.userTable.getUsers().contains(user)) {
+        if (password != null && !db.userTable.userExists(user)) {
             serverResponse = invalidCommandResponse(ScreenUI.INVALID_USER_DOES_NOT_EXIST, request.session());
             return serverResponse;
         }

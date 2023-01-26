@@ -52,6 +52,10 @@ public class ScreenUI {
     public static final String SUCCESSFUL_LOGIN = "\nSuccessful login!";
 
     public static final String HOME_PROMPT = "\nHello %s! You can start playing!";
+
+    public static final String INVALID_GAME_NAME_NULL_EMPTY_BLANK = "\nThe name of the game is null, empty or blank!";
+    public static final String INVALID_GAME_ALREADY_EXISTS = "\nA game with this name already exists! Choose a different name!";
+
     public static final String SUCCESSFUL_LOGOUT = "\nSuccessful logout!";
 
     public static final String CURRENT_GAME_TEMPLATE = "\nCurrent game room: %s";

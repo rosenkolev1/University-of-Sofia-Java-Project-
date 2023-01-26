@@ -6,7 +6,7 @@ public record User(String username, String password) {
         this(other.username, other.password);
     }
 
-    public User clone() {
-        return new User(this);
-    }
+//    public User clone() {
+//        return new User(this);
+//    }
 }

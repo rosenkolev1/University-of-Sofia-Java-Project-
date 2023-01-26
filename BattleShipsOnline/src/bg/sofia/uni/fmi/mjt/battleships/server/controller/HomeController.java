@@ -31,8 +31,15 @@ public class HomeController extends Controller {
 
             var gameName = args[0];
 
+            //Validate that the game name is valid
             if (gameName.isBlank()) {
-                serverResponse = invalidCommandResponse("The name of the game is null, empty or blank!", request.session());
+                serverResponse = invalidCommandResponse(ScreenUI.INVALID_GAME_NAME_NULL_EMPTY_BLANK, request.session());
+                return serverResponse;
+            }
+
+            //Validate that the game has not been created already
+            if (db.gameTable.gameExists(gameName)) {
+                serverResponse = invalidCommandResponse(ScreenUI.INVALID_GAME_ALREADY_EXISTS, request.session());
                 return serverResponse;
             }
 

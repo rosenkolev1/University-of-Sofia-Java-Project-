@@ -26,6 +26,24 @@ public class GameTable extends Table {
         initialiseGames();
     }
 
+    public List<Game> games() {
+        return games;
+    }
+
+    public boolean gameExists(String name) {
+        return getGame(name) != null;
+    }
+
+    public Game getGame(String name) {
+        for (var game : games) {
+            if (game.name.equals(name)) {
+                return game;
+            }
+        }
+
+        return null;
+    }
+
     public void addGame(Game game) {
         try (var bufferedWriter = Files.newBufferedWriter(tablePath, StandardOpenOption.APPEND)) {
             this.games.add(game);
@@ -39,8 +57,6 @@ public class GameTable extends Table {
 
     private void initialiseGames() {
         this.games = new ArrayList<>();
-
-        createTable();
 
         try (var bufferedReader = Files.newBufferedReader(tablePath)) {
             while(true) {

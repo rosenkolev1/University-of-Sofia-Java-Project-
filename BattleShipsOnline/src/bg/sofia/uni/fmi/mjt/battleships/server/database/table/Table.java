@@ -17,6 +17,8 @@ public abstract class Table {
         this.tablePath = tablePath;
         this.entrySeparator = entrySeparator;
         this.fieldSeparator = fieldSeparator;
+
+        createTable();
     }
 
     protected Table(String tablePath, String entrySeparator, String fieldSeparator) {

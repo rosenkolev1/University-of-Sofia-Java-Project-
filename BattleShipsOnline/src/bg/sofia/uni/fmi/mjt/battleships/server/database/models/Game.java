@@ -6,14 +6,12 @@ import java.util.*;
 
 public class Game {
 
-    public final long id;
     public String name;
     public List<Player> players;
     public int turn;
     private GameStatus status;
 
     public Game(long id, String name, List<User> users, GameStatus status, boolean randomizedBoards) {
-        this.id = id;
         this.name = name;
         this.players = new ArrayList<>();
         this.status = status;

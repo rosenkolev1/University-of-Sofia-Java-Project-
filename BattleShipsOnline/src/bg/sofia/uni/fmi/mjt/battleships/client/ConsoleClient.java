@@ -164,6 +164,11 @@ public class ConsoleClient {
                 this.cookies.game.turn = serverResponse.cookies().game.turn;
                 this.cookies.game.playersInfo = serverResponse.cookies().game.playersInfo;
             }
+            else {
+                //In this case, the games has ended and our client has lost
+                this.cookies.game = null;
+                this.cookies.player = null;
+            }
 
             printMessage(serverResponse.message());
         }

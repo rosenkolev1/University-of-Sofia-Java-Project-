@@ -106,8 +106,20 @@ public class HomeController extends Controller {
                 return joinGameResponse(request, game);
             }
         }
-        else if (command.command().equals(CommandInfo.JOIN_GAME)) {
-            
+        else if (command.command().equals(CommandInfo.LIST_GAMES)) {
+            //Validate arguments
+            if (args.length != 0) {
+                serverResponse = invalidCommandResponse(request);
+                return serverResponse;
+            }
+
+            var games = db.gameTable.games().stream().filter(x -> x.status != GameStatus.ENDED).toList();
+
+            if (games.isEmpty()) {
+                return messageResponse(ScreenUI.GAMES_LIST_EMPTY, request);
+            }
+
+            return messageResponse(String.join("\n", games.stream().map(x -> x.id + " | " + x.name).toList()), request);
         }
 //        else if (command.command().equals(CommandInfo.DELETE_GAME)) {
 ////            serverResponse = new ServerResponse(ResponseStatus.JOINING_GAME, null,
@@ -174,9 +186,10 @@ public class HomeController extends Controller {
 
             var responseMessage = ScreenUI.GAME_FOUND_OPPONENT + ScreenUI.GAME_STARTING;
 
-            var signalResponse = new ServerResponse (ResponseStatus.STARTING_GAME,
-                responseMessage
-                + getScreenPrompt(ScreenInfo.GAME_SCREEN, enemyClientCookies), enemyClientCookies);
+//            var signalResponse = new ServerResponse (ResponseStatus.STARTING_GAME,
+//                responseMessage
+//                + getScreenPrompt(ScreenInfo.GAME_SCREEN, enemyClientCookies), enemyClientCookies);
+            var signalResponse = messageResponse(responseMessage, enemyClientCookies);
 
             signals.add(signalResponse);
         }

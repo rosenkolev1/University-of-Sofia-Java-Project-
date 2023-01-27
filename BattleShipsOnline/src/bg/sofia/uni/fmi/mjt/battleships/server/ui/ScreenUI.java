@@ -67,6 +67,8 @@ public class ScreenUI {
     public static final String INVALID_GAME_EXISTS_BUT_NOT_PENDING = "\nThe game with this name is full!\n";
     public static final String INVALID_NO_GAMES_AVAILABLE = "\nThere are no pending games available at this time!\n";
 
+    public static final String GAMES_LIST_EMPTY = "\nThere are currently no games!\n";
+
     public static final String SUCCESSFUL_LOGOUT = "\nSuccessful logout!\n";
 
     public static final String CURRENT_GAME_TEMPLATE = "\nCurrent game room: %s";

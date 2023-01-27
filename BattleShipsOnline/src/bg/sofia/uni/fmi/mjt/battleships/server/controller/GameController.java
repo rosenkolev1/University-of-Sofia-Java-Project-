@@ -101,6 +101,9 @@ public class GameController extends Controller {
                 //Finish the game and save it to the file
                 this.db.gameTable.finishGame(game);
 
+                request.cookies().player = null;
+                request.cookies().game = null;
+
                 serverResponse = redirectResponse(ScreenInfo.HOME_SCREEN, request, message.toString(), signals);
             }
             else {
@@ -118,9 +121,10 @@ public class GameController extends Controller {
                 //Go to the next turn;
                 request.cookies().game.nextTurn();
 
-                serverResponse = new ServerResponse(ResponseStatus.OK,
-                    message.toString() + getScreenPrompt(ScreenInfo.GAME_SCREEN, request.cookies()),
-                    request.cookies(), signals);
+//                serverResponse = new ServerResponse(ResponseStatus.OK,
+//                    message.toString() + getScreenPrompt(ScreenInfo.GAME_SCREEN, request.cookies()),
+//                    request.cookies(), signals);
+                serverResponse = messageResponse(message.toString(), request, signals);
             }
 
         }
@@ -198,6 +202,8 @@ public class GameController extends Controller {
                     .append(ScreenUI.GAME_ENDING_LOOSER);
 
                 cookies.session.currentScreen = ScreenInfo.HOME_SCREEN;
+                cookies.game = null;
+                cookies.player = null;
 
                 responseStatus = ResponseStatus.FINISH_GAME;
             }
@@ -214,9 +220,10 @@ public class GameController extends Controller {
                 responseStatus = ResponseStatus.OK;
             }
 
-            var response = new ServerResponse(responseStatus,
-                message.toString() + getScreenPrompt(cookies.session.currentScreen, cookies),
-                cookies);
+//            var response = new ServerResponse(responseStatus,
+//                message.toString() + getScreenPrompt(cookies.session.currentScreen, cookies),
+//                cookies);
+            var response = messageResponse(message.toString(), cookies);
 
             signals.add(response);
         }

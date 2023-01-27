@@ -11,6 +11,24 @@ import java.util.List;
 
 public class Controller {
 
+    protected ServerResponse messageResponse(String message, ClientState cookies, List<ServerResponse> signals) {
+        return new ServerResponse(ResponseStatus.OK,
+            message + getScreenPrompt(cookies.session.currentScreen, cookies),
+            cookies, signals);
+    }
+
+    protected ServerResponse messageResponse(String message, ClientState cookies) {
+        return messageResponse(message, cookies, null);
+    }
+
+    protected ServerResponse messageResponse(String message, ClientRequest request, List<ServerResponse> signals) {
+        return messageResponse(message, request.cookies(), signals);
+    }
+
+    protected ServerResponse messageResponse(String message, ClientRequest request) {
+        return messageResponse(message, request.cookies());
+    }
+
     protected String getScreenPrompt(String screen, ClientState cookies) {
         var screenPrompt = ScreenUI.SCREENS_PROMPTS.get(screen).apply(cookies);
         return "-".repeat(100) + (screenPrompt == null ? "" : screenPrompt);

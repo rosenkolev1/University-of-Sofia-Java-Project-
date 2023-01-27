@@ -63,6 +63,8 @@ public class ScreenUI {
 
     public static final String INVALID_GAME_NAME_NULL_EMPTY_BLANK = "\nInvalid name! The name of the game cannot be null, empty or blank!\n";
     public static final String INVALID_GAME_ALREADY_EXISTS = "\nA game with this name already exists! Choose a different name!\n";
+    public static final String INVALID_GAME_DOES_NOT_EXIST = "\nA game with this name does not exist!\n";
+    public static final String INVALID_GAME_EXISTS_BUT_NOT_PENDING = "\nThe game with this name is full!\n";
     public static final String INVALID_NO_GAMES_AVAILABLE = "\nThere are no pending games available at this time!\n";
 
     public static final String SUCCESSFUL_LOGOUT = "\nSuccessful logout!\n";

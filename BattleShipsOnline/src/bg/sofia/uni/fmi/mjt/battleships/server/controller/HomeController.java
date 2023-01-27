@@ -82,19 +82,37 @@ public class HomeController extends Controller {
 
                 var chosenGame = games.get(gameIndex);
 
-               return joinGameResponse(request, chosenGame);
+                return joinGameResponse(request, chosenGame);
             }
             else {
                 if (gameName.isBlank()) {
                     serverResponse = invalidCommandResponse(ScreenUI.INVALID_GAME_NAME_NULL_EMPTY_BLANK, request);
                     return serverResponse;
                 }
+
+                var game = db.gameTable.getGame(gameName,
+                    GameStatus.PENDING);
+
+                if (db.gameTable.gameExists(gameName, GameStatus.IN_PROGRESS)) {
+                    serverResponse = invalidCommandResponse(ScreenUI.INVALID_GAME_EXISTS_BUT_NOT_PENDING, request);
+                    return serverResponse;
+                }
+
+                if (game == null) {
+                    serverResponse = invalidCommandResponse(ScreenUI.INVALID_GAME_DOES_NOT_EXIST, request);
+                    return serverResponse;
+                }
+
+                return joinGameResponse(request, game);
             }
         }
-        else if (command.command().equals(CommandInfo.DELETE_GAME)) {
-//            serverResponse = new ServerResponse(ResponseStatus.JOINING_GAME, null,
-//                ScreenUI.PLACEHOLDER, request.session());
+        else if (command.command().equals(CommandInfo.JOIN_GAME)) {
+            
         }
+//        else if (command.command().equals(CommandInfo.DELETE_GAME)) {
+////            serverResponse = new ServerResponse(ResponseStatus.JOINING_GAME, null,
+////                ScreenUI.PLACEHOLDER, request.session());
+//        }
         else if (request.input().equals(CommandInfo.LOG_OUT)) {
             request.cookies().session.username = null;
             serverResponse = redirectResponse(ScreenInfo.GUEST_HOME_SCREEN, request, ScreenUI.SUCCESSFUL_LOGOUT);

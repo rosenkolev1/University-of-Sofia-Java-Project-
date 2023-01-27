@@ -101,7 +101,10 @@ public class Server {
                                     for (var selectionKey : selector.keys()) {
                                         var keySession = (ClientState)selectionKey.attachment();
 
-                                        if (keySession != null && keySession.session.username.equals(signalResponse.cookies().session.username)) {
+                                        if (keySession != null &&
+                                            keySession.session != null &&
+                                            keySession.session.username != null &&
+                                            keySession.session.username.equals(signalResponse.cookies().session.username)) {
                                             writeClientOutput((SocketChannel) selectionKey.channel(), gson.toJson(signalResponse));
                                         }
 

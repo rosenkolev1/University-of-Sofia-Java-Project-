@@ -124,6 +124,9 @@ public class GameController extends Controller {
             }
 
         }
+        else if (command.command().equals(CommandInfo.GAME_HIT)) {
+
+        }
         else if (request.input().equals(CommandInfo.HELP)) {
             serverResponse = helpResponse(request,
                 CommandInfo.GAME_HIT, CommandInfo.GAME_ABANDON,

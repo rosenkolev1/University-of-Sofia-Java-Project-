@@ -1,16 +1,23 @@
-package bg.sofia.uni.fmi.mjt.battleships.common;
+package bg.sofia.uni.fmi.mjt.battleships.server.ui;
+
+import bg.sofia.uni.fmi.mjt.battleships.common.ClientState;
+import bg.sofia.uni.fmi.mjt.battleships.common.PlayerCookie;
+import bg.sofia.uni.fmi.mjt.battleships.common.ScreenInfo;
+import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 public class ScreenUI {
     public static final String PLACEHOLDER = "\nPLACEHOLDER STRING HERE";
 
     public static final String ENTER_COMMANDS_TEMPLATE = "\nEnter a command%s:";
 
-    public static final String HELP_PROMPT = "\nType \"help\" to see all the available commands";
+    public static final String HELP_PROMPT = "\nType \"help\" to see all the available commands\n";
 
-    public static final String AVAILABLE_COMMANDS_TEMPLATE = "\nAvailable commands:%s";
+    public static final String AVAILABLE_COMMANDS_TEMPLATE = "\nAvailable commands:%s\n";
 
     public static final String INVALID_COMMAND = "\nInvalid command, try again!";
 
@@ -37,33 +44,33 @@ public class ScreenUI {
         Password should be at least 8 characters long and cannot contain whitespaces! 
         """ + "The username and password can only contain numbers, letters and underscores";
 
-    public static final String INVALID_USERNAME_FORBIDDEN_CHARS = "\nThis username contains forbidden characters! Choose a different one!";
-    public static final String INVALID_USERNAME_TAKEN = "\nThis username already exists! Choose a different one!";
-    public static final String INVALID_PASSWORD_LENGTH = "\nInvalid password! The password should be at least 8 characters long!";
-    public static final String INVALID_PASSWORD_FORBIDDEN_CHARS = "\nThis password contains forbidden characters! Choose a different one!";
-    public static final String INVALID_PASSWORD_TAKEN = "\nThis password already exists! Choose a different one!";
+    public static final String INVALID_USERNAME_FORBIDDEN_CHARS = "\nThis username contains forbidden characters! Choose a different one!\n";
+    public static final String INVALID_USERNAME_TAKEN = "\nThis username already exists! Choose a different one!\n";
+    public static final String INVALID_PASSWORD_FORBIDDEN_CHARS = "\nThis password contains forbidden characters! Choose a different one!\n";
+    public static final String INVALID_PASSWORD_LENGTH = "\nInvalid password! The password should be at least 8 characters long!\n";
+    public static final String INVALID_PASSWORD_TAKEN = "\nThis password already exists! Choose a different one!\n";
 
-    public static final String SUCCESSFUL_REGISTRATION = "\nSuccessful registration! You can now log in to your account and start playing!";
+    public static final String SUCCESSFUL_REGISTRATION = "\nSuccessful registration! You can now log in to your account and start playing!\n";
 
     public static final String LOGIN_PROMPT = "\nPlease enter your username and password, seperated by a space in between:";
 
-    public static final String INVALID_USER_DOES_NOT_EXIST = "\nA user with these username and password doesn't exist!";
-    public static final String INVALID_USER_ALREADY_LOGGED_IN = "\nThis user has already logged in!";
+    public static final String INVALID_USER_DOES_NOT_EXIST = "\nA user with these username and password doesn't exist!\n";
+    public static final String INVALID_USER_ALREADY_LOGGED_IN = "\nThis user has already logged in!\n";
 
-    public static final String SUCCESSFUL_LOGIN = "\nSuccessful login!";
+    public static final String SUCCESSFUL_LOGIN = "\nSuccessful login!\n";
 
     public static final String HOME_PROMPT = "\nHello %s! You can start playing!";
 
-    public static final String INVALID_GAME_NAME_NULL_EMPTY_BLANK = "\nThe name of the game is null, empty or blank!";
-    public static final String INVALID_GAME_ALREADY_EXISTS = "\nA game with this name already exists! Choose a different name!";
-    public static final String INVALID_NO_GAMES_AVAILABLE = "\nThere are no pending games available at this time!";
+    public static final String INVALID_GAME_NAME_NULL_EMPTY_BLANK = "\nInvalid name! The name of the game cannot be null, empty or blank!\n";
+    public static final String INVALID_GAME_ALREADY_EXISTS = "\nA game with this name already exists! Choose a different name!\n";
+    public static final String INVALID_NO_GAMES_AVAILABLE = "\nThere are no pending games available at this time!\n";
 
-    public static final String SUCCESSFUL_LOGOUT = "\nSuccessful logout!";
+    public static final String SUCCESSFUL_LOGOUT = "\nSuccessful logout!\n";
 
     public static final String CURRENT_GAME_TEMPLATE = "\nCurrent game room: %s";
-    public static final String GAME_PENDING_PROMPT = "\nCurrently waiting for a second enemy...";
+    public static final String GAME_PENDING_PROMPT = "\nCurrently waiting for a second enemy...\n";
     public static final String GAME_FOUND_OPPONENT = "\nAn opponent has been found!";
-    public static final String GAME_STARTING = "\nGame is starting...";
+    public static final String GAME_STARTING = "\nGame is starting...\n";
     public static final String GAME_JOINED_TEMPLATE = "\nJoined game \"%s\"";
     public static final String GAME_ENEMY_LAST_TURN_TEMPLATE = "\n%s's last turn: %s";
     public static final String GAME_MY_TURN = "\nIt's your turn now! Enter your turn:";
@@ -75,22 +82,49 @@ public class ScreenUI {
         The coordinates for the tile are incorrect!
         Possible rank values: %s
         Possible file values: %s
+        
         """;
 
     public static final String GAME_TILE_HIT_MISS = "\nYour attack missed :(";
     public static final String GAME_TILE_HIT_SUCCESS = "\nSuccessful hit!";
     public static final String GAME_SHIP_HIT_SUNK = " You have managed to sink a ship! Good job!";
 
-    public static final String GAME_DEFENDER_HIT_MISSED_TEMPLATE = "\nYour attacker missed on tile \"%s\" :)";
-    public static final String GAME_DEFENDER_SHIP_HIT_TEMPLATE = "\nYour ship on tile \"%s\" has been hit :(";
-    public static final String GAME_DEFENDER_SHIP_SUNK_TEMPLATE = "\nYour ship on tile \"%s\" has been hit and it has sunk :( :(";
+    public static final String GAME_DEFENDER_HIT_MISSED_TEMPLATE = "\nYour attacker missed on tile \"%s\" :)\n";
+    public static final String GAME_DEFENDER_SHIP_HIT_TEMPLATE = "\nYour ship on tile \"%s\" has been hit :(\n";
+    public static final String GAME_DEFENDER_SHIP_SUNK_TEMPLATE = "\nYour ship on tile \"%s\" has been hit and it has sunk :( :(\n";
 
     public static final String GAME_YOUR_BOARD = "YOUR BOARD\n";
     public static final String GAME_ENEMY_BOARD = "ENEMY BOARD\n";
 
-    public static final String GAME_ENDING_RETURN_TO_MAIN = "\nReturning to main menu...";
+    public static final String GAME_ENDING_RETURN_TO_MAIN = "\nReturning to main menu...\n";
     public static final String GAME_ENDING_WINNER = "\nYou have won the game! Congrats :)" + GAME_ENDING_RETURN_TO_MAIN;
     public static final String GAME_ENDING_LOOSER = "\nYou have lost the game! That's unfortunate :(" + GAME_ENDING_RETURN_TO_MAIN;
+
+    public static final Map<String, Function<ClientState, String>> SCREENS_PROMPTS = Map.of(
+        ScreenInfo.GUEST_HOME_SCREEN, (cookies) -> ScreenUI.GUEST_HOME_PROMPT,
+        ScreenInfo.REGISTER_SCREEN, (cookies) -> ScreenUI.REGISTER_PROMPT,
+        ScreenInfo.LOGIN_SCREEN, (request) -> ScreenUI.LOGIN_PROMPT,
+
+        ScreenInfo.HOME_SCREEN, (cookies) -> ScreenUI.homePrompt(cookies.session.username) +
+            ScreenUI.getAvailableCommands(
+                CommandInfo.CREATE_GAME_VERBOSE, CommandInfo.LIST_GAMES,
+                CommandInfo.JOIN_GAME_VERBOSE, CommandInfo.SAVED_GAMES,
+                CommandInfo.LOAD_GAME_VERBOSE, CommandInfo.DELETE_GAME,
+                CommandInfo.LOG_OUT, CommandInfo.HELP
+            ) + ScreenUI.enterCommandPrompt(),
+
+        ScreenInfo.GAME_SCREEN, (cookies) -> {
+            if (cookies.game == null) {
+                return null;
+            }
+            else if (cookies.game.turn == cookies.player.myTurn) {
+                return ScreenUI.myTurnPrompt(cookies.game.playersInfo);
+            }
+            else {
+                return ScreenUI.enemyTurnPrompt(cookies.game.playersInfo.get(cookies.game.turn).player);
+            }
+        }
+    );
 
     public static String redirectMessage(String from, String to) {
         return String.format(REDIRECT_TEMPLATE, from, to);
@@ -120,8 +154,8 @@ public class ScreenUI {
 
     public static String myTurnPrompt(List<PlayerCookie> enemyInfo) {
         return String.join("", enemyInfo.stream()
-                .filter(x -> x.move != null)
-                .map(x -> String.format(GAME_ENEMY_LAST_TURN_TEMPLATE, x.player, x.move)).toList())
+                .filter(x -> x.moves != null && !x.moves.isEmpty())
+                .map(x -> String.format(GAME_ENEMY_LAST_TURN_TEMPLATE, x.player, x.moves.get(x.moves.size() - 1))).toList())
             + GAME_MY_TURN;
     }
 

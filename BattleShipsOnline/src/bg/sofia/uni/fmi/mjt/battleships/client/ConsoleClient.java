@@ -1,6 +1,9 @@
 package bg.sofia.uni.fmi.mjt.battleships.client;
 
-import bg.sofia.uni.fmi.mjt.battleships.common.*;
+import bg.sofia.uni.fmi.mjt.battleships.common.ClientRequest;
+import bg.sofia.uni.fmi.mjt.battleships.common.ClientState;
+import bg.sofia.uni.fmi.mjt.battleships.common.ResponseStatus;
+import bg.sofia.uni.fmi.mjt.battleships.common.ServerResponse;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
@@ -28,8 +31,7 @@ public class ConsoleClient {
     private final Scanner scanner;
     private final Gson gson;
 
-    private SessionCookie session;
-    private GameCookie game;
+    private ClientState cookies;
 
     public ConsoleClient(SocketChannel socketChannel, BufferedReader reader, PrintWriter writer, Scanner scanner) {
         this.socketChannel = socketChannel;
@@ -37,8 +39,12 @@ public class ConsoleClient {
         this.writer = writer;
         this.scanner = scanner;
         this.gson = new Gson();
-        this.session = new SessionCookie(ScreenInfo.GUEST_HOME_SCREEN, null);
-        this.game = null;
+//        this.cookies = new ClientState(
+//            new SessionCookie(ScreenInfo.GUEST_HOME_SCREEN, null),
+//            null,
+//            null
+//        );
+        this.cookies = new ClientState();
     }
 
     public static void main(String[] args) {
@@ -53,16 +59,18 @@ public class ConsoleClient {
 
             var client = new ConsoleClient(socketChannel, reader, writer, scanner);
 
-            //Send initial request to server so that the server can identify which client belongs to which socket!
-            //...
+            //Send initial request and set initial client state
+            var initialServerResponse = client.sendAndReceiveInitial();
+            client.cookies = initialServerResponse.cookies();
+            client.printMessage(initialServerResponse.message());
 
-            var currentScreenHandler = new ScreenHandler(client, client.session.currentScreen);
+            var currentScreenHandler = new ScreenHandler(client, client.cookies.session.currentScreen);
 
             while (true) {
                 var currentScreenResponse = currentScreenHandler.executeHandler();
 
                 //Handle screen change
-                currentScreenHandler.setHandler(client.session.currentScreen);
+                currentScreenHandler.setHandler(client.cookies.session.currentScreen);
 
                 //Handle call to exit the application
                 if (currentScreenResponse.status() == ResponseStatus.EXIT) {
@@ -79,65 +87,41 @@ public class ConsoleClient {
     }
 
     public ServerResponse guestHomeScreen() throws IOException {
-        printlnClean(ScreenUI.GUEST_HOME_PROMPT);
-
         var serverResponse = sendAndReceive();
 
-        this.session = serverResponse.session();
+        this.cookies = serverResponse.cookies();
 
-        if (serverResponse.message() != null) {
-            printlnClean(serverResponse.message());
-        }
+        printMessage(serverResponse.message());
 
         return serverResponse;
     }
 
     public ServerResponse registerScreen() throws IOException {
-        printlnClean(ScreenUI.REGISTER_PROMPT);
-
         var serverResponse = sendAndReceive();
 
-        this.session = serverResponse.session();
+        this.cookies = serverResponse.cookies();
 
-        if (serverResponse.message() != null) {
-            printlnClean(serverResponse.message());
-        }
+        printMessage(serverResponse.message());
 
         return serverResponse;
     }
 
     public ServerResponse loginScreen() throws IOException {
-        printlnClean(ScreenUI.LOGIN_PROMPT);
-
         var serverResponse = sendAndReceive();
 
-        this.session = serverResponse.session();
+        this.cookies = serverResponse.cookies();
 
-        if (serverResponse.message() != null) {
-            printlnClean(serverResponse.message());
-        }
+        printMessage(serverResponse.message());
 
         return serverResponse;
     }
 
     public ServerResponse homeScreen() throws IOException {
-        printlnClean(ScreenUI.homePrompt(session.username) +
-            ScreenUI.getAvailableCommands(
-                CommandInfo.CREATE_GAME_VERBOSE, CommandInfo.LIST_GAMES,
-                CommandInfo.JOIN_GAME_VERBOSE, CommandInfo.SAVED_GAMES,
-                CommandInfo.LOAD_GAME_VERBOSE, CommandInfo.DELETE_GAME,
-                CommandInfo.LOG_OUT, CommandInfo.HELP
-            ) +
-            ScreenUI.enterCommandPrompt());
-
         var serverResponse = sendAndReceive();
 
-        this.game = serverResponse.game();
-        this.session = serverResponse.session();
+        this.cookies = serverResponse.cookies();
 
-        if (serverResponse.message() != null) {
-            printlnClean(serverResponse.message());
-        }
+        printMessage(serverResponse.message());
 
         return serverResponse;
     }
@@ -145,67 +129,70 @@ public class ConsoleClient {
     public ServerResponse gameScreen() throws IOException, InterruptedException {
         ServerResponse serverResponse = null;
 
-        if (game == null) {
+        if (cookies.game == null) {
             //Make this user sleep until another user joins the game
             var serverResponseRaw = receiveFromServer(socketChannel);
 
             serverResponse = gson.fromJson(serverResponseRaw, ServerResponse.class);
 
-            this.session = serverResponse.session();
+            this.cookies = serverResponse.cookies();
 
-            if (serverResponse.message() != null) {
-                printlnClean(serverResponse.message());
-            }
+            printMessage(serverResponse.message());
 
             if (serverResponse.status().equals(ResponseStatus.STARTING_GAME)) {
-                this.game = serverResponse.game();
+                this.cookies.game = serverResponse.cookies().game;
             }
         }
         //Handler when it is this client's turn
-        else if (game.turn == game.myTurn) {
-            printlnClean(ScreenUI.myTurnPrompt(game.playersInfo));
-
+        else if (cookies.game.turn == cookies.player.myTurn) {
             serverResponse = sendAndReceive();
 
-            this.game = serverResponse.game();
-            this.session = serverResponse.session();
+            this.cookies = serverResponse.cookies();
 
-            if (serverResponse.message() != null) {
-                printlnClean(serverResponse.message());
-            }
+            printMessage(serverResponse.message());
         }
         //Handler when it is not client's turn
         else {
-            printlnClean(ScreenUI.enemyTurnPrompt(game.playersInfo.get(game.turn).player));
-
             //Make this user sleep until another enemy make a move
             var serverResponseRaw = receiveFromServer(socketChannel);
 
             serverResponse = gson.fromJson(serverResponseRaw, ServerResponse.class);
 
-            this.session = serverResponse.session();
+            this.cookies.session = serverResponse.cookies().session;
 
-            if (serverResponse.game() != null) {
-                this.game.turn = serverResponse.game().turn;
-                this.game.playersInfo = serverResponse.game().playersInfo;
+            if (serverResponse.cookies().game != null) {
+                this.cookies.game.turn = serverResponse.cookies().game.turn;
+                this.cookies.game.playersInfo = serverResponse.cookies().game.playersInfo;
             }
 
-            if (serverResponse.message() != null) {
-                printlnClean(serverResponse.message());
-            }
+            printMessage(serverResponse.message());
         }
 
         return serverResponse;
     }
 
-    private void printlnClean(String text) {
-        System.out.println(ScreenUI.cleanText(text));
+    private void printMessage(String message) {
+        if (message != null) {
+            System.out.println(message);
+        }
+    }
+
+    private ServerResponse sendAndReceiveInitial() throws IOException {
+        var request = new ClientRequest(null, cookies);
+        var requestJson = gson.toJson(request);
+
+        this.sendToServer(writer, requestJson);
+        var serverResponseRaw = receiveFromServer(socketChannel);
+
+        var serverResponse = gson.fromJson(serverResponseRaw, ServerResponse.class);
+
+        return serverResponse;
     }
 
     private ServerResponse sendAndReceive() throws IOException {
         var userInput = this.getConsoleInput();
 
-        var request = new ClientRequest(userInput, session, game);
+        var request = new ClientRequest(userInput, cookies);
         var requestJson = gson.toJson(request);
 
         this.sendToServer(writer, requestJson);

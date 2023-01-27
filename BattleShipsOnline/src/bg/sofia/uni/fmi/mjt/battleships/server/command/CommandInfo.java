@@ -1,4 +1,4 @@
-package bg.sofia.uni.fmi.mjt.battleships.common;
+package bg.sofia.uni.fmi.mjt.battleships.server.command;
 
 public class CommandInfo {
     public static final String INVALID_ARGS_COUNT_MESSAGE_FORMAT =

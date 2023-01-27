@@ -1,11 +1,13 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.controller;
 
 import bg.sofia.uni.fmi.mjt.battleships.common.*;
+import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
+
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.Game;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.GameStatus;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.Player;
+import bg.sofia.uni.fmi.mjt.battleships.server.ui.ScreenUI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,16 +49,13 @@ public class HomeController extends Controller {
                 return serverResponse;
             }
 
-            var curUser = db.userTable.getUser(request.session().username);
+            var curUser = db.userTable.getUser(request.cookies().session.username);
 
             var game = db.gameTable.createGame(gameName, 2, GameStatus.PENDING, true, List.of(curUser));
 
             db.gameTable.addGame(game);
 
-            request.session().currentScreen = ScreenInfo.GAME_SCREEN;
-
-            serverResponse = new ServerResponse(ResponseStatus.PENDING_GAME, ScreenInfo.GAME_SCREEN,
-                ScreenUI.currentGame(gameName) + ScreenUI.GAME_PENDING_PROMPT, request.session());
+            serverResponse = redirectResponse(ScreenInfo.GAME_SCREEN, request, ScreenUI.currentGame(gameName) + ScreenUI.GAME_PENDING_PROMPT);
 
         }
         else if (command.command().equals(CommandInfo.JOIN_GAME)) {
@@ -93,66 +92,83 @@ public class HomeController extends Controller {
             }
         }
         else if (command.command().equals(CommandInfo.DELETE_GAME)) {
-            serverResponse = new ServerResponse(ResponseStatus.JOINING_GAME, null,
-                ScreenUI.PLACEHOLDER, request.session());
+//            serverResponse = new ServerResponse(ResponseStatus.JOINING_GAME, null,
+//                ScreenUI.PLACEHOLDER, request.session());
         }
         else if (request.input().equals(CommandInfo.LOG_OUT)) {
-            request.session().username = null;
-            request.session().currentScreen = ScreenInfo.GUEST_HOME_SCREEN;
-
-            serverResponse = new ServerResponse(ResponseStatus.LOGOUT, ScreenInfo.GUEST_HOME_SCREEN,
-                ScreenUI.SUCCESSFUL_LOGOUT, request.session());
+            request.cookies().session.username = null;
+            serverResponse = redirectResponse(ScreenInfo.GUEST_HOME_SCREEN, request, ScreenUI.SUCCESSFUL_LOGOUT);
         }
         else if (request.input().equals(CommandInfo.HELP)) {
-            serverResponse = new ServerResponse(ResponseStatus.OK, null,
-                ScreenUI.getAvailableCommands(
-                    CommandInfo.CREATE_GAME_VERBOSE, CommandInfo.LIST_GAMES,
-                    CommandInfo.JOIN_GAME_VERBOSE, CommandInfo.SAVED_GAMES,
-                    CommandInfo.LOAD_GAME_VERBOSE, CommandInfo.DELETE_GAME,
-                    CommandInfo.LOG_OUT, CommandInfo.HELP), request.session());
+            serverResponse = helpResponse(request,
+                CommandInfo.CREATE_GAME_VERBOSE, CommandInfo.LIST_GAMES,
+                CommandInfo.JOIN_GAME_VERBOSE, CommandInfo.SAVED_GAMES,
+                CommandInfo.LOAD_GAME_VERBOSE, CommandInfo.DELETE_GAME,
+                CommandInfo.LOG_OUT, CommandInfo.HELP);
         }
         else {
-            serverResponse = new ServerResponse(ResponseStatus.INVALID_COMMAND, null,
-                ScreenUI.invalidWithHelp(ScreenUI.INVALID_COMMAND), request.session());
+            serverResponse = invalidCommandResponse(request);
         }
 
         return serverResponse;
     }
 
     private ServerResponse joinGameResponse(ClientRequest request, Game game) {
-        var curUser = db.userTable.getUser(request.session().username);
+        var curUser = db.userTable.getUser(request.cookies().session.username);
 
         game.status = GameStatus.IN_PROGRESS;
         game.addPlayer(curUser);
 
         //Go to the game screen
-        request.session().currentScreen = ScreenInfo.GAME_SCREEN;
+        request.cookies().session.currentScreen = ScreenInfo.GAME_SCREEN;
 
         List<PlayerCookie> playersCookies = new ArrayList<>();
 
-        for (var player : game.players) {
-            var playerCookie = new PlayerCookie(player.user.username());
+        PlayerCookie curPlayerCookie = null;
+
+        for (int i = 0; i < game.players.size(); i++) {
+            var player = game.players.get(i);
+            var playerCookie = new PlayerCookie(player.user.username(), i);
+
+            if (playerCookie.player.equals(curUser.username())) {
+                curPlayerCookie = playerCookie;
+            }
 
             playersCookies.add(playerCookie);
         }
 
-        var curClientGameCookie = new GameCookie(game.name,1, 0, playersCookies);
+        var curClientGameCookie = new GameCookie(game.name,0, playersCookies);
 
         List<ServerResponse> signals = new ArrayList<>();
 
         var enemyPlayers = game.players.stream().filter(x -> !x.user.username().equals(curUser.username())).toList();
 
         for (var enemy : enemyPlayers) {
-            var signalResponse = new ServerResponse(ResponseStatus.STARTING_GAME, ScreenInfo.GAME_SCREEN,
-                ScreenUI.GAME_FOUND_OPPONENT + ScreenUI.GAME_STARTING,
+            var playerCookie = playersCookies.stream()
+                .filter(x -> x.player.equals(enemy.user.username()))
+                .findFirst().orElse(null);
+
+            var enemyClientCookies = new ClientState(
                 new SessionCookie(ScreenInfo.GAME_SCREEN, enemy.user.username()),
-                new GameCookie(game.name,0, 0, playersCookies));
+                playerCookie,
+                new GameCookie(game.name,0, playersCookies)
+            );
+
+            var responseMessage = ScreenUI.GAME_FOUND_OPPONENT + ScreenUI.GAME_STARTING;
+
+            var signalResponse = new ServerResponse (ResponseStatus.STARTING_GAME,
+                responseMessage
+                + getScreenPrompt(ScreenInfo.GAME_SCREEN, enemyClientCookies), enemyClientCookies);
 
             signals.add(signalResponse);
         }
 
-        var serverResponse = new ServerResponse(ResponseStatus.JOINING_GAME, ScreenInfo.GAME_SCREEN,
-            ScreenUI.gameJoined(game.name) + ScreenUI.GAME_STARTING, request.session(), curClientGameCookie, signals);
+        request.cookies().player = curPlayerCookie;
+        request.cookies().game = curClientGameCookie;
+
+        var serverResponse = redirectResponse(ScreenInfo.GAME_SCREEN, request,
+            ScreenUI.gameJoined(game.name) + ScreenUI.GAME_STARTING,
+            signals);
 
         return serverResponse;
     }

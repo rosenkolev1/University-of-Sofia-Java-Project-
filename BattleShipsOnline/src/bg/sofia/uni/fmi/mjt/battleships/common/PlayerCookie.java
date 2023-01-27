@@ -1,17 +1,23 @@
 package bg.sofia.uni.fmi.mjt.battleships.common;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
 public class PlayerCookie {
 
     public String player;
-    public String move;
+    public final int myTurn;
+    public List<String> moves;
 
-    public PlayerCookie(String player) {
-        this(player, null);
+    public PlayerCookie(String player, int myTurn) {
+        this(player, myTurn, new ArrayList<>());
     }
 
-    public PlayerCookie(String player, String move) {
+    public PlayerCookie(String player, int myTurn, List<String> moves) {
         this.player = player;
-        this.move = move;
+        this.myTurn = myTurn;
+        this.moves = moves;
     }
 
     @Override
@@ -26,6 +32,8 @@ public class PlayerCookie {
         }
 
         return this.player.equals(castOther.player) &&
-            this.move.equals(castOther.move);
+            this.myTurn == castOther.myTurn &&
+            new HashSet<>(this.moves).containsAll(castOther.moves) &&
+            new HashSet<>(castOther.moves).containsAll(this.moves);
     }
 }

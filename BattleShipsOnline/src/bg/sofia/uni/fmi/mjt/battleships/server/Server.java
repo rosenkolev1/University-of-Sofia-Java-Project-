@@ -37,12 +37,12 @@ public class Server {
 
     private ByteBuffer buffer;
     private Selector selector;
-    private Database db;
 
-    private UserController userController;
-    private HomeController homeController;
-    private GuestHomeController guestHomeController;
-    private GameController gameController;
+    private final Database db;
+    private final UserController userController;
+    private final HomeController homeController;
+    private final GuestHomeController guestHomeController;
+    private final GameController gameController;
 
     public Server(int port, CommandExecutor commandExecutor, Database db) {
         this.port = port;
@@ -92,16 +92,16 @@ public class Server {
                             // Get server response
                             var serverResponse = getServerResponse(selector, key, clientRequest);
 
-                            //Attach the session object to the selectionKey so that this client can be identified by other clients
-                            key.attach(serverResponse.session());
+                            //Attach the cookies to the selectionKey so that this client can be identified by other clients
+                            key.attach(serverResponse.cookies());
 
                             //Send any resulting signals to the target clients
                             if (serverResponse.signals() != null) {
                                 for (var signalResponse : serverResponse.signals()) {
                                     for (var selectionKey : selector.keys()) {
-                                        var keySession = (SessionCookie)selectionKey.attachment();
+                                        var keySession = (ClientState)selectionKey.attachment();
 
-                                        if (keySession != null && keySession.username.equals(signalResponse.session().username)) {
+                                        if (keySession != null && keySession.session.username.equals(signalResponse.cookies().session.username)) {
                                             writeClientOutput((SocketChannel) selectionKey.channel(), gson.toJson(signalResponse));
                                         }
 
@@ -135,28 +135,30 @@ public class Server {
     private ServerResponse getServerResponse(Selector selector, SelectionKey key, ClientRequest clientRequest) {
         ServerResponse serverResponse = null;
 
-        if (clientRequest.session().currentScreen.equals(ScreenInfo.GUEST_HOME_SCREEN)) {
+        if (clientRequest.cookies().session == null || clientRequest.cookies().session.currentScreen.equals(ScreenInfo.GUEST_HOME_SCREEN)) {
             return guestHomeController.respond(clientRequest);
         }
-        if (clientRequest.session().currentScreen.equals(ScreenInfo.LOGIN_SCREEN)) {
+        if (clientRequest.cookies().session.currentScreen.equals(ScreenInfo.LOGIN_SCREEN)) {
             List<SessionCookie> sessions = new ArrayList<>();
 
             //Get all the currently logged users' session cookies
             for (var selectionKey : selector.keys()) {
-                var keySession = (SessionCookie)selectionKey.attachment();
+                var cookies = (ClientState)selectionKey.attachment();
 
-                sessions.add(keySession);
+                if (cookies != null) {
+                    sessions.add(cookies.session);
+                }
             }
 
             return userController.loginResponse(sessions, clientRequest);
         }
-        else if (clientRequest.session().currentScreen.equals(ScreenInfo.REGISTER_SCREEN)) {
+        else if (clientRequest.cookies().session.currentScreen.equals(ScreenInfo.REGISTER_SCREEN)) {
             return userController.registerResponse(clientRequest);
         }
-        else if (clientRequest.session().currentScreen.equals(ScreenInfo.HOME_SCREEN)) {
+        else if (clientRequest.cookies().session.currentScreen.equals(ScreenInfo.HOME_SCREEN)) {
             return homeController.respond(clientRequest);
         }
-        else if (clientRequest.session().currentScreen.equals(ScreenInfo.GAME_SCREEN)) {
+        else if (clientRequest.cookies().session.currentScreen.equals(ScreenInfo.GAME_SCREEN)) {
             return gameController.respond(clientRequest);
         }
 

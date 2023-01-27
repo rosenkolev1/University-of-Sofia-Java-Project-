@@ -1,13 +1,13 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.controller;
 
 import bg.sofia.uni.fmi.mjt.battleships.common.*;
-import bg.sofia.uni.fmi.mjt.battleships.server.command.Command;
+import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
+
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.User;
+import bg.sofia.uni.fmi.mjt.battleships.server.ui.ScreenUI;
 
-import java.nio.channels.Selector;
-import java.nio.channels.SocketChannel;
 import java.util.List;
 
 public class UserController extends Controller {
@@ -52,22 +52,15 @@ public class UserController extends Controller {
         }
 
         if (password != null) {
-            request.session().username = username;
-            request.session().currentScreen = ScreenInfo.HOME_SCREEN;
-
-            serverResponse = new ServerResponse(ResponseStatus.LOGIN, ScreenInfo.HOME_SCREEN,
-                ScreenUI.SUCCESSFUL_LOGIN, request.session());
+            request.cookies().session.username = username;
+            serverResponse = redirectResponse(ScreenInfo.HOME_SCREEN, request, ScreenUI.SUCCESSFUL_LOGIN);
         }
         else if (request.input().equals(CommandInfo.BACK)) {
-            request.session().currentScreen = ScreenInfo.GUEST_HOME_SCREEN;
-
-            serverResponse = new ServerResponse(ResponseStatus.REDIRECT, ScreenInfo.GUEST_HOME_SCREEN,
-                null, request.session());
+            serverResponse = redirectResponse(ScreenInfo.GUEST_HOME_SCREEN, request);
         }
         else if (request.input().equals(CommandInfo.HELP)) {
-            serverResponse = new ServerResponse(ResponseStatus.OK, null,
-                ScreenUI.getAvailableCommands(
-                    CommandInfo.LOGIN_CREDENTIALS, CommandInfo.BACK), request.session());
+            serverResponse = helpResponse(request,
+                CommandInfo.LOGIN_CREDENTIALS, CommandInfo.BACK);
         }
         else {
             serverResponse = invalidCommandResponse(request);
@@ -100,11 +93,9 @@ public class UserController extends Controller {
 
             //Check if the username or password contains disallowed characters
             if (!username.matches(VALID_REGISTRATION_REGEX)) {
-
                 return invalidCommandResponse(ScreenUI.INVALID_USERNAME_FORBIDDEN_CHARS, request);
             }
             else if (!password.matches(VALID_REGISTRATION_REGEX)) {
-
                 return invalidCommandResponse(ScreenUI.INVALID_PASSWORD_FORBIDDEN_CHARS, request);
             }
 
@@ -122,20 +113,14 @@ public class UserController extends Controller {
 
             db.userTable.addUser(username, password);
 
-            request.session().currentScreen = ScreenInfo.GUEST_HOME_SCREEN;
-
-            serverResponse = new ServerResponse(ResponseStatus.REDIRECT, ScreenInfo.GUEST_HOME_SCREEN,
-                ScreenUI.SUCCESSFUL_REGISTRATION, request.session());
+            serverResponse = redirectResponse(ScreenInfo.GUEST_HOME_SCREEN, request, ScreenUI.SUCCESSFUL_REGISTRATION);
         }
         else if (request.input().equals(CommandInfo.BACK)) {
-            request.session().currentScreen = ScreenInfo.GUEST_HOME_SCREEN;
-
-            serverResponse = new ServerResponse(ResponseStatus.REDIRECT, ScreenInfo.GUEST_HOME_SCREEN,
-                null, request.session());
+            serverResponse = redirectResponse(ScreenInfo.GUEST_HOME_SCREEN, request);
         }
         else if (request.input().equals(CommandInfo.HELP)) {
-            serverResponse = new ServerResponse(ResponseStatus.OK, null,
-                ScreenUI.getAvailableCommands(CommandInfo.REGISTER_CREDENTIALS, CommandInfo.BACK, CommandInfo.HELP), request.session());
+            serverResponse = helpResponse(request,
+                CommandInfo.REGISTER_CREDENTIALS, CommandInfo.BACK, CommandInfo.HELP);
         }
         else {
             serverResponse = invalidCommandResponse(request);

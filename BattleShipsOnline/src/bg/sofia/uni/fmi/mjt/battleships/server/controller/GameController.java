@@ -1,10 +1,11 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.controller;
 
 import bg.sofia.uni.fmi.mjt.battleships.common.*;
+import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.*;
-import net.bytebuddy.agent.VirtualMachine;
+import bg.sofia.uni.fmi.mjt.battleships.server.ui.ScreenUI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,17 +32,17 @@ public class GameController extends Controller {
 
             var targetTileString = args[0];
 
-            var game = db.gameTable.getGame(request.game().name, GameStatus.IN_PROGRESS);
+            var game = db.gameTable.getGame(request.cookies().game.name, GameStatus.IN_PROGRESS);
 
-            var curUsername = request.session().username;
-            var enemyName = request.game().playersInfo.stream()
+            var curUsername = request.cookies().session.username;
+            var enemyName = request.cookies().game.playersInfo.stream()
                 .filter(x -> !x.player.equals(curUsername))
                 .findFirst().get().player;
 
             var enemyPlayer = game.getPlayer(enemyName);
             var enemyBoard = enemyPlayer.board;
 
-            //DEBUG. IN THIS CASE, HIT ALL OF THE TILES AND MAKE THE GAME END INSTANTLY
+            //DEBUG. IN THIS CASE, HIT ALL THE TILES AND MAKE THE GAME END INSTANTLY
             if (targetTileString.equals("all")) {
                 targetTileString = "A1";
                 for (var tile : enemyBoard.board()) {
@@ -76,13 +77,16 @@ public class GameController extends Controller {
             var playerHasLost = enemyPlayer.status == PlayerStatus.DEAD;
             var gameHasEnded = game.status == GameStatus.ENDED;
 
-            //Add the attacker's last move to the last move to the game cookie
-            var curPlayerCookie = request.game().playersInfo.stream().filter(x -> x.player.equals(curUsername)).findFirst().get();
-            curPlayerCookie.move = targetTileString;
+            //Add the attacker's last move to the moves of the player cookie
+            var curPlayerCookie = request.cookies().game.playersInfo.stream()
+                .filter(x -> x.player.equals(curUsername)).findFirst().get();
 
-            //Remove the dead players' last moves from the game cookie
+            curPlayerCookie.moves.add(targetTileString);
+
+            //Remove the dead players' from the game cookie
             if (playerHasLost) {
-                request.game().playersInfo = request.game().playersInfo.stream().filter(x -> x.player.equals(enemyName)).toList();
+                request.cookies().game.playersInfo = request.cookies().game.playersInfo.stream()
+                    .filter(x -> x.player.equals(enemyName)).toList();
             }
 
             List<ServerResponse> signals = createSignalResponses(request, enemyName, targetTileString,
@@ -93,13 +97,11 @@ public class GameController extends Controller {
             //Check if the game has been won by the attacker
             if (gameHasEnded) {
                 message.append("\n").append(ScreenUI.GAME_ENDING_WINNER);
-                request.session().currentScreen = ScreenInfo.HOME_SCREEN;
 
                 //Finish the game and save it to the file
                 this.db.gameTable.finishGame(game);
 
-                serverResponse = new ServerResponse(ResponseStatus.FINISH_GAME, ScreenInfo.HOME_SCREEN,
-                    message.toString(), request.session(), null, signals);
+                serverResponse = redirectResponse(ScreenInfo.HOME_SCREEN, request, message.toString(), signals);
             }
             else {
                 var enemyBoardWithFogOfWar = enemyBoard.boardWithFogOfWar();
@@ -111,25 +113,24 @@ public class GameController extends Controller {
                 var enemyBoardWithFogOfWarString = enemyBoardWithFogOfWar.toString();
 
                 message.append("\n").append(ScreenUI.yourBoard(curPlayerBoardString))
-                    .append("\n").append(ScreenUI.enemyBoard(enemyBoardWithFogOfWarString));
+                    .append("\n").append(ScreenUI.enemyBoard(enemyBoardWithFogOfWarString)).append("\n");
 
                 //Go to the next turn;
-                request.game().nextTurn();
+                request.cookies().game.nextTurn();
 
-                serverResponse = new ServerResponse(ResponseStatus.OK, null,
-                    message.toString(), request.session(), request.game(), signals);
+                serverResponse = new ServerResponse(ResponseStatus.OK,
+                    message.toString() + getScreenPrompt(ScreenInfo.GAME_SCREEN, request.cookies()),
+                    request.cookies(), signals);
             }
 
         }
         else if (request.input().equals(CommandInfo.HELP)) {
-            serverResponse = new ServerResponse(ResponseStatus.OK, null,
-                ScreenUI.getAvailableCommands(
-                    CommandInfo.GAME_HIT, CommandInfo.GAME_ABANDON, CommandInfo.GAME_SAVE_AND_QUIT,
-                    CommandInfo.HELP), request.session(), request.game());
+            serverResponse = helpResponse(request,
+                CommandInfo.GAME_HIT, CommandInfo.GAME_ABANDON,
+                CommandInfo.GAME_SAVE_AND_QUIT, CommandInfo.HELP);
         }
         else {
-            serverResponse = new ServerResponse(ResponseStatus.INVALID_COMMAND, null,
-                ScreenUI.invalidWithHelp(ScreenUI.INVALID_COMMAND), request.session(), request.game());
+            serverResponse = invalidCommandResponse(request);
         }
 
         return serverResponse;
@@ -173,24 +174,27 @@ public class GameController extends Controller {
                                                        boolean playerHasLost, boolean gameHasEnded) {
         List<ServerResponse> signals = new ArrayList<>();
 
-        var enemies = request.game().playersInfo.stream().filter(x -> !x.player.equals(request.session().username)).toList();
+        var enemies = request.cookies().game.playersInfo.stream()
+            .filter(x -> !x.player.equals(request.cookies().session.username)).toList();
 
         for (var enemy : enemies) {
             var isDefenderPlayer = enemy.player.equals(enemyName);
 
-            String redirect = null;
             ResponseStatus responseStatus = null;
+            var cookies = new ClientState(
+                new SessionCookie(null, enemy.player),
+                enemy,
+                null
+            );
+
             StringBuilder message = new StringBuilder();
-            GameCookie gameCookie = null;
-            SessionCookie sessionCookie = new SessionCookie(null, enemy.player);
 
             if (isDefenderPlayer && (gameHasEnded || playerHasLost)) {
-                redirect = ScreenInfo.HOME_SCREEN;
                 message
                     .append(defenderMessage(tilePos, hasHitShip, hasSunkShip))
-                    .append("\n" + ScreenUI.GAME_ENDING_LOOSER);
+                    .append(ScreenUI.GAME_ENDING_LOOSER);
 
-                sessionCookie.currentScreen = ScreenInfo.HOME_SCREEN;
+                cookies.session.currentScreen = ScreenInfo.HOME_SCREEN;
 
                 responseStatus = ResponseStatus.FINISH_GAME;
             }
@@ -199,18 +203,17 @@ public class GameController extends Controller {
                     defenderMessage(tilePos, hasHitShip, hasSunkShip) :
                     new StringBuilder(ScreenUI.PLACEHOLDER);
 
-                sessionCookie.currentScreen = ScreenInfo.GAME_SCREEN;
+                cookies.session.currentScreen = ScreenInfo.GAME_SCREEN;
 
-                gameCookie = new GameCookie(request.game().name, -1, request.game().turn, request.game().playersInfo);
-                gameCookie.nextTurn();
+                cookies.game = new GameCookie(request.cookies().game.name, request.cookies().game.turn, request.cookies().game.playersInfo);
+                cookies.game.nextTurn();
 
                 responseStatus = ResponseStatus.OK;
             }
 
-            var response = new ServerResponse(responseStatus, redirect,
-                message.toString(),
-                sessionCookie,
-                gameCookie);
+            var response = new ServerResponse(responseStatus,
+                message.toString() + getScreenPrompt(cookies.session.currentScreen, cookies),
+                cookies);
 
             signals.add(response);
         }

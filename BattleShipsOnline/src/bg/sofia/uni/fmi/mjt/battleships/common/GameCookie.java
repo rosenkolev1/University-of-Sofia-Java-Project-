@@ -5,14 +5,11 @@ import java.util.List;
 
 public class GameCookie {
     public final String name;
-    public final int myTurn;
-
     public int turn;
     public List<PlayerCookie> playersInfo;
 
-    public GameCookie(String name, int myTurn, int turn, List<PlayerCookie> opponentsInfo) {
+    public GameCookie(String name, int turn, List<PlayerCookie> opponentsInfo) {
         this.name = name;
-        this.myTurn = myTurn;
         this.turn = turn;
         this.playersInfo = opponentsInfo;
     }
@@ -37,7 +34,7 @@ public class GameCookie {
         }
 
         return this.name.equals(castOther.name) &&
-            this.turn == castOther.turn && this.myTurn == castOther.myTurn &&
+            this.turn == castOther.turn &&
             new HashSet<>(this.playersInfo).containsAll(castOther.playersInfo) &&
             new HashSet<>(castOther.playersInfo).containsAll(this.playersInfo);
     }

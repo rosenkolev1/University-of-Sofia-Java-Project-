@@ -77,11 +77,16 @@ public class ScreenUI {
     public static final String GAME_DEFENDER_SHIP_HIT_TEMPLATE = "\nYour ship on tile \"%s\" has been hit :(";
     public static final String GAME_DEFENDER_SHIP_SUNK_TEMPLATE = "\nYour ship on tile \"%s\" has been hit and it has sunk :( :(";
 
-    public static final String GAME_YOUR_BOARD = "\nYOUR BOARD\n";
-    public static final String GAME_ENEMY_BOARD = "\nENEMY BOARD\n";
+    public static final String GAME_YOUR_BOARD = "YOUR BOARD\n";
+    public static final String GAME_ENEMY_BOARD = "ENEMY BOARD\n";
 
-    public static final String INVALID_GAME_HIT_TILE_TEMPLATE = "\nThe coordinates for the tile are incorrect!" +
-        "\nPossible rank values: %s" + "\nPossible file values: %s";
+    public static final String INVALID_GAME_HIT_TILE_TEMPLATE =
+        """
+
+        The coordinates for the tile are incorrect!
+        Possible rank values: %s
+        Possible file values: %s
+        """;
 
     public static String redirectMessage(String from, String to) {
         return String.format(REDIRECT_TEMPLATE, from, to);
@@ -142,6 +147,14 @@ public class ScreenUI {
         return String.format(GAME_DEFENDER_SHIP_SUNK_TEMPLATE, tilePos);
     }
 
+    public static String enemyBoard(String board) {
+        return boardWithAnnotation(GAME_ENEMY_BOARD, board);
+    }
+
+    public static String yourBoard(String board) {
+        return boardWithAnnotation(GAME_YOUR_BOARD, board);
+    }
+
     public static String cleanText(String text) {
         while (text.contains("\n\n\n")) {
             text = text.replace("\n\n\n", "\n\n");
@@ -152,5 +165,28 @@ public class ScreenUI {
 
     public static String invalidWithHelp(String invalidMessage) {
         return invalidMessage + HELP_PROMPT;
+    }
+
+    private static String boardWithAnnotation(String annotation, String board) {
+        var rowLength = board.indexOf("\n");
+
+        var rowBeginningWhitespaces = 0;
+
+        while(board.substring(0, rowLength).startsWith(" ".repeat(rowBeginningWhitespaces))) {
+            rowBeginningWhitespaces++;
+        }
+
+        rowBeginningWhitespaces-=2;
+
+        rowLength -= rowBeginningWhitespaces;
+
+        var annotationLength = annotation.strip().length();
+        int whiteSpace = 0;
+
+        while(Math.abs(whiteSpace - (rowLength - (whiteSpace + annotationLength))) >= 2) {
+            whiteSpace++;
+        }
+
+        return "\n" + " ".repeat(rowBeginningWhitespaces) + " ".repeat(whiteSpace) + annotation + board;
     }
 }

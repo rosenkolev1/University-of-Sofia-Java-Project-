@@ -2,6 +2,7 @@ import bg.sofia.uni.fmi.mjt.battleships.server.Server;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandExecutor;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.Game;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.GameStatus;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.User;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.Assertions;
@@ -12,7 +13,7 @@ public class Main {
     public static void main(String[] args) {
 
 //        var user = new User("roskata", "12345678");
-//        var game = new Game(1, List.of(user, user), true);
+//        var game = new Game("someGame", 2, GameStatus.IN_PROGRESS, true, List.of(user, user));
 //
 //        var gson = new Gson();
 //        var something = gson.toJson(game);

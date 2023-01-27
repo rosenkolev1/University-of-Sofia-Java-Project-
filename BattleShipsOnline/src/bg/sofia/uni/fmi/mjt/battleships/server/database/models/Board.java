@@ -187,11 +187,24 @@ public class Board {
 
         BoardRank lastRank = null;
 
+        stringBuilder.append("  ");
+
+        //Print the files on top of the board
+        for (int file = 1; file <= FILES_COUNT; file++) {
+            stringBuilder
+                .append(" ")
+                .append(file);
+        }
+        stringBuilder.append("\n");
+
         for (var tile : orderedBoard) {
             var curRank = tile.pos().rank();
 
-            if (curRank != lastRank && lastRank != null) {
-                stringBuilder.append("|\n");
+            if (lastRank == null) {
+                stringBuilder.append(curRank.toString()).append(" ");
+            }
+            else if (curRank != lastRank) {
+                stringBuilder.append("|\n").append(curRank.toString()).append(" ");
             }
 
             stringBuilder.append("|" + tile.status.toString());

@@ -74,8 +74,11 @@ public class GameController extends Controller {
             var curPlayer = game.getPlayer(curUsername);
             var curPlayerBoard = curPlayer.board;
 
-            message.append("\n" + ScreenUI.GAME_YOUR_BOARD + curPlayerBoard.toString() +
-                "\n" + ScreenUI.GAME_ENEMY_BOARD + enemyBoardWithFogOfWar.toString());
+            var curPlayerBoardString = curPlayerBoard.toString();
+            var enemyBoardWithFogOfWarString = enemyBoardWithFogOfWar.toString();
+
+            message.append("\n").append(ScreenUI.yourBoard(curPlayerBoardString))
+                .append("\n").append(ScreenUI.enemyBoard(enemyBoardWithFogOfWarString));
 
             //Go to the next turn;
             request.game().nextTurn();

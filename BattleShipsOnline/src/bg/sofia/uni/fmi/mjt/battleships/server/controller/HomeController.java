@@ -39,15 +39,17 @@ public class HomeController extends Controller {
                 return serverResponse;
             }
 
-            //Validate that the game has not been created already
-            if (db.gameTable.gameExists(gameName)) {
+            //Validate that an unfinished game with the same name has not been created already
+            if (db.gameTable.gameExists(gameName,
+                GameStatus.PENDING, GameStatus.IN_PROGRESS, GameStatus.PAUSED)) {
+
                 serverResponse = invalidCommandResponse(ScreenUI.INVALID_GAME_ALREADY_EXISTS, request);
                 return serverResponse;
             }
 
             var curUser = db.userTable.getUser(request.session().username);
 
-            var game = new Game(gameName, 2, GameStatus.PENDING, true, List.of(curUser));
+            var game = db.gameTable.createGame(gameName, 2, GameStatus.PENDING, true, List.of(curUser));
 
             db.gameTable.addGame(game);
 
@@ -141,16 +143,16 @@ public class HomeController extends Controller {
         var enemyPlayers = game.players.stream().filter(x -> !x.user.username().equals(curUser.username())).toList();
 
         for (var enemy : enemyPlayers) {
-            var signalResponse = new ServerResponse(ResponseStatus.STARTING_GAME, null,
+            var signalResponse = new ServerResponse(ResponseStatus.STARTING_GAME, ScreenInfo.GAME_SCREEN,
                 ScreenUI.GAME_FOUND_OPPONENT + ScreenUI.GAME_STARTING,
-                new SessionCookie(null, enemy.user.username()),
+                new SessionCookie(ScreenInfo.GAME_SCREEN, enemy.user.username()),
                 new GameCookie(game.name,0, 0, playersCookies));
 
             signals.add(signalResponse);
         }
 
-        var serverResponse = new ServerResponse(ResponseStatus.JOINING_GAME, null,
-            ScreenUI.gameJoined(game.name), request.session(), curClientGameCookie, signals);
+        var serverResponse = new ServerResponse(ResponseStatus.JOINING_GAME, ScreenInfo.GAME_SCREEN,
+            ScreenUI.gameJoined(game.name) + ScreenUI.GAME_STARTING, request.session(), curClientGameCookie, signals);
 
         return serverResponse;
     }

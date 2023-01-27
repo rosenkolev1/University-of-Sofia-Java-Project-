@@ -69,6 +69,14 @@ public class ScreenUI {
     public static final String GAME_MY_TURN = "\nIt's your turn now! Enter your turn:";
     public static final String GAME_ENEMY_TURN_TEMPLATE = "\nWaiting for %s's turn now!";
 
+    public static final String INVALID_GAME_HIT_TILE_TEMPLATE =
+        """
+
+        The coordinates for the tile are incorrect!
+        Possible rank values: %s
+        Possible file values: %s
+        """;
+
     public static final String GAME_TILE_HIT_MISS = "\nYour attack missed :(";
     public static final String GAME_TILE_HIT_SUCCESS = "\nSuccessful hit!";
     public static final String GAME_SHIP_HIT_SUNK = " You have managed to sink a ship! Good job!";
@@ -80,13 +88,9 @@ public class ScreenUI {
     public static final String GAME_YOUR_BOARD = "YOUR BOARD\n";
     public static final String GAME_ENEMY_BOARD = "ENEMY BOARD\n";
 
-    public static final String INVALID_GAME_HIT_TILE_TEMPLATE =
-        """
-
-        The coordinates for the tile are incorrect!
-        Possible rank values: %s
-        Possible file values: %s
-        """;
+    public static final String GAME_ENDING_RETURN_TO_MAIN = "\nReturning to main menu...";
+    public static final String GAME_ENDING_WINNER = "\nYou have won the game! Congrats :)" + GAME_ENDING_RETURN_TO_MAIN;
+    public static final String GAME_ENDING_LOOSER = "\nYou have lost the game! That's unfortunate :(" + GAME_ENDING_RETURN_TO_MAIN;
 
     public static String redirectMessage(String from, String to) {
         return String.format(REDIRECT_TEMPLATE, from, to);

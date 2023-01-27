@@ -64,6 +64,16 @@ public class Board {
         }
     }
 
+    public boolean allShipsHaveSunk() {
+        for (var ship : this.ships) {
+            if (!this.shipHasSunk(ship)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public void changeTile(BoardRank rank, int file, TileStatus status) {
         changeTile(new TilePos(rank, file), status);
     }

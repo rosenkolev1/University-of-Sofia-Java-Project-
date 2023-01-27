@@ -62,7 +62,7 @@ public class ConsoleClient {
                 var currentScreenResponse = currentScreenHandler.executeHandler();
 
                 //Handle screen change
-                currentScreenHandler.setHandler(currentScreenResponse.session().currentScreen);
+                currentScreenHandler.setHandler(client.session.currentScreen);
 
                 //Handle call to exit the application
                 if (currentScreenResponse.status() == ResponseStatus.EXIT) {
@@ -151,10 +151,6 @@ public class ConsoleClient {
 
             serverResponse = gson.fromJson(serverResponseRaw, ServerResponse.class);
 
-            //Set the current screen to the game screen
-            // (you can also set the current screen from when you create the signal response in HomeController)
-            serverResponse.session().currentScreen = ScreenInfo.GAME_SCREEN;
-
             this.session = serverResponse.session();
 
             if (serverResponse.message() != null) {
@@ -187,13 +183,12 @@ public class ConsoleClient {
 
             serverResponse = gson.fromJson(serverResponseRaw, ServerResponse.class);
 
-            //Set the current screen to the game screen
-            // (you can also set the current screen from when you create the signal response in GameController)
-            serverResponse.session().currentScreen = ScreenInfo.GAME_SCREEN;
             this.session = serverResponse.session();
 
-            this.game.turn = serverResponse.game().turn;
-            this.game.playersInfo = serverResponse.game().playersInfo;
+            if (serverResponse.game() != null) {
+                this.game.turn = serverResponse.game().turn;
+                this.game.playersInfo = serverResponse.game().playersInfo;
+            }
 
             if (serverResponse.message() != null) {
                 printlnClean(serverResponse.message());

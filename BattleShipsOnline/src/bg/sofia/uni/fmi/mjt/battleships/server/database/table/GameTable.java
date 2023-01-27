@@ -10,6 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -27,8 +29,30 @@ public class GameTable extends Table {
         initialiseGames();
     }
 
+    public Game createGame(String name, int playerCount, GameStatus status, boolean randomizedBoards, List<User> users) {
+        var gameId = this.games.stream()
+            .map(x -> x.id).max(Long::compare).orElse(0L) + 1;
+
+        return new Game(gameId, name, playerCount, status, randomizedBoards, users);
+    }
+
+    public void finishGame(Game game) {
+        try (var bufferedWriter = Files.newBufferedWriter(tablePath, StandardOpenOption.APPEND)) {
+            var gameJson = gson.toJson(game);
+            bufferedWriter
+                .append(gameJson)
+                .append(entrySeparator);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public List<Game> games() {
         return games;
+    }
+
+    public boolean gameExists(String name, GameStatus... statuses) {
+        return getGame(name, statuses) != null;
     }
 
     public boolean gameExists(String name) {
@@ -37,6 +61,18 @@ public class GameTable extends Table {
 
     public List<Game> pendingGames() {
         return this.games.stream().filter(x -> x.status == GameStatus.PENDING).toList();
+    }
+
+    public Game getGame(String name, GameStatus... statuses) {
+        for (var game : games) {
+            if (game.name.equals(name) &&
+                Arrays.stream(statuses).toList().contains(game.status)) {
+
+                return game;
+            }
+        }
+
+        return null;
     }
 
     public Game getGame(String name) {
@@ -50,14 +86,7 @@ public class GameTable extends Table {
     }
 
     public void addGame(Game game) {
-        try (var bufferedWriter = Files.newBufferedWriter(tablePath, StandardOpenOption.APPEND)) {
-            this.games.add(game);
-
-//            var gameJson = gson.toJson(game);
-//            bufferedWriter.append(gameJson + entrySeparator);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        this.games.add(game);
     }
 
     private void initialiseGames() {

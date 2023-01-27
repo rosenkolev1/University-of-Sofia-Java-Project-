@@ -9,6 +9,7 @@ public enum ResponseStatus {
     PENDING_GAME,
     STARTING_GAME,
     JOINING_GAME,
+    FINISH_GAME,
     UNEXPECTED_ERROR,
     EXIT
 }

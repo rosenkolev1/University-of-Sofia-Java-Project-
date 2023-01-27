@@ -1,6 +1,7 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.controller;
 
 import bg.sofia.uni.fmi.mjt.battleships.common.*;
+import bg.sofia.uni.fmi.mjt.battleships.server.Server;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
@@ -116,10 +117,19 @@ public class HomeController extends Controller {
             var games = db.gameTable.games().stream().filter(x -> x.status != GameStatus.ENDED).toList();
 
             if (games.isEmpty()) {
-                return messageResponse(ScreenUI.GAMES_LIST_EMPTY, request);
+                return messageResponse(ServerResponse.builder()
+                    .setMessage(ScreenUI.GAMES_LIST_EMPTY)
+                    .setCookies(request.cookies()));
             }
 
-            return messageResponse(String.join("\n", games.stream().map(x -> x.id + " | " + x.name).toList()), request);
+            //TODO: Create a fancy way to show the list of all games
+
+            return messageResponse(
+                ServerResponse
+                    .builder()
+                    .setMessage(String.join("\n", games.stream().map(x -> x.id + " | " + x.name).toList()))
+                    .setCookies(request.cookies())
+            );
         }
 //        else if (command.command().equals(CommandInfo.DELETE_GAME)) {
 ////            serverResponse = new ServerResponse(ResponseStatus.JOINING_GAME, null,
@@ -186,10 +196,12 @@ public class HomeController extends Controller {
 
             var responseMessage = ScreenUI.GAME_FOUND_OPPONENT + ScreenUI.GAME_STARTING;
 
-//            var signalResponse = new ServerResponse (ResponseStatus.STARTING_GAME,
-//                responseMessage
-//                + getScreenPrompt(ScreenInfo.GAME_SCREEN, enemyClientCookies), enemyClientCookies);
-            var signalResponse = messageResponse(responseMessage, enemyClientCookies);
+            var signalResponse = messageResponse(
+                ServerResponse
+                    .builder()
+                    .setMessage(responseMessage)
+                    .setCookies(enemyClientCookies)
+            );
 
             signals.add(signalResponse);
         }

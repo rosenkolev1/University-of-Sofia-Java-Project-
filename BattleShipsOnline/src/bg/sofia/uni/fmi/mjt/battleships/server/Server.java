@@ -93,18 +93,18 @@ public class Server {
                             var serverResponse = getServerResponse(selector, key, clientRequest);
 
                             //Attach the cookies to the selectionKey so that this client can be identified by other clients
-                            key.attach(serverResponse.cookies());
+                            key.attach(serverResponse.cookies);
 
                             //Send any resulting signals to the target clients
-                            if (serverResponse.signals() != null) {
-                                for (var signalResponse : serverResponse.signals()) {
+                            if (serverResponse.signals != null) {
+                                for (var signalResponse : serverResponse.signals) {
                                     for (var selectionKey : selector.keys()) {
                                         var keySession = (ClientState)selectionKey.attachment();
 
                                         if (keySession != null &&
                                             keySession.session != null &&
                                             keySession.session.username != null &&
-                                            keySession.session.username.equals(signalResponse.cookies().session.username)) {
+                                            keySession.session.username.equals(signalResponse.cookies.session.username)) {
                                             writeClientOutput((SocketChannel) selectionKey.channel(), gson.toJson(signalResponse));
                                         }
 

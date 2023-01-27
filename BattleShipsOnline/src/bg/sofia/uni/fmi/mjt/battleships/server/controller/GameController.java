@@ -1,6 +1,7 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.controller;
 
 import bg.sofia.uni.fmi.mjt.battleships.common.*;
+import bg.sofia.uni.fmi.mjt.battleships.server.Server;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
@@ -124,7 +125,14 @@ public class GameController extends Controller {
 //                serverResponse = new ServerResponse(ResponseStatus.OK,
 //                    message.toString() + getScreenPrompt(ScreenInfo.GAME_SCREEN, request.cookies()),
 //                    request.cookies(), signals);
-                serverResponse = messageResponse(message.toString(), request, signals);
+
+                serverResponse = messageResponse(
+                    ServerResponse
+                        .builder()
+                        .setMessage(message.toString())
+                        .setCookies(request.cookies())
+                        .setSignals(signals)
+                );
             }
 
         }
@@ -223,7 +231,12 @@ public class GameController extends Controller {
 //            var response = new ServerResponse(responseStatus,
 //                message.toString() + getScreenPrompt(cookies.session.currentScreen, cookies),
 //                cookies);
-            var response = messageResponse(message.toString(), cookies);
+            var response = messageResponse(
+                ServerResponse
+                    .builder()
+                    .setMessage(message.toString())
+                    .setCookies(cookies)
+            );
 
             signals.add(response);
         }

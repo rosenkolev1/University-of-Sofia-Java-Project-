@@ -61,8 +61,8 @@ public class ConsoleClient {
 
             //Send initial request and set initial client state
             var initialServerResponse = client.sendAndReceiveInitial();
-            client.cookies = initialServerResponse.cookies();
-            client.printMessage(initialServerResponse.message());
+            client.cookies = initialServerResponse.cookies;
+            client.printMessage(initialServerResponse.message);
 
             var currentScreenHandler = new ScreenHandler(client, client.cookies.session.currentScreen);
 
@@ -73,11 +73,11 @@ public class ConsoleClient {
                 currentScreenHandler.setHandler(client.cookies.session.currentScreen);
 
                 //Handle call to exit the application
-                if (currentScreenResponse.status() == ResponseStatus.EXIT) {
+                if (currentScreenResponse.status == ResponseStatus.EXIT) {
                     break;
                 }
                 //Handle invalid command
-                else if (currentScreenResponse.status() == ResponseStatus.INVALID_COMMAND) {
+                else if (currentScreenResponse.status == ResponseStatus.INVALID_COMMAND) {
 
                 }
             }
@@ -89,9 +89,9 @@ public class ConsoleClient {
     public ServerResponse guestHomeScreen() throws IOException {
         var serverResponse = sendAndReceive();
 
-        this.cookies = serverResponse.cookies();
+        this.cookies = serverResponse.cookies;
 
-        printMessage(serverResponse.message());
+        printMessage(serverResponse.message);
 
         return serverResponse;
     }
@@ -99,9 +99,9 @@ public class ConsoleClient {
     public ServerResponse registerScreen() throws IOException {
         var serverResponse = sendAndReceive();
 
-        this.cookies = serverResponse.cookies();
+        this.cookies = serverResponse.cookies;
 
-        printMessage(serverResponse.message());
+        printMessage(serverResponse.message);
 
         return serverResponse;
     }
@@ -109,9 +109,9 @@ public class ConsoleClient {
     public ServerResponse loginScreen() throws IOException {
         var serverResponse = sendAndReceive();
 
-        this.cookies = serverResponse.cookies();
+        this.cookies = serverResponse.cookies;
 
-        printMessage(serverResponse.message());
+        printMessage(serverResponse.message);
 
         return serverResponse;
     }
@@ -119,9 +119,9 @@ public class ConsoleClient {
     public ServerResponse homeScreen() throws IOException {
         var serverResponse = sendAndReceive();
 
-        this.cookies = serverResponse.cookies();
+        this.cookies = serverResponse.cookies;
 
-        printMessage(serverResponse.message());
+        printMessage(serverResponse.message);
 
         return serverResponse;
     }
@@ -135,21 +135,21 @@ public class ConsoleClient {
 
             serverResponse = gson.fromJson(serverResponseRaw, ServerResponse.class);
 
-            this.cookies = serverResponse.cookies();
+            this.cookies = serverResponse.cookies;
 
-            printMessage(serverResponse.message());
+            printMessage(serverResponse.message);
 
-            if (serverResponse.status().equals(ResponseStatus.STARTING_GAME)) {
-                this.cookies.game = serverResponse.cookies().game;
+            if (serverResponse.status.equals(ResponseStatus.STARTING_GAME)) {
+                this.cookies.game = serverResponse.cookies.game;
             }
         }
         //Handler when it is this client's turn
         else if (cookies.game.turn == cookies.player.myTurn) {
             serverResponse = sendAndReceive();
 
-            this.cookies = serverResponse.cookies();
+            this.cookies = serverResponse.cookies;
 
-            printMessage(serverResponse.message());
+            printMessage(serverResponse.message);
         }
         //Handler when it is not client's turn
         else {
@@ -158,11 +158,11 @@ public class ConsoleClient {
 
             serverResponse = gson.fromJson(serverResponseRaw, ServerResponse.class);
 
-            this.cookies.session = serverResponse.cookies().session;
+            this.cookies.session = serverResponse.cookies.session;
 
-            if (serverResponse.cookies().game != null) {
-                this.cookies.game.turn = serverResponse.cookies().game.turn;
-                this.cookies.game.playersInfo = serverResponse.cookies().game.playersInfo;
+            if (serverResponse.cookies.game != null) {
+                this.cookies.game.turn = serverResponse.cookies.game.turn;
+                this.cookies.game.playersInfo = serverResponse.cookies.game.playersInfo;
             }
             else {
                 //In this case, the games has ended and our client has lost
@@ -170,7 +170,7 @@ public class ConsoleClient {
                 this.cookies.player = null;
             }
 
-            printMessage(serverResponse.message());
+            printMessage(serverResponse.message);
         }
 
         return serverResponse;

@@ -4,6 +4,7 @@ import bg.sofia.uni.fmi.mjt.battleships.common.ClientRequest;
 import bg.sofia.uni.fmi.mjt.battleships.common.ClientState;
 import bg.sofia.uni.fmi.mjt.battleships.common.ResponseStatus;
 import bg.sofia.uni.fmi.mjt.battleships.common.ServerResponse;
+import bg.sofia.uni.fmi.mjt.battleships.server.Server;
 import bg.sofia.uni.fmi.mjt.battleships.server.ui.ScreenUI;
 
 
@@ -11,22 +12,14 @@ import java.util.List;
 
 public class Controller {
 
-    protected ServerResponse messageResponse(String message, ClientState cookies, List<ServerResponse> signals) {
-        return new ServerResponse(ResponseStatus.OK,
-            message + getScreenPrompt(cookies.session.currentScreen, cookies),
-            cookies, signals);
+    protected ServerResponse messageResponse(ServerResponse response) {
+        response.message += getScreenPrompt(response.cookies.session.currentScreen, response.cookies);
+        return response;
     }
 
-    protected ServerResponse messageResponse(String message, ClientState cookies) {
-        return messageResponse(message, cookies, null);
-    }
-
-    protected ServerResponse messageResponse(String message, ClientRequest request, List<ServerResponse> signals) {
-        return messageResponse(message, request.cookies(), signals);
-    }
-
-    protected ServerResponse messageResponse(String message, ClientRequest request) {
-        return messageResponse(message, request.cookies());
+    protected ServerResponse messageResponse(ServerResponse.Builder builder) {
+        var response = builder.build();
+        return messageResponse(response);
     }
 
     protected String getScreenPrompt(String screen, ClientState cookies) {
@@ -40,32 +33,71 @@ public class Controller {
             request.cookies());
     }
 
-    protected ServerResponse redirectResponse(String screen, ClientRequest request, List<ServerResponse> signals) {
-        return redirectResponse(screen, request, null, signals);
+    protected ServerResponse redirectResponse(String screen, ServerResponse response) {
+        if (response.message == null) response.message = "";
+
+        response.cookies.session.currentScreen = screen;
+        response.message += getScreenPrompt(screen, response.cookies);
+
+        return response;
+    }
+
+    protected ServerResponse redirectResponse(String screen, ServerResponse.Builder builder) {
+        var response = builder.build();
+        return redirectResponse(screen, response);
     }
 
     protected ServerResponse redirectResponse(String screen, ClientRequest request, String message, List<ServerResponse> signals) {
-        if (message == null) message = "";
-
-        request.cookies().session.currentScreen = screen;
-        return new ServerResponse(ResponseStatus.REDIRECT, message + getScreenPrompt(screen, request.cookies()), request.cookies(), signals);
+        return redirectResponse(screen,
+            ServerResponse
+                .builder()
+                .setCookies(request.cookies())
+                .setMessage(message)
+                .setSignals(signals)
+        );
     }
 
-    protected ServerResponse redirectResponse(String screen, ClientRequest request) {
-        return redirectResponse(screen, request, null, null);
+    protected ServerResponse redirectResponse(String screen, ClientRequest request, List<ServerResponse> signals) {
+        return redirectResponse(screen, request, null, signals);
     }
 
     protected ServerResponse redirectResponse(String screen, ClientRequest request, String message) {
         return redirectResponse(screen, request, message, null);
     }
 
+    protected ServerResponse redirectResponse(String screen, ClientRequest request) {
+        return redirectResponse(screen, request, null, null);
+    }
+
+    protected ServerResponse invalidCommandResponse(ServerResponse.Builder builder) {
+        var response = builder.build();
+        return invalidCommandResponse(response);
+    }
+
+    protected ServerResponse invalidCommandResponse(ServerResponse response) {
+        response.message += getScreenPrompt(response.cookies.session.currentScreen, response.cookies);
+        response.status = ResponseStatus.INVALID_COMMAND;
+        return response;
+    }
+
     protected ServerResponse invalidCommandResponse(ClientRequest request) {
-        return this.invalidCommandResponse(ScreenUI.invalidWithHelp(ScreenUI.INVALID_COMMAND), request);
+        return invalidCommandResponse(request.cookies());
+    }
+
+    protected ServerResponse invalidCommandResponse(ClientState cookies) {
+        return invalidCommandResponse(ScreenUI.invalidWithHelp(ScreenUI.INVALID_COMMAND), cookies);
     }
 
     protected ServerResponse invalidCommandResponse(String message, ClientRequest request) {
-        return new ServerResponse(ResponseStatus.INVALID_COMMAND,
-            message + getScreenPrompt(request.cookies().session.currentScreen, request.cookies()),
-            request.cookies());
+        return invalidCommandResponse(message, request.cookies());
+    }
+
+    protected ServerResponse invalidCommandResponse(String message, ClientState cookies) {
+        return invalidCommandResponse(
+            ServerResponse
+                .builder()
+                .setMessage(message)
+                .setCookies(cookies)
+        );
     }
 }

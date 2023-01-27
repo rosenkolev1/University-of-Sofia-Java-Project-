@@ -8,6 +8,7 @@ import bg.sofia.uni.fmi.mjt.battleships.server.database.models.User;
 
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.List;
 
 public class UserController extends Controller {
 
@@ -19,7 +20,7 @@ public class UserController extends Controller {
         this.db = db;
     }
 
-    public ServerResponse loginResponse(Selector selector, ClientRequest request) {
+    public ServerResponse loginResponse(List<SessionCookie> sessions, ClientRequest request) {
         ServerResponse serverResponse = null;
 
         var command = CommandCreator.newCommand(request.input());
@@ -43,10 +44,8 @@ public class UserController extends Controller {
         }
 
         //Validate that the user has not logged in already
-        for (var selectionKey : selector.keys()) {
-            var keySession = (SessionCookie)selectionKey.attachment();
-
-            if (keySession != null && keySession.username != null && keySession.username.equals(username)) {
+        for (var session : sessions) {
+            if (session != null && session.username != null && session.username.equals(username)) {
                 serverResponse = invalidCommandResponse(ScreenUI.INVALID_USER_ALREADY_LOGGED_IN, request);
                 return serverResponse;
             }

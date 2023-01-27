@@ -53,8 +53,8 @@ public class GameTable extends Table {
         try (var bufferedWriter = Files.newBufferedWriter(tablePath, StandardOpenOption.APPEND)) {
             this.games.add(game);
 
-            var gameJson = gson.toJson(game);
-            bufferedWriter.append(gameJson + entrySeparator);
+//            var gameJson = gson.toJson(game);
+//            bufferedWriter.append(gameJson + entrySeparator);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

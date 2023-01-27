@@ -18,7 +18,9 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class Server {
     private static final int BUFFER_SIZE = 512;
@@ -137,7 +139,16 @@ public class Server {
             return guestHomeController.respond(clientRequest);
         }
         if (clientRequest.session().currentScreen.equals(ScreenInfo.LOGIN_SCREEN)) {
-            return userController.loginResponse(selector, clientRequest);
+            List<SessionCookie> sessions = new ArrayList<>();
+
+            //Get all the currently logged users' session cookies
+            for (var selectionKey : selector.keys()) {
+                var keySession = (SessionCookie)selectionKey.attachment();
+
+                sessions.add(keySession);
+            }
+
+            return userController.loginResponse(sessions, clientRequest);
         }
         else if (clientRequest.session().currentScreen.equals(ScreenInfo.REGISTER_SCREEN)) {
             return userController.registerResponse(clientRequest);

@@ -10,17 +10,21 @@ public class PlayerCookie {
     public String player;
     public final int myTurn;
     public List<String> moves;
-//    public boolean willAbandon;
+    public int quitStatusCode;
 
     public PlayerCookie(String player, int myTurn) {
         this(player, myTurn, new ArrayList<>());
     }
 
     public PlayerCookie(String player, int myTurn, List<String> moves) {
+        this(player, myTurn, moves, 0);
+    }
+
+    public PlayerCookie(String player, int myTurn, List<String> moves, int quitStatusCode) {
         this.player = player;
         this.myTurn = myTurn;
         this.moves = moves;
-//        this.willAbandon = false;
+        this.quitStatusCode = quitStatusCode;
     }
 
     @Override
@@ -36,6 +40,7 @@ public class PlayerCookie {
 
         return this.player.equals(castOther.player) &&
             this.myTurn == castOther.myTurn &&
+            this.quitStatusCode == castOther.quitStatusCode &&
             new HashSet<>(this.moves).containsAll(castOther.moves) &&
             new HashSet<>(castOther.moves).containsAll(this.moves);
     }

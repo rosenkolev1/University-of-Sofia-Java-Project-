@@ -7,21 +7,21 @@ public class GameCookie {
     public final String name;
     public int turn;
     public List<PlayerCookie> playersInfo;
-    //The player that originally started the abandon attempt
-    public PlayerCookie abandonPlayer;
+    //The player that originally started the quit attempt
+    public PlayerCookie quitPlayer;
 
     public GameCookie(GameCookie cookie) {
         this.name = cookie.name;
         this.turn = cookie.turn;
         this.playersInfo = cookie.playersInfo;
-        this.abandonPlayer = cookie.abandonPlayer;
+        this.quitPlayer = cookie.quitPlayer;
     }
 
     public GameCookie(String name, int turn, List<PlayerCookie> opponentsInfo) {
         this.name = name;
         this.turn = turn;
         this.playersInfo = opponentsInfo;
-        this.abandonPlayer = null;
+        this.quitPlayer = null;
     }
 
     public void nextTurn() {
@@ -46,6 +46,7 @@ public class GameCookie {
         return this.name.equals(castOther.name) &&
             this.turn == castOther.turn &&
             new HashSet<>(this.playersInfo).containsAll(castOther.playersInfo) &&
-            new HashSet<>(castOther.playersInfo).containsAll(this.playersInfo);
+            new HashSet<>(castOther.playersInfo).containsAll(this.playersInfo) &&
+            this.quitPlayer.equals(castOther.quitPlayer);
     }
 }

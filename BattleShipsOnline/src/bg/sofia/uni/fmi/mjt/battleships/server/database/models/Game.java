@@ -1,16 +1,16 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.database.models;
 
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.*;
-
 import java.util.*;
 
 public class Game {
+    private boolean randomizedBoards;
+
     public long id;
     public String name;
     public int playerCount;
     public int turn;
     public GameStatus status;
-    public boolean randomizedBoards;
+    public QuitStatus quitStatus;
     public List<Player> players;
 
     public Game(long id, String name, int playerCount, GameStatus status, boolean randomizedBoards, List<User> users) {
@@ -20,6 +20,7 @@ public class Game {
         this.status = status;
         this.randomizedBoards = randomizedBoards;
         this.turn = 0;
+        this.quitStatus = QuitStatus.NONE;
 
         this.players = new ArrayList<>();
 
@@ -29,9 +30,9 @@ public class Game {
 
     }
 
-    private boolean hasBeenAbandoned() {
+    private boolean hasBeenQuit(QuitStatus quitStatus) {
         for (var player : players) {
-            if (player.status != PlayerStatus.ABANDON) {
+            if (player.quitStatus != quitStatus) {
                 return false;
             }
         }
@@ -39,21 +40,17 @@ public class Game {
         return true;
     }
 
-    public void abandonGame(Player player) {
-        player.status = PlayerStatus.ABANDON;
+    public void quitGame(Player player, QuitStatus quitStatus) {
+        player.quitStatus = quitStatus;
 
-        if (hasBeenAbandoned()) {
-            status = GameStatus.ABANDONED;
+        if (hasBeenQuit(quitStatus)) {
+            this.quitStatus = quitStatus;
         }
     }
 
     public void resumeGame() {
         for (var player : players) {
-            player.status = PlayerStatus.ALIVE;
-
-            if (player.board.allShipsHaveSunk()) {
-                player.status = PlayerStatus.DEAD;
-            }
+            player.quitStatus = QuitStatus.NONE;
         }
     }
 

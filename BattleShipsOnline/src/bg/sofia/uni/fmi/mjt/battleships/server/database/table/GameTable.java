@@ -41,59 +41,6 @@ public class GameTable extends Table {
         }
     }
 
-//    public List<Game> games() {
-//        return games;
-//    }
-
-//    public boolean gameExists(String name, GameStatus... statuses) {
-////        return getGame(name, statuses) != null;
-//        return this.games
-//            .stream().filter(x -> x.name.equals(name) &&
-//                x.stat)
-//    }
-
-//    public boolean gameExists(String name) {
-//        return getGame(name) != null;
-//    }
-
-//    public List<Game> pendingGames() {
-//        return this.games.stream().filter(x -> x.status == GameStatus.PENDING).toList();
-//    }
-
-//    public Game getGame(String name, GameStatus... statuses, boolean excluded) {
-//        for (var game : games) {
-//            if (game.name.equals(name) &&
-//                Arrays.stream(statuses).toList().contains(game.status)) {
-//
-//                return game;
-//            }
-//        }
-//
-//        return null;
-//    }
-//
-//    public Game getGame(String name, GameStatus... statuses) {
-//        for (var game : games) {
-//            if (game.name.equals(name) &&
-//                Arrays.stream(statuses).toList().contains(game.status)) {
-//
-//                return game;
-//            }
-//        }
-//
-//        return null;
-//    }
-//
-//    public Game getGame(String name) {
-//        for (var game : games) {
-//            if (game.name.equals(name)) {
-//                return game;
-//            }
-//        }
-//
-//        return null;
-//    }
-
     public void addGame(Game game) {
         this.games.add(game);
     }

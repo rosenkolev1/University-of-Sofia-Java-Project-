@@ -1,12 +1,12 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.controller;
 
 import bg.sofia.uni.fmi.mjt.battleships.common.*;
-import bg.sofia.uni.fmi.mjt.battleships.server.Server;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.Command;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.*;
+import bg.sofia.uni.fmi.mjt.battleships.server.ui.QuitGameUI;
 import bg.sofia.uni.fmi.mjt.battleships.server.ui.ScreenUI;
 
 import java.util.ArrayList;
@@ -19,7 +19,92 @@ public class GameController extends Controller {
         this.db = db;
     }
 
-    public ServerResponse respondAbandonDenied(Command command, ClientRequest request, Game game, Player curPlayer) {
+    public ServerResponse respondQuitGame(Command command, ClientRequest request, Game game, Player curPlayer, QuitStatus quitStatus) {
+        var commandQuitStatus = CommandInfo.COMMAND_QUIT_STATUS_MAP.get(command.command());
+
+        quitStatus = quitStatus == null || quitStatus == QuitStatus.NONE ? commandQuitStatus : quitStatus;
+
+        QuitGameUI quitGameUI = ScreenUI.QUIT_STATUS_TO_UI_MAP.get(quitStatus);
+
+        ServerResponse serverResponse = null;
+
+        var args = command.arguments();
+
+        //Validate arguments
+        if (args.length != 0) {
+            serverResponse = invalidCommandResponse(request);
+            return serverResponse;
+        }
+
+        //Validate that the quit command is valid for the quitStatus
+        if (quitStatus != null &&
+            quitStatus != QuitStatus.NONE &&
+            !quitStatus.equals(commandQuitStatus)) {
+            serverResponse = invalidCommandResponse(request);
+            return serverResponse;
+        }
+
+        game.quitGame(curPlayer, quitStatus);
+
+        boolean quitGame = game.quitStatus == quitStatus;
+
+        request.cookies().player.quitStatusCode = quitStatus.statusCode();
+
+        //In this case, the current player is the players who started the quit attempt
+        if (request.cookies().game.quitPlayer == null) {
+            request.cookies().game.quitPlayer = request.cookies().player;
+        }
+
+        List<ServerResponse> signals = createSignalResponseUponQuit(request, curPlayer, game.quitStatus, quitGameUI);
+
+        var message = new StringBuilder().append(quitGameUI.gameQuitCurrentUser());
+
+        if (quitGame) {
+            message.append(quitGameUI.gameEndingQuit());
+
+            request.cookies().player = null;
+            request.cookies().game = null;
+
+            //Delete game or save game depending on the quitStatus
+            if (quitStatus == QuitStatus.ABANDON) {
+                db.gameTable.deleteGame(game);
+            }
+            else if (quitStatus == QuitStatus.SAVE_AND_QUIT) {
+                game.status = GameStatus.PAUSED;
+                db.gameTable.saveGameFile(game);
+            }
+
+            serverResponse = redirectResponse(
+                ScreenInfo.HOME_SCREEN,
+                ServerResponse
+                    .builder()
+                    .setStatus(ResponseStatus.QUIT_GAME)
+                    .setCookies(request.cookies())
+                    .setMessage(message.toString())
+                    .setSignals(signals)
+            );
+        }
+        else {
+            message.append(quitGameUI.gameQuitWaiting());
+
+            //Go to the next player and ask him if he wants to abandon the game!
+            request.cookies().game.nextTurn();
+
+            serverResponse = messageResponse(
+                ServerResponse
+                    .builder()
+                    .setMessage(message.toString())
+                    .setCookies(request.cookies())
+                    .setSignals(signals)
+            );
+        }
+
+        return serverResponse;
+    }
+
+    public ServerResponse respondQuitGameDenied(Command command, ClientRequest request, Game game, Player curPlayer, QuitStatus quitStatus) {
+        QuitGameUI quitGameUI = ScreenUI.QUIT_STATUS_TO_UI_MAP.get(quitStatus);
+
         ServerResponse serverResponse = null;
 
         var args = command.arguments();
@@ -31,13 +116,13 @@ public class GameController extends Controller {
                 return serverResponse;
             }
 
-            List<ServerResponse> signals = createSignalResponsesUponAbandonDenied(request, curPlayer);
+            List<ServerResponse> signals = createSignalResponsesUponQuitDenied(request, curPlayer, quitGameUI);
 
-            request.cookies().game.turn = request.cookies().game.abandonPlayer.myTurn;
-            request.cookies().game.abandonPlayer = null;
+            request.cookies().game.turn = request.cookies().game.quitPlayer.myTurn;
+            request.cookies().game.quitPlayer = null;
 
             var message = new StringBuilder()
-                .append(ScreenUI.GAME_ABANDON_DENIED_CURRENT_USER)
+                .append(quitGameUI.gameQuitDeniedCurrentUser())
                 .append(ScreenUI.GAME_RESUMING);
 
             game.resumeGame();
@@ -57,66 +142,6 @@ public class GameController extends Controller {
         }
         else {
             serverResponse = invalidCommandResponse(request);
-        }
-
-        return serverResponse;
-    }
-
-    public ServerResponse respondAbandon(Command command, ClientRequest request, Game game, Player curPlayer) {
-        ServerResponse serverResponse = null;
-
-        var args = command.arguments();
-
-        //Validate arguments
-        if (args.length != 0) {
-            serverResponse = invalidCommandResponse(request);
-            return serverResponse;
-        }
-
-        game.abandonGame(curPlayer);
-
-        var abandonGame = game.status == GameStatus.ABANDONED;
-
-        //In this case, the current player is the players who starts the abandon attempt
-        if (request.cookies().game.abandonPlayer == null) {
-            request.cookies().game.abandonPlayer = request.cookies().player;
-        }
-
-        List<ServerResponse> signals = createSignalResponseUponAbandon(request, curPlayer, abandonGame);
-
-        var message = new StringBuilder().append(ScreenUI.GAME_ABANDON_CURRENT_USER);
-
-        if (abandonGame) {
-            message.append(ScreenUI.GAME_ENDING_ABANDONED);
-
-            request.cookies().player = null;
-            request.cookies().game = null;
-
-            db.gameTable.deleteGame(game);
-
-            serverResponse = redirectResponse(
-                ScreenInfo.HOME_SCREEN,
-                ServerResponse
-                    .builder()
-                    .setStatus(ResponseStatus.ABANDON_GAME)
-                    .setCookies(request.cookies())
-                    .setMessage(message.toString())
-                    .setSignals(signals)
-            );
-        }
-        else {
-            message.append(ScreenUI.GAME_ABANDON_WAITING);
-
-            //Go to the next player and ask him if he wants to abandon the game!
-            request.cookies().game.nextTurn();
-
-            serverResponse = messageResponse(
-                ServerResponse
-                    .builder()
-                    .setMessage(message.toString())
-                    .setCookies(request.cookies())
-                    .setSignals(signals)
-            );
         }
 
         return serverResponse;
@@ -244,24 +269,30 @@ public class GameController extends Controller {
 
         var curPlayer = game.getPlayer(request.cookies().player.player);
 
-        var tryingToAbandon = game.players.stream().anyMatch(x -> x.status == PlayerStatus.ABANDON);
+        var quitStatus = game.players.stream()
+            .map(x -> x.quitStatus)
+            .filter(x -> x != QuitStatus.NONE)
+            .findFirst()
+            .orElse(null);
 
-        if (tryingToAbandon && command.command().equals(CommandInfo.GAME_HIT)) {
-            serverResponse = respondAbandonDenied(command, request, game, curPlayer);
+        var tryingToQuit = quitStatus != null;
+
+        if (tryingToQuit && command.command().equals(CommandInfo.GAME_HIT)) {
+            serverResponse = respondQuitGameDenied(command, request, game, curPlayer, quitStatus);
         }
         else if (command.command().equals(CommandInfo.GAME_HIT)) {
             serverResponse = respondHit(command, request, game, curPlayer);
         }
-        else if (command.command().equals(CommandInfo.GAME_ABANDON)) {
-            serverResponse = respondAbandon(command, request, game, curPlayer);
+        else if (CommandInfo.COMMAND_QUIT_STATUS_MAP.containsKey(command.command())) {
+            serverResponse = respondQuitGame(command, request, game, curPlayer, quitStatus);
         }
-        else if (tryingToAbandon && command.command().equals(CommandInfo.HELP)) {
+        else if (tryingToQuit && command.command().equals(CommandInfo.HELP)) {
             serverResponse = helpResponse(request,
-                CommandInfo.GAME_HIT, CommandInfo.GAME_ABANDON, CommandInfo.HELP);
+                CommandInfo.GAME_HIT, CommandInfo.QUIT_STATUS_COMMAND_MAP.get(quitStatus), CommandInfo.HELP);
         }
         else if (request.input().equals(CommandInfo.HELP)) {
             serverResponse = helpResponse(request,
-                CommandInfo.GAME_HIT, CommandInfo.GAME_ABANDON,
+                CommandInfo.GAME_HIT_VERBOSE, CommandInfo.GAME_ABANDON,
                 CommandInfo.GAME_SAVE_AND_QUIT, CommandInfo.HELP);
         }
         else {
@@ -303,7 +334,7 @@ public class GameController extends Controller {
         return message;
     }
 
-    private List<ServerResponse> createSignalResponseUponAbandon(ClientRequest request, Player curPlayer, boolean abandonGame) {
+    private List<ServerResponse> createSignalResponseUponQuit(ClientRequest request, Player curPlayer, QuitStatus gameQuitStatus, QuitGameUI quitGameUI) {
         List<ServerResponse> signals = new ArrayList<>();
 
         var enemies = request.cookies().game.playersInfo.stream()
@@ -319,15 +350,15 @@ public class GameController extends Controller {
             );
 
             var message = new StringBuilder()
-                .append(ScreenUI.abandonGame(curPlayer.user.username()));
+                .append(quitGameUI.quitGame(curPlayer.user.username()));
 
-            if (abandonGame) {
-                message.append(ScreenUI.GAME_ENDING_ABANDONED);
+            if (gameQuitStatus != QuitStatus.NONE) {
+                message.append(quitGameUI.gameEndingQuit());
                 cookies.session.currentScreen = ScreenInfo.HOME_SCREEN;
-                responseStatus = ResponseStatus.ABANDON_GAME;
+                responseStatus = ResponseStatus.QUIT_GAME;
             }
             else {
-                message.append(ScreenUI.GAME_ABANDON_WAITING);
+                message.append(quitGameUI.gameQuitWaiting());
                 cookies.session.currentScreen = ScreenInfo.GAME_SCREEN;
                 responseStatus = ResponseStatus.OK;
 
@@ -348,7 +379,7 @@ public class GameController extends Controller {
         return signals;
     }
 
-    private List<ServerResponse> createSignalResponsesUponAbandonDenied(ClientRequest request, Player curPlayer) {
+    private List<ServerResponse> createSignalResponsesUponQuitDenied(ClientRequest request, Player curPlayer, QuitGameUI quitGameUI) {
         List<ServerResponse> signals = new ArrayList<>();
 
         var enemies = request.cookies().game.playersInfo.stream()
@@ -364,13 +395,13 @@ public class GameController extends Controller {
             );
 
             //Return the game's turn back to the player who first tried to abandon the game
-            cookies.game.turn = cookies.game.abandonPlayer.myTurn;
+            cookies.game.turn = cookies.game.quitPlayer.myTurn;
 
             //Now remove the abandonPlayer from the cookie
-            cookies.game.abandonPlayer = null;
+            cookies.game.quitPlayer = null;
 
             var message = new StringBuilder()
-                .append(ScreenUI.abandonGameDenied(curPlayer.user.username()))
+                .append(quitGameUI.quitGameDenied(curPlayer.user.username()))
                 .append(ScreenUI.GAME_RESUMING);
 
             signals.add(messageResponse(

@@ -1,5 +1,10 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.command;
 
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.QuitStatus;
+
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public class CommandInfo {
     public static final String INVALID_ARGS_COUNT_MESSAGE_FORMAT =
         "Invalid count of arguments: \"%s\" expects %d arguments. Example: \"%s\"";
@@ -32,4 +37,12 @@ public class CommandInfo {
     public static final String GAME_HIT = "hit";
     public static final String GAME_ABANDON = "abandon";
     public static final String GAME_SAVE_AND_QUIT = "sq";
+
+    public static final Map<QuitStatus, String> QUIT_STATUS_COMMAND_MAP = Map.of(
+        QuitStatus.ABANDON, CommandInfo.GAME_ABANDON,
+        QuitStatus.SAVE_AND_QUIT, CommandInfo.GAME_SAVE_AND_QUIT
+    );
+
+    public static final Map<String, QuitStatus> COMMAND_QUIT_STATUS_MAP =
+        QUIT_STATUS_COMMAND_MAP.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
 }

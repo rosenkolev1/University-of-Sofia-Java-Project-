@@ -6,9 +6,11 @@ import java.util.List;
 
 public class PlayerCookie {
 
+    //TODO: rename field "player" to "name"
     public String player;
     public final int myTurn;
     public List<String> moves;
+//    public boolean willAbandon;
 
     public PlayerCookie(String player, int myTurn) {
         this(player, myTurn, new ArrayList<>());
@@ -18,6 +20,7 @@ public class PlayerCookie {
         this.player = player;
         this.myTurn = myTurn;
         this.moves = moves;
+//        this.willAbandon = false;
     }
 
     @Override

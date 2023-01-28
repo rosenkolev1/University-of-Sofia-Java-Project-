@@ -92,6 +92,11 @@ public class ScreenUI {
     public static final String GAME_JOINED_TEMPLATE = "\nJoined game \"%s\"";
     public static final String GAME_ENEMY_LAST_TURN_TEMPLATE = "\n%s's last turn: %s";
     public static final String GAME_MY_TURN = "\nIt's your turn now! Enter your turn:";
+    public static final String GAME_MY_TURN_ABANDON =
+    """
+    
+    It's your turn now! You have a choice between resuming the game (hit) or abandoning the game(abandon)
+    Enter your turn:""";
     public static final String GAME_ENEMY_TURN_TEMPLATE = "\nWaiting for %s's turn now!";
 
     public static final String INVALID_GAME_HIT_TILE_TEMPLATE =
@@ -114,9 +119,18 @@ public class ScreenUI {
     public static final String GAME_YOUR_BOARD = "YOUR BOARD\n";
     public static final String GAME_ENEMY_BOARD = "ENEMY BOARD\n";
 
+    public static final String GAME_ABANDON_CURRENT_USER = "\nYou have decided to abandon the game!";
+    public static final String GAME_ABANDON_WAITING = "\nWaiting for other users to abandon the game!\n";
+    public static final String GAME_ABANDON_TEMPLATE = "\n%s has decided to abandon the game!";
+    public static final String GAME_ABANDON_DENIED_TEMPLATE = "\n%s has decided to not abandon the game";
+    public static final String GAME_ABANDON_DENIED_CURRENT_USER = "\nYou have decided to not abandon the game!";
+
+    public static final String GAME_RESUMING = "\nResuming the game!\n";
+
     public static final String GAME_ENDING_RETURN_TO_MAIN = "\nReturning to main menu...\n";
     public static final String GAME_ENDING_WINNER = "\nYou have won the game! Congrats :)" + GAME_ENDING_RETURN_TO_MAIN;
     public static final String GAME_ENDING_LOOSER = "\nYou have lost the game! That's unfortunate :(" + GAME_ENDING_RETURN_TO_MAIN;
+    public static final String GAME_ENDING_ABANDONED = "\nThe current game has been abandoned by all players!\n" + GAME_ENDING_RETURN_TO_MAIN;
 
     public static final Map<String, Function<ClientState, String>> SCREENS_PROMPTS = Map.of(
         ScreenInfo.GUEST_HOME_SCREEN, (cookies) -> ScreenUI.GUEST_HOME_PROMPT,
@@ -136,13 +150,27 @@ public class ScreenUI {
                 return null;
             }
             else if (cookies.game.turn == cookies.player.myTurn) {
-                return ScreenUI.myTurnPrompt(cookies.game.playersInfo);
+                //In this case, a vote for abandoning the game has started
+                if (cookies.game.abandonPlayer != null) {
+                    return ScreenUI.GAME_MY_TURN_ABANDON;
+                }
+                else {
+                    return ScreenUI.myTurnPrompt(cookies.game.playersInfo);
+                }
             }
             else {
                 return ScreenUI.enemyTurnPrompt(cookies.game.playersInfo.get(cookies.game.turn).player);
             }
         }
     );
+
+    public static String abandonGameDenied(String user) {
+        return String.format(GAME_ABANDON_DENIED_TEMPLATE, user);
+    }
+
+    public static String abandonGame(String user) {
+        return String.format(GAME_ABANDON_TEMPLATE, user);
+    }
 
     public static String redirectMessage(String from, String to) {
         return String.format(REDIRECT_TEMPLATE, from, to);

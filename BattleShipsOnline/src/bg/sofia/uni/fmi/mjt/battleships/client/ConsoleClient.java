@@ -39,11 +39,6 @@ public class ConsoleClient {
         this.writer = writer;
         this.scanner = scanner;
         this.gson = new Gson();
-//        this.cookies = new ClientState(
-//            new SessionCookie(ScreenInfo.GUEST_HOME_SCREEN, null),
-//            null,
-//            null
-//        );
         this.cookies = new ClientState();
     }
 
@@ -138,10 +133,10 @@ public class ConsoleClient {
             this.cookies = serverResponse.cookies;
 
             printMessage(serverResponse.message);
-
-            if (serverResponse.status.equals(ResponseStatus.STARTING_GAME)) {
-                this.cookies.game = serverResponse.cookies.game;
-            }
+//
+//            if (serverResponse.status.equals(ResponseStatus.START_GAME)) {
+//                this.cookies.game = serverResponse.cookies.game;
+//            }
         }
         //Handler when it is this client's turn
         else if (cookies.game.turn == cookies.player.myTurn) {
@@ -160,12 +155,27 @@ public class ConsoleClient {
 
             this.cookies.session = serverResponse.cookies.session;
 
-            if (serverResponse.cookies.game != null) {
-                this.cookies.game.turn = serverResponse.cookies.game.turn;
-                this.cookies.game.playersInfo = serverResponse.cookies.game.playersInfo;
+            //In this case, the game has been abandoned by all players
+            if (serverResponse.status == ResponseStatus.ABANDON_GAME) {
+                this.cookies.game = null;
+                this.cookies.player = null;
             }
+            //In this case, the abandon has been denied and the game is resuming
+            else if (serverResponse.status == ResponseStatus.RESUME_GAME) {
+//                this.cookies.game.turn = serverResponse.cookies.game.turn;
+//                this.cookies.game = serverResponse.cookies.game;
+                this.cookies = serverResponse.cookies;
+            }
+            //In this case the game has not ended
+            else if (serverResponse.cookies.game != null) {
+//                this.cookies.game.turn = serverResponse.cookies.game.turn;
+//                this.cookies.game.playersInfo = serverResponse.cookies.game.playersInfo;
+//                this.cookies.game.abandonPlayer
+//                this.cookies.game = serverResponse.cookies.game;
+                this.cookies = serverResponse.cookies;
+            }
+            //In this case, the games has ended and our client has lost
             else {
-                //In this case, the games has ended and our client has lost
                 this.cookies.game = null;
                 this.cookies.player = null;
             }

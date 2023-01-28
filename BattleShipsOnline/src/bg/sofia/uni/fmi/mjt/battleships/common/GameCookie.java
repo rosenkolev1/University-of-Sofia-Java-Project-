@@ -7,11 +7,21 @@ public class GameCookie {
     public final String name;
     public int turn;
     public List<PlayerCookie> playersInfo;
+    //The player that originally started the abandon attempt
+    public PlayerCookie abandonPlayer;
+
+    public GameCookie(GameCookie cookie) {
+        this.name = cookie.name;
+        this.turn = cookie.turn;
+        this.playersInfo = cookie.playersInfo;
+        this.abandonPlayer = cookie.abandonPlayer;
+    }
 
     public GameCookie(String name, int turn, List<PlayerCookie> opponentsInfo) {
         this.name = name;
         this.turn = turn;
         this.playersInfo = opponentsInfo;
+        this.abandonPlayer = null;
     }
 
     public void nextTurn() {

@@ -4,7 +4,8 @@ public enum GameStatus {
     PENDING("Pending"),
     IN_PROGRESS("In Progress"),
     PAUSED("Paused"),
-    ENDED("Ended");
+    ENDED("Ended"),
+    ABANDONED("Abandoned");
 
     private final String status;
 

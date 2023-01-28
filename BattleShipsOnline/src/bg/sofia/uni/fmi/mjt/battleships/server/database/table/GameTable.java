@@ -16,13 +16,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class GameTable extends Table {
-
-    private List<Game> games;
-
-    public GameTable(Path tablePath, String entrySeparator, String fieldSeparator) {
-        super(tablePath, entrySeparator, fieldSeparator);
-        initialiseGames();
-    }
+    public List<Game> games;
 
     public GameTable(String tablePath, String entrySeparator, String fieldSeparator) {
         super(tablePath, entrySeparator, fieldSeparator);
@@ -36,7 +30,7 @@ public class GameTable extends Table {
         return new Game(gameId, name, playerCount, status, randomizedBoards, users);
     }
 
-    public void finishGame(Game game) {
+    public void saveGameFile(Game game) {
         try (var bufferedWriter = Files.newBufferedWriter(tablePath, StandardOpenOption.APPEND)) {
             var gameJson = gson.toJson(game);
             bufferedWriter
@@ -47,46 +41,65 @@ public class GameTable extends Table {
         }
     }
 
-    public List<Game> games() {
-        return games;
-    }
+//    public List<Game> games() {
+//        return games;
+//    }
 
-    public boolean gameExists(String name, GameStatus... statuses) {
-        return getGame(name, statuses) != null;
-    }
+//    public boolean gameExists(String name, GameStatus... statuses) {
+////        return getGame(name, statuses) != null;
+//        return this.games
+//            .stream().filter(x -> x.name.equals(name) &&
+//                x.stat)
+//    }
 
-    public boolean gameExists(String name) {
-        return getGame(name) != null;
-    }
+//    public boolean gameExists(String name) {
+//        return getGame(name) != null;
+//    }
 
-    public List<Game> pendingGames() {
-        return this.games.stream().filter(x -> x.status == GameStatus.PENDING).toList();
-    }
+//    public List<Game> pendingGames() {
+//        return this.games.stream().filter(x -> x.status == GameStatus.PENDING).toList();
+//    }
 
-    public Game getGame(String name, GameStatus... statuses) {
-        for (var game : games) {
-            if (game.name.equals(name) &&
-                Arrays.stream(statuses).toList().contains(game.status)) {
-
-                return game;
-            }
-        }
-
-        return null;
-    }
-
-    public Game getGame(String name) {
-        for (var game : games) {
-            if (game.name.equals(name)) {
-                return game;
-            }
-        }
-
-        return null;
-    }
+//    public Game getGame(String name, GameStatus... statuses, boolean excluded) {
+//        for (var game : games) {
+//            if (game.name.equals(name) &&
+//                Arrays.stream(statuses).toList().contains(game.status)) {
+//
+//                return game;
+//            }
+//        }
+//
+//        return null;
+//    }
+//
+//    public Game getGame(String name, GameStatus... statuses) {
+//        for (var game : games) {
+//            if (game.name.equals(name) &&
+//                Arrays.stream(statuses).toList().contains(game.status)) {
+//
+//                return game;
+//            }
+//        }
+//
+//        return null;
+//    }
+//
+//    public Game getGame(String name) {
+//        for (var game : games) {
+//            if (game.name.equals(name)) {
+//                return game;
+//            }
+//        }
+//
+//        return null;
+//    }
 
     public void addGame(Game game) {
         this.games.add(game);
+    }
+
+    public boolean deleteGame(Game game) {
+        return games.remove(game);
     }
 
     private void initialiseGames() {

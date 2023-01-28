@@ -43,8 +43,8 @@ public class HomeController extends Controller {
             }
 
             //Validate that an unfinished game with the same name has not been created already
-            if (db.gameTable.gameExists(gameName,
-                GameStatus.PENDING, GameStatus.IN_PROGRESS, GameStatus.PAUSED)) {
+            if (db.gameTable.games.stream()
+                .anyMatch(x -> x.name.equals(gameName) && x.status != GameStatus.ENDED)) {
 
                 serverResponse = invalidCommandResponse(ScreenUI.INVALID_GAME_ALREADY_EXISTS, request);
                 return serverResponse;
@@ -70,7 +70,7 @@ public class HomeController extends Controller {
 
             //If there is no gameName, then choose a random game to join
             if (gameName == null) {
-                var games = db.gameTable.pendingGames();
+                var games = db.gameTable.games.stream().filter(x -> x.status == GameStatus.PENDING).toList();
 
                 //Validate that there are any games available
                 if (games.size() == 0) {
@@ -91,10 +91,13 @@ public class HomeController extends Controller {
                     return serverResponse;
                 }
 
-                var game = db.gameTable.getGame(gameName,
-                    GameStatus.PENDING);
+                var game = db.gameTable.games
+                    .stream().filter(x -> x.name.equals(gameName) && x.status == GameStatus.PENDING)
+                    .findFirst().orElse(null);
 
-                if (db.gameTable.gameExists(gameName, GameStatus.IN_PROGRESS)) {
+                if (db.gameTable.games
+                    .stream().anyMatch(x -> x.name.equals(gameName) && x.status == GameStatus.IN_PROGRESS)) {
+
                     serverResponse = invalidCommandResponse(ScreenUI.INVALID_GAME_EXISTS_BUT_NOT_PENDING, request);
                     return serverResponse;
                 }
@@ -114,9 +117,8 @@ public class HomeController extends Controller {
                 return serverResponse;
             }
 
-            var games = db.gameTable.games().stream().filter(x -> x.status != GameStatus.ENDED).toList();
+            var games = db.gameTable.games.stream().filter(x -> x.status != GameStatus.ENDED).toList();
 
-            //TODO: Create a fancy way to show the list of all games
             var message = ScreenUI.listGames(games);
 
             return messageResponse(

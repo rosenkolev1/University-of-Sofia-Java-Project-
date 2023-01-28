@@ -29,7 +29,35 @@ public class Game {
 
     }
 
-    public boolean gameHasEnded() {
+    private boolean hasBeenAbandoned() {
+        for (var player : players) {
+            if (player.status != PlayerStatus.ABANDON) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public void abandonGame(Player player) {
+        player.status = PlayerStatus.ABANDON;
+
+        if (hasBeenAbandoned()) {
+            status = GameStatus.ABANDONED;
+        }
+    }
+
+    public void resumeGame() {
+        for (var player : players) {
+            player.status = PlayerStatus.ALIVE;
+
+            if (player.board.allShipsHaveSunk()) {
+                player.status = PlayerStatus.DEAD;
+            }
+        }
+    }
+
+    private boolean hasEnded() {
         var alivePlayer = this.players.stream().filter(x -> x.status == PlayerStatus.ALIVE).toList();
 
         return alivePlayer.size() == 1;
@@ -41,7 +69,7 @@ public class Game {
         if (player.board.allShipsHaveSunk()) {
             player.status = PlayerStatus.DEAD;
 
-            if (gameHasEnded()) {
+            if (hasEnded()) {
                 this.status = GameStatus.ENDED;
             }
         }

@@ -116,18 +116,13 @@ public class HomeController extends Controller {
 
             var games = db.gameTable.games().stream().filter(x -> x.status != GameStatus.ENDED).toList();
 
-            if (games.isEmpty()) {
-                return messageResponse(ServerResponse.builder()
-                    .setMessage(ScreenUI.GAMES_LIST_EMPTY)
-                    .setCookies(request.cookies()));
-            }
-
             //TODO: Create a fancy way to show the list of all games
+            var message = ScreenUI.listGames(games);
 
             return messageResponse(
                 ServerResponse
                     .builder()
-                    .setMessage(String.join("\n", games.stream().map(x -> x.id + " | " + x.name).toList()))
+                    .setMessage(message)
                     .setCookies(request.cookies())
             );
         }

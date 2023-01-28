@@ -4,10 +4,9 @@ import bg.sofia.uni.fmi.mjt.battleships.common.ClientState;
 import bg.sofia.uni.fmi.mjt.battleships.common.PlayerCookie;
 import bg.sofia.uni.fmi.mjt.battleships.common.ScreenInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.Game;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 public class ScreenUI {
@@ -68,6 +67,21 @@ public class ScreenUI {
     public static final String INVALID_NO_GAMES_AVAILABLE = "\nThere are no pending games available at this time!\n";
 
     public static final String GAMES_LIST_EMPTY = "\nThere are currently no games!\n";
+    public static final String GAMES_LIST_HEADER_NAME = "NAME";
+    public static final String GAMES_LIST_HEADER_CREATOR = "CREATOR";
+    public static final String GAMES_LIST_HEADER_STATUS = "STATUS";
+    public static final String GAMES_LIST_HEADER_PLAYERS = "PLAYERS";
+    public static final List<String> GAMES_LIST_HEADERS = List.of(
+        GAMES_LIST_HEADER_NAME,
+        GAMES_LIST_HEADER_CREATOR,
+        GAMES_LIST_HEADER_STATUS,
+        GAMES_LIST_HEADER_PLAYERS
+    );
+
+    public static final String GAMES_LIST_HEADER_SEPARATOR = "-";
+    public static final String GAMES_LIST_HEADER_SEPARATOR_LINE_TEMPLATE = "|%s+%s+%s+%s|";
+    public static final String GAMES_LIST_PLAYERS = "%s/%s";
+    public static final String GAMES_LIST_ROW_TEMPLATE = "| %s | %s | %s | %s |";
 
     public static final String SUCCESSFUL_LOGOUT = "\nSuccessful logout!\n";
 
@@ -195,6 +209,78 @@ public class ScreenUI {
 
     public static String yourBoard(String board) {
         return boardWithAnnotation(GAME_YOUR_BOARD, board);
+    }
+
+    public static String listGames(List<Game> games) {
+        if (games == null || games.size() == 0) {
+            return ScreenUI.GAMES_LIST_EMPTY;
+        }
+
+        Function<Game, String> nameMapper = (Game x) -> x.name;
+        Function<Game, String> creatorMapper = (Game x) -> x.players.get(0).user.username();
+        Function<Game, String> statusMapper = (Game x) -> x.status.status();
+        Function<Game, String> playersMapper = (Game x) -> String.format(GAMES_LIST_PLAYERS, x.players.size(), x.playerCount);
+
+        List<Function<Game, String>> fieldMappers = List.of(
+            nameMapper,
+            creatorMapper,
+            statusMapper,
+            playersMapper
+        );
+
+        List<Integer> longestFields = new ArrayList<>();
+
+        for (var fieldMapper : fieldMappers) {
+            var longestField = games.stream().map(fieldMapper).max(Comparator.comparingInt(String::length)).get().length();
+            longestFields.add(longestField);
+        }
+
+        StringBuilder table = new StringBuilder();
+
+        //Create the headers
+        List<String> headers = new ArrayList<>();
+        List<String> headerLineSeparators = new ArrayList<>();
+
+        for (int i = 0; i < GAMES_LIST_HEADERS.size(); i++) {
+            var header = GAMES_LIST_HEADERS.get(i);
+            var headerIsLonger = header.length() > longestFields.get(i);
+            var lengthDiff = longestFields.get(i) - header.length();
+
+            if (headerIsLonger) {
+                longestFields.set(i, header.length());
+            }
+
+            var headerWithSpaces = headerIsLonger ? header : header + " ".repeat(lengthDiff);
+            headers.add(headerWithSpaces);
+
+            var headerLineSeparator = GAMES_LIST_HEADER_SEPARATOR.repeat(2 + longestFields.get(i));
+            headerLineSeparators.add(headerLineSeparator);
+        }
+
+        table.append(String.format(GAMES_LIST_ROW_TEMPLATE, headers.toArray())).append("\n");
+        table.append(String.format(GAMES_LIST_HEADER_SEPARATOR_LINE_TEMPLATE, headerLineSeparators.toArray())).append("\n");
+
+        //Add all the rows for the games
+        for (var game : games) {
+            List<String> rowFields = new ArrayList<>();
+
+            for (int i = 0; i < fieldMappers.size(); i++) {
+                var fieldMapper = fieldMappers.get(i);
+
+                var field = fieldMapper.apply(game);
+                var longestField = longestFields.get(i);
+
+                var fieldWithSpaces = field.length() < longestField ?
+                    field + " ".repeat(longestField - field.length()) :
+                    field;
+
+                rowFields.add(fieldWithSpaces);
+            }
+
+            table.append(String.format(GAMES_LIST_ROW_TEMPLATE, rowFields.toArray())).append("\n");
+        }
+
+        return table.toString();
     }
 
     public static String cleanText(String text) {

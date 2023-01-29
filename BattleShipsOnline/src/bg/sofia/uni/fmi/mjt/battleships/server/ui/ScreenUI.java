@@ -67,7 +67,11 @@ public class ScreenUI {
     public static final String INVALID_GAME_EXISTS_BUT_NOT_PENDING = "\nThe game with this name is full!\n";
     public static final String INVALID_NO_GAMES_AVAILABLE = "\nThere are no pending games available at this time!\n";
 
+    public static final String INVALID_SAVE_GAME_DOES_NOT_EXIST = "\nNo saved game create by you with this name exists!\n";
+
     public static final String GAMES_LIST_EMPTY = "\nThere are currently no games!\n";
+    public static final String GAMES_SAVED_EMPTY = "\nThere are no saved games that you have been a part of!\n";
+
     public static final String GAMES_LIST_HEADER_NAME = "NAME";
     public static final String GAMES_LIST_HEADER_CREATOR = "CREATOR";
     public static final String GAMES_LIST_HEADER_STATUS = "STATUS";
@@ -87,10 +91,12 @@ public class ScreenUI {
     public static final String SUCCESSFUL_LOGOUT = "\nSuccessful logout!\n";
 
     public static final String CURRENT_GAME_TEMPLATE = "\nCurrent game room: %s";
-    public static final String GAME_PENDING_PROMPT = "\nCurrently waiting for a second enemy...\n";
-    public static final String GAME_FOUND_OPPONENT = "\nAn opponent has been found!";
+    public static final String GAME_PENDING_PROMPT = "\nCurrently waiting for the room to fill up fully...\n";
+    public static final String GAME_JOINED_OPPONENT = "\nAn opponent has joined the game!";
+    public static final String GAME_FILLED = "\nAll the opponents have joined!";
     public static final String GAME_STARTING = "\nGame is starting...\n";
     public static final String GAME_JOINED_TEMPLATE = "\nJoined game \"%s\"";
+
     public static final String GAME_ENEMY_LAST_TURN_TEMPLATE = "\n%s's last turn: %s";
     public static final String GAME_MY_TURN = "\nIt's your turn now! Enter your turn:";
     public static final String GAME_ENEMY_TURN_TEMPLATE = "\nWaiting for %s's turn now!";
@@ -227,15 +233,16 @@ public class ScreenUI {
         return boardWithAnnotation(GAME_YOUR_BOARD, board);
     }
 
-    public static String listGames(List<Game> games) {
+    public static String listGames(List<Game> games, String emptyListMessage) {
         if (games == null || games.size() == 0) {
-            return ScreenUI.GAMES_LIST_EMPTY;
+            return emptyListMessage;
         }
 
         Function<Game, String> nameMapper = (Game x) -> x.name;
         Function<Game, String> creatorMapper = (Game x) -> x.players.get(0).user.username();
         Function<Game, String> statusMapper = (Game x) -> x.status.status();
-        Function<Game, String> playersMapper = (Game x) -> String.format(GAMES_LIST_PLAYERS, x.players.size(), x.playerCount);
+        Function<Game, String> playersMapper = (Game x) -> String.format(GAMES_LIST_PLAYERS,
+            x.players.stream().filter(y -> y.quitStatus == QuitStatus.NONE).count(), x.playerCapacity);
 
         List<Function<Game, String>> fieldMappers = List.of(
             nameMapper,

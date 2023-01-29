@@ -30,14 +30,48 @@ public class GameTable extends Table {
         return new Game(gameId, name, playerCount, status, randomizedBoards, users);
     }
 
+    public TableEntryInfo<Game> getGameEntryInfo(int id) {
+        var entries = getTableEntries();
+        var matchEntryIndex = -1;
+        Game targetEntry = null;
+
+        for (int i = 0; i < entries.size(); i++) {
+            var curEntry = entries.get(i);
+            var curGame = gson.fromJson(curEntry, Game.class);
+
+            if (curGame.id == id) {
+                matchEntryIndex = i;
+                targetEntry = curGame;
+                break;
+            }
+        }
+
+        return new TableEntryInfo<>(targetEntry, matchEntryIndex, entries);
+    }
+
+    public TableEntryInfo<Game> getGameEntryInfo(Game game) {
+        return getGameEntryInfo((int) game.id);
+    }
+
     public void saveGameFile(Game game) {
-        try (var bufferedWriter = Files.newBufferedWriter(tablePath, StandardOpenOption.APPEND)) {
-            var gameJson = gson.toJson(game);
-            bufferedWriter
-                .append(gameJson)
-                .append(entrySeparator);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        var gameJson = gson.toJson(game);
+
+        //Check if game already exists in the file
+        var entryInfo = getGameEntryInfo(game);
+        entryInfo.entry = game;
+
+        if (entryInfo.entryIndex == -1) {
+            try (var bufferedWriter = Files.newBufferedWriter(tablePath, StandardOpenOption.APPEND)) {
+                bufferedWriter
+                    .append(gameJson)
+                    .append(entrySeparator);
+            }
+            catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else {
+            overwriteEntry(entryInfo);
         }
     }
 
@@ -45,22 +79,24 @@ public class GameTable extends Table {
         this.games.add(game);
     }
 
-    public boolean deleteGame(Game game) {
-        return games.remove(game);
+    public void deleteGameFile(Game game) {
+//        games.remove(game);
+
+        //Check if game already exists in the file
+        var entryInfo = getGameEntryInfo(game);
+        entryInfo.entry = null;
+
+        overwriteEntry(entryInfo);
     }
 
     private void initialiseGames() {
         this.games = new ArrayList<>();
 
         try (var bufferedReader = Files.newBufferedReader(tablePath)) {
-            while(true) {
-                var line = bufferedReader.readLine();
+            var entries = getTableEntries();
 
-                if (line == null) {
-                    break;
-                }
-
-                var game = gson.fromJson(line, Game.class);
+            for (var entryLine : entries) {
+                var game = gson.fromJson(entryLine, Game.class);
 
                 this.games.add(game);
             }

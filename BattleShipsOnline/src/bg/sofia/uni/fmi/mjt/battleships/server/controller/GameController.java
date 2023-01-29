@@ -19,7 +19,7 @@ public class GameController extends Controller {
         this.db = db;
     }
 
-    public ServerResponse respondQuitGame(Command command, ClientRequest request, Game game, Player curPlayer, QuitStatus quitStatus) {
+    private ServerResponse respondQuitGame(Command command, ClientRequest request, Game game, Player curPlayer, QuitStatus quitStatus) {
         var commandQuitStatus = CommandInfo.COMMAND_QUIT_STATUS_MAP.get(command.command());
 
         quitStatus = quitStatus == null || quitStatus == QuitStatus.NONE ? commandQuitStatus : quitStatus;
@@ -67,7 +67,8 @@ public class GameController extends Controller {
 
             //Delete game or save game depending on the quitStatus
             if (quitStatus == QuitStatus.ABANDON) {
-                db.gameTable.deleteGame(game);
+                game.status = GameStatus.ENDED;
+                db.gameTable.deleteGameFile(game);
             }
             else if (quitStatus == QuitStatus.SAVE_AND_QUIT) {
                 game.status = GameStatus.PAUSED;
@@ -102,7 +103,7 @@ public class GameController extends Controller {
         return serverResponse;
     }
 
-    public ServerResponse respondQuitGameDenied(Command command, ClientRequest request, Game game, Player curPlayer, QuitStatus quitStatus) {
+    private ServerResponse respondQuitGameDenied(Command command, ClientRequest request, Game game, Player curPlayer, QuitStatus quitStatus) {
         QuitGameUI quitGameUI = ScreenUI.QUIT_STATUS_TO_UI_MAP.get(quitStatus);
 
         ServerResponse serverResponse = null;
@@ -147,7 +148,7 @@ public class GameController extends Controller {
         return serverResponse;
     }
 
-    public ServerResponse respondHit(Command command, ClientRequest request, Game game, Player curPlayer) {
+    private ServerResponse respondHit(Command command, ClientRequest request, Game game, Player curPlayer) {
         ServerResponse serverResponse = null;
 
         var args = command.arguments();
@@ -280,15 +281,15 @@ public class GameController extends Controller {
         if (tryingToQuit && command.command().equals(CommandInfo.GAME_HIT)) {
             serverResponse = respondQuitGameDenied(command, request, game, curPlayer, quitStatus);
         }
+        else if (tryingToQuit && command.command().equals(CommandInfo.HELP)) {
+            serverResponse = helpResponse(request,
+                CommandInfo.GAME_HIT, CommandInfo.QUIT_STATUS_COMMAND_MAP.get(quitStatus), CommandInfo.HELP);
+        }
         else if (command.command().equals(CommandInfo.GAME_HIT)) {
             serverResponse = respondHit(command, request, game, curPlayer);
         }
         else if (CommandInfo.COMMAND_QUIT_STATUS_MAP.containsKey(command.command())) {
             serverResponse = respondQuitGame(command, request, game, curPlayer, quitStatus);
-        }
-        else if (tryingToQuit && command.command().equals(CommandInfo.HELP)) {
-            serverResponse = helpResponse(request,
-                CommandInfo.GAME_HIT, CommandInfo.QUIT_STATUS_COMMAND_MAP.get(quitStatus), CommandInfo.HELP);
         }
         else if (request.input().equals(CommandInfo.HELP)) {
             serverResponse = helpResponse(request,

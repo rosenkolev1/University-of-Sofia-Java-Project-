@@ -1,5 +1,7 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.database.models;
 
+import bg.sofia.uni.fmi.mjt.battleships.server.dto.BoardOption;
+
 import java.util.*;
 
 public class Board {
@@ -315,8 +317,9 @@ public class Board {
 
                 var shipTiles = shipPositions.get(position);
 
+                board.addShip(new Ship(shipTiles, shipType, ShipStatus.AFLOAT));
+
                 for (var tilePos : shipTiles) {
-                    board.addShip(new Ship(shipTiles, shipType, ShipStatus.AFLOAT));
                     board.changeTile(tilePos, TileStatus.SHIP);
                 }
             }

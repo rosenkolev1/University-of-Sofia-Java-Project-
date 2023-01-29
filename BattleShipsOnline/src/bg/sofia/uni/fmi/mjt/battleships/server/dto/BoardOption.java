@@ -1,4 +1,6 @@
-package bg.sofia.uni.fmi.mjt.battleships.server.database.models;
+package bg.sofia.uni.fmi.mjt.battleships.server.dto;
+
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.TileStatus;
 
 public enum BoardOption {
 

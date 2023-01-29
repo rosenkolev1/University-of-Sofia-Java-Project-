@@ -1,8 +1,16 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.command;
 
+import bg.sofia.uni.fmi.mjt.battleships.common.ClientRequest;
+import bg.sofia.uni.fmi.mjt.battleships.common.ScreenInfo;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.Game;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.GameStatus;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.QuitStatus;
+import bg.sofia.uni.fmi.mjt.battleships.server.dto.ListCommandInfo;
+import bg.sofia.uni.fmi.mjt.battleships.server.ui.ScreenUI;
 
+import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class CommandInfo {
@@ -37,6 +45,19 @@ public class CommandInfo {
     public static final String GAME_HIT = "hit";
     public static final String GAME_ABANDON = "abandon";
     public static final String GAME_SAVE_AND_QUIT = "sq";
+
+    public static final Map<String, ListCommandInfo> COMMAND_LIST_INFO_MAP = Map.of(
+        CommandInfo.LIST_GAMES, new ListCommandInfo(
+            (Game x, ClientRequest request) -> x.status != GameStatus.ENDED,
+            (List<Game> games) -> ScreenUI.listGames(games, ScreenUI.GAMES_LIST_EMPTY)),
+
+        CommandInfo.SAVED_GAMES, new ListCommandInfo(
+            (Game x, ClientRequest request) ->
+                (x.status == GameStatus.PAUSED || (x.status == GameStatus.PENDING && x.quitStatus == QuitStatus.SAVE_AND_QUIT))
+                    &&
+                x.players.stream().map(y -> y.user.username()).anyMatch(y -> y.equals(request.cookies().session.username)),
+            (List<Game> games) -> ScreenUI.listGames(games, ScreenUI.GAMES_SAVED_EMPTY))
+        );
 
     public static final Map<QuitStatus, String> QUIT_STATUS_COMMAND_MAP = Map.of(
         QuitStatus.ABANDON, CommandInfo.GAME_ABANDON,

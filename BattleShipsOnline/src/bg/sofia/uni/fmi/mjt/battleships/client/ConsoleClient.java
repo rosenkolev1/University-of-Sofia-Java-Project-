@@ -17,25 +17,23 @@ import java.util.Scanner;
 
 // NIO specifics wrapped & hidden
 public class ConsoleClient {
-
     private static final int SERVER_PORT = 7777;
     private static final String SERVER_HOST = "localhost";
+
     //This string signifies that there is more to read from the socket channel than there is space for in the buffer
     private static final String BUFFER_CONTINUES_STRING = "#c";
     private static final int BUFFER_SIZE = 512;
     private static ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
 
     private final SocketChannel socketChannel;
-    private final BufferedReader reader;
     private final PrintWriter writer;
     private final Scanner scanner;
     private final Gson gson;
 
     private ClientState cookies;
 
-    public ConsoleClient(SocketChannel socketChannel, BufferedReader reader, PrintWriter writer, Scanner scanner) {
+    public ConsoleClient(SocketChannel socketChannel, PrintWriter writer, Scanner scanner) {
         this.socketChannel = socketChannel;
-        this.reader = reader;
         this.writer = writer;
         this.scanner = scanner;
         this.gson = new Gson();
@@ -45,38 +43,36 @@ public class ConsoleClient {
     public static void main(String[] args) {
 
         try (SocketChannel socketChannel = SocketChannel.open();
-             BufferedReader reader = new BufferedReader(Channels.newReader(socketChannel, "UTF-8"));
              PrintWriter writer = new PrintWriter(Channels.newWriter(socketChannel, "UTF-8"), true);
              Scanner scanner = new Scanner(System.in)) {
 
             socketChannel.connect(new InetSocketAddress(SERVER_HOST, SERVER_PORT));
             System.out.println("Connected to the server.");
 
-            var client = new ConsoleClient(socketChannel, reader, writer, scanner);
+            var client = new ConsoleClient(socketChannel, writer, scanner);
 
             //Send initial request and set initial client state
-            var initialServerResponse = client.sendAndReceiveInitial();
-            client.cookies = initialServerResponse.cookies;
-            client.printMessage(initialServerResponse.message);
+            var initialServerResponse = client.sendAndReceiveInitialHandler();
 
             var currentScreenHandler = new ScreenHandler(client, client.cookies.session.currentScreen);
 
             while (true) {
                 var currentScreenResponse = currentScreenHandler.executeHandler();
 
-                //Handle screen change
-                currentScreenHandler.setHandler(client.cookies.session.currentScreen);
-
                 //Handle call to exit the application
                 if (currentScreenResponse.status == ResponseStatus.EXIT) {
                     break;
                 }
-                //Handle invalid command
+                //Handle error
                 else if (currentScreenResponse.status == ResponseStatus.INVALID_COMMAND) {
 
                 }
+
+                //Handle screen change
+                currentScreenHandler.setHandler(client.cookies.session.currentScreen);
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException("There is a problem with the network communication", e);
         }
     }
@@ -112,9 +108,7 @@ public class ConsoleClient {
 
         var serverResponse = gson.fromJson(serverResponseRaw, ServerResponse.class);
 
-        this.cookies = serverResponse.cookies;
-
-        printMessage(serverResponse.message);
+        actOnResponseDefault(serverResponse);
 
         return serverResponse;
     }
@@ -122,11 +116,17 @@ public class ConsoleClient {
     public ServerResponse sendAndReceiveDefaultHandler() throws IOException {
         var serverResponse = sendAndReceive();
 
-        this.cookies = serverResponse.cookies;
-
-        printMessage(serverResponse.message);
+        actOnResponseDefault(serverResponse);
 
         return serverResponse;
+    }
+
+    private ServerResponse sendAndReceiveInitialHandler() throws IOException {
+        var initialServerResponse = this.sendAndReceiveInitial();
+
+        actOnResponseDefault(initialServerResponse);
+
+        return initialServerResponse;
     }
 
     private void printMessage(String message) {
@@ -135,8 +135,13 @@ public class ConsoleClient {
         }
     }
 
-    private ServerResponse sendAndReceiveInitial() throws IOException {
-        var request = new ClientRequest(null, cookies);
+    private void actOnResponseDefault(ServerResponse response) {
+        this.cookies = response.cookies;
+
+        this.printMessage(response.message);
+    }
+
+    private ServerResponse sendRequestAndReceive(ClientRequest request) throws IOException {
         var requestJson = gson.toJson(request);
 
         this.sendToServer(writer, requestJson);
@@ -147,18 +152,18 @@ public class ConsoleClient {
         return serverResponse;
     }
 
+    private ServerResponse sendAndReceiveInitial() throws IOException {
+        var request = new ClientRequest(null, cookies);
+
+        return sendRequestAndReceive(request);
+    }
+
     private ServerResponse sendAndReceive() throws IOException {
         var userInput = this.getConsoleInput();
 
         var request = new ClientRequest(userInput, cookies);
-        var requestJson = gson.toJson(request);
 
-        this.sendToServer(writer, requestJson);
-        var serverResponseRaw = receiveFromServer(socketChannel);
-
-        var serverResponse = gson.fromJson(serverResponseRaw, ServerResponse.class);
-
-        return serverResponse;
+        return sendRequestAndReceive(request);
     }
 
     private String getConsoleInput() {

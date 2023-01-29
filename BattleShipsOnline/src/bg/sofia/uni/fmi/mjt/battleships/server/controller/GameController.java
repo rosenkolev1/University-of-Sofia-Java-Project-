@@ -347,7 +347,7 @@ public class GameController extends Controller {
 
             var cookies = new ClientState(
                 new SessionCookie(null , enemy.name),
-                enemy,
+                null,
                 null
             );
 
@@ -363,6 +363,8 @@ public class GameController extends Controller {
                 message.append(quitGameUI.gameQuitWaiting());
                 cookies.session.currentScreen = ScreenInfo.GAME_SCREEN;
                 responseStatus = ResponseStatus.OK;
+
+                cookies.player = enemy;
 
                 cookies.game = new GameCookie(request.cookies().game);
                 cookies.game.nextTurn();

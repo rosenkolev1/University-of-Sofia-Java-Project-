@@ -144,7 +144,7 @@ public class ConsoleClient {
         }
         //Handler when it is not client's turn
         else {
-            //Make this user sleep until another enemy make a move
+            //Make this user sleep until another enemy makes a move
             var serverResponseRaw = receiveFromServer(socketChannel);
 
             serverResponse = gson.fromJson(serverResponseRaw, ServerResponse.class);

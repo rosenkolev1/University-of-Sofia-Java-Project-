@@ -145,9 +145,9 @@ public class HomeController extends Controller {
 
             var chosenGame = games.get(gameIndex);
 
-            var isSavedGame = chosenGame.quitStatus != QuitStatus.NONE;
+            var isSavedGame = chosenGame.quitStatus == QuitStatus.SAVE_AND_QUIT;
 
-            return joinGameResponse(request, chosenGame, isSavedGame);
+            return joinGameResponse(request, chosenGame);
         }
         else {
             if (gameName.isBlank()) {
@@ -193,6 +193,7 @@ public class HomeController extends Controller {
             }
 
             var pausedGameWithThisNameExists = db.gameTable.games.stream().anyMatch(x ->
+                x.name.equals(gameName) &&
                 x.status == GameStatus.PAUSED);
 
             if (pausedGameWithThisNameExists) {
@@ -205,9 +206,9 @@ public class HomeController extends Controller {
                 return serverResponse;
             }
 
-            var isSavedGame = game.quitStatus != QuitStatus.NONE;
+            var isSavedGame = game.quitStatus == QuitStatus.SAVE_AND_QUIT;
 
-            return joinGameResponse(request, game, isSavedGame);
+            return joinGameResponse(request, game);
         }
     }
 
@@ -309,11 +310,11 @@ public class HomeController extends Controller {
         return serverResponse;
     }
 
-    private ServerResponse joinGameResponse(ClientRequest request, Game game, boolean isSavedGame) {
+    private ServerResponse joinGameResponse(ClientRequest request, Game game) {
         var curUser = db.userTable.getUser(request.cookies().session.username);
 
         //Resume the game if the current player had saved and quit before
-        if (isSavedGame) {
+        if (game.quitStatus == QuitStatus.SAVE_AND_QUIT) {
             var curPlayer = game.players.stream().filter(x -> x.user.username().equals(curUser.username())).findFirst().get();
             game.resumeGame(curPlayer);
         }

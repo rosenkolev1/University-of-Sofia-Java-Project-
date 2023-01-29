@@ -1,5 +1,11 @@
-package bg.sofia.uni.fmi.mjt.battleships.server.database.models;
+package bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.board;
 
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.board.ship.Ship;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.board.ship.ShipStatus;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.board.ship.ShipType;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.board.tile.Tile;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.board.tile.TilePos;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.board.tile.TileStatus;
 import bg.sofia.uni.fmi.mjt.battleships.server.dto.BoardOption;
 
 import java.util.*;

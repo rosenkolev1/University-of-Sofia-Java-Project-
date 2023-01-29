@@ -5,8 +5,12 @@ import bg.sofia.uni.fmi.mjt.battleships.server.command.Command;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.*;
-import bg.sofia.uni.fmi.mjt.battleships.server.ui.QuitGameUI;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.*;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.board.ship.ShipStatus;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.board.tile.TileStatus;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.Player;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.PlayerStatus;
+import bg.sofia.uni.fmi.mjt.battleships.server.ui.quit.QuitGameUI;
 import bg.sofia.uni.fmi.mjt.battleships.server.ui.ScreenUI;
 
 import java.util.ArrayList;
@@ -216,10 +220,16 @@ public class GameController extends Controller {
                 .filter(x -> x.name.equals(enemyName)).toList();
         }
 
+        //If the defender player has lost, then remove him from the game cookie
+        if (playerHasLost) {
+            request.cookies().game.playersInfo = request.cookies().game.playersInfo
+                .stream().filter(x -> !x.name.equals(enemyName)).toList();
+        }
+
         List<ServerResponse> signals = createSignalResponsesUponHit(request, enemyName, targetTileString,
             hasHitShip, hasSunkShip, playerHasLost, gameHasEnded);
 
-        var message = attackerMessage(hasHitShip, hasSunkShip);
+        var message = ScreenUI.attackMessage(hasHitShip, hasSunkShip);
 
         //Check if the game has been won by the attacker
         if (gameHasEnded) {
@@ -234,6 +244,7 @@ public class GameController extends Controller {
             serverResponse = redirectResponse(ScreenInfo.HOME_SCREEN, request, message.toString(), signals);
         }
         else {
+            //TODO: Right now, if the game has more than 2 players, player A will be able to tell on which tiles player B has hit player C.
             var enemyBoardWithFogOfWar = enemyBoard.boardWithFogOfWar();
 
             var curPlayerBoard = curPlayer.board;
@@ -302,38 +313,6 @@ public class GameController extends Controller {
         }
 
         return serverResponse;
-    }
-
-    private StringBuilder defenderMessage(String tilePos, boolean hasHitShip, boolean hasSunkShip) {
-        StringBuilder message = new StringBuilder();
-
-        if (hasSunkShip) {
-            message.append(ScreenUI.defenderShipSunk(tilePos));
-        }
-        else if (hasHitShip) {
-            message.append(ScreenUI.defenderShipHit(tilePos));
-        }
-        else {
-            message.append(ScreenUI.defenderHitMiss(tilePos));
-        }
-
-        return message;
-    }
-
-    private StringBuilder attackerMessage(boolean hasHitShip, boolean hasSunkShip) {
-        StringBuilder message = new StringBuilder();
-
-        if (!hasHitShip) {
-            message.append(ScreenUI.GAME_TILE_HIT_MISS);
-        }
-        if (hasHitShip) {
-            message.append(ScreenUI.GAME_TILE_HIT_SUCCESS);
-        }
-        if (hasSunkShip) {
-            message.append(ScreenUI.GAME_SHIP_HIT_SUNK);
-        }
-
-        return message;
     }
 
     private List<ServerResponse> createSignalResponseUponQuit(ClientRequest request, Player curPlayer, QuitStatus gameQuitStatus, QuitGameUI quitGameUI) {
@@ -422,7 +401,7 @@ public class GameController extends Controller {
     }
 
     private List<ServerResponse> createSignalResponsesUponHit(ClientRequest request,
-                                                       String enemyName, String tilePos,
+                                                       String defenderEnemyName, String tilePos,
                                                        boolean hasHitShip, boolean hasSunkShip,
                                                        boolean playerHasLost, boolean gameHasEnded) {
         List<ServerResponse> signals = new ArrayList<>();
@@ -430,8 +409,10 @@ public class GameController extends Controller {
         var enemies = request.cookies().game.playersInfo.stream()
             .filter(x -> !x.name.equals(request.cookies().session.username)).toList();
 
+        var attackerName = request.cookies().session.username;
+
         for (var enemy : enemies) {
-            var isDefenderPlayer = enemy.name.equals(enemyName);
+            var isDefenderPlayer = enemy.name.equals(defenderEnemyName);
 
             ResponseStatus responseStatus = null;
             var cookies = new ClientState(
@@ -444,7 +425,7 @@ public class GameController extends Controller {
 
             if (isDefenderPlayer && (gameHasEnded || playerHasLost)) {
                 message
-                    .append(defenderMessage(tilePos, hasHitShip, hasSunkShip))
+                    .append(ScreenUI.defendMessage(tilePos, hasHitShip, hasSunkShip))
                     .append(ScreenUI.GAME_ENDING_LOOSER);
 
                 cookies.session.currentScreen = ScreenInfo.HOME_SCREEN;
@@ -454,9 +435,9 @@ public class GameController extends Controller {
                 responseStatus = ResponseStatus.FINISH_GAME;
             }
             else {
-                message = enemy.name.equals(enemyName) ?
-                    defenderMessage(tilePos, hasHitShip, hasSunkShip) :
-                    new StringBuilder(ScreenUI.PLACEHOLDER);
+                message = enemy.name.equals(defenderEnemyName) ?
+                    ScreenUI.defendMessage(tilePos, hasHitShip, hasSunkShip) :
+                    ScreenUI.witnessMessage(attackerName, defenderEnemyName, tilePos, hasHitShip, hasSunkShip);
 
                 cookies.session.currentScreen = ScreenInfo.GAME_SCREEN;
 
@@ -469,6 +450,7 @@ public class GameController extends Controller {
             var response = messageResponse(
                 ServerResponse
                     .builder()
+                    .setStatus(responseStatus)
                     .setMessage(message.toString())
                     .setCookies(cookies)
             );

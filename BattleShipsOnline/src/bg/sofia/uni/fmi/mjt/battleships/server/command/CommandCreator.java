@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CommandCreator {
-    // straight out of https://stackoverflow.com/a/14656159 with small enhancement
     private static List<String> getCommandArguments(String input) {
         List<String> tokens = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
@@ -22,6 +21,7 @@ public class CommandCreator {
                 sb.append(c); //else add character to token
             }
         }
+
         //lets not forget about last token that doesn't have space after it
         tokens.add(sb.toString().replace("\"", ""));
 

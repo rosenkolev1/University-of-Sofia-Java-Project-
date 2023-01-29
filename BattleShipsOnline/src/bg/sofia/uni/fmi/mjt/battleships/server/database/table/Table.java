@@ -1,5 +1,6 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.database.table;
 
+import bg.sofia.uni.fmi.mjt.battleships.server.database.table.entry.TableEntryInfo;
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
@@ -104,7 +105,7 @@ public abstract class Table {
         }
     }
 
-    protected boolean foundEntrySeparator(String charString, BufferedReader bufferedReader) throws IOException {
+    private boolean foundEntrySeparator(String charString, BufferedReader bufferedReader) throws IOException {
         //Check if the charString is the beginning of an entry separator
         boolean foundSeparator = entrySeparator.equals(charString);
 

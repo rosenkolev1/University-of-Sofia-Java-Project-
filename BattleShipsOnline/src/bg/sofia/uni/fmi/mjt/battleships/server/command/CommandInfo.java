@@ -1,22 +1,17 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.command;
 
 import bg.sofia.uni.fmi.mjt.battleships.common.ClientRequest;
-import bg.sofia.uni.fmi.mjt.battleships.common.ScreenInfo;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.Game;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.GameStatus;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.QuitStatus;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.Game;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.GameStatus;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.QuitStatus;
 import bg.sofia.uni.fmi.mjt.battleships.server.dto.ListCommandInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.ui.ScreenUI;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class CommandInfo {
-    public static final String INVALID_ARGS_COUNT_MESSAGE_FORMAT =
-        "Invalid count of arguments: \"%s\" expects %d arguments. Example: \"%s\"";
-
     public static final String EXIT = "exit";
     public static final String HELP = "help";
     public static final String BACK = "back";

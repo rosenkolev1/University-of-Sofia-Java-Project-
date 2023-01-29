@@ -1,20 +1,16 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.database.table;
 
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.Game;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.GameStatus;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.QuitStatus;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.User;
-import com.google.gson.Gson;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.Game;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.GameStatus;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.QuitStatus;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.user.User;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.table.entry.TableEntryInfo;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class GameTable extends Table {
     public List<Game> games;

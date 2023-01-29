@@ -1,4 +1,4 @@
-package bg.sofia.uni.fmi.mjt.battleships.server.ui;
+package bg.sofia.uni.fmi.mjt.battleships.server.ui.quit;
 
 public abstract class QuitGameUI {
     public abstract String gameMyTurnQuitPrompt();

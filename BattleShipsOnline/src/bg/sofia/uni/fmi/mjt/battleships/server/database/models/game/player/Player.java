@@ -1,4 +1,8 @@
-package bg.sofia.uni.fmi.mjt.battleships.server.database.models;
+package bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player;
+
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.QuitStatus;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.board.Board;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.user.User;
 
 public class Player {
     public final User user;

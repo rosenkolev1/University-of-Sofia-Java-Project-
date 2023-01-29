@@ -4,9 +4,12 @@ import bg.sofia.uni.fmi.mjt.battleships.common.ClientState;
 import bg.sofia.uni.fmi.mjt.battleships.common.PlayerCookie;
 import bg.sofia.uni.fmi.mjt.battleships.common.ScreenInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.Game;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.GameStatus;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.QuitStatus;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.Game;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.GameStatus;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.QuitStatus;
+import bg.sofia.uni.fmi.mjt.battleships.server.ui.quit.AbandonGameUI;
+import bg.sofia.uni.fmi.mjt.battleships.server.ui.quit.QuitGameUI;
+import bg.sofia.uni.fmi.mjt.battleships.server.ui.quit.SaveAndQuitGameUI;
 
 import java.util.*;
 import java.util.function.Function;
@@ -132,6 +135,12 @@ public class ScreenUI {
     public static final String GAME_DEFENDER_SHIP_HIT_TEMPLATE = "\nYour ship on tile \"%s\" has been hit :(\n";
     public static final String GAME_DEFENDER_SHIP_SUNK_TEMPLATE = "\nYour ship on tile \"%s\" has been hit and it has sunk :( :(\n";
 
+    public static final String GAME_WITNESS_ATTACK_TEMPLATE = "\nAttacker %s has attacked %s! o_o";
+
+    public static final String GAME_WITNESS_HIT_MISSED_TEMPLATE = "\n%s's attack on tile \"%s\" has missed! -_- \n";
+    public static final String GAME_WITNESS_SHIP_HIT_TEMPLATE = "\n%s's attack on tile \"%s\" has hit a ship! 0_o \n";
+    public static final String GAME_WITNESS_SHIP_SUNK_TEMPLATE = "\n%s's attack on tile \"%s\" has hit a ship and that ship has sunk! 0_0 \n";
+
     public static final String GAME_YOUR_BOARD = "YOUR BOARD\n";
     public static final String GAME_ENEMY_BOARD = "ENEMY BOARD\n";
 
@@ -180,10 +189,6 @@ public class ScreenUI {
         }
     );
 
-    public static String redirectMessage(String from, String to) {
-        return String.format(REDIRECT_TEMPLATE, from, to);
-    }
-
     public static String enterCommandPrompt(String... commands) {
         if (commands.length > 0) {
             return String.format(ENTER_COMMANDS_TEMPLATE, " (" + String.join("/", commands) + ")");
@@ -206,10 +211,15 @@ public class ScreenUI {
         return String.format(GAME_JOINED_TEMPLATE, name);
     }
 
+    public static String currentGame(String gameName) {
+        var res = String.format(CURRENT_GAME_TEMPLATE, gameName);
+        return res;
+    }
+
     public static String myTurnPrompt(List<PlayerCookie> enemyInfo) {
         return String.join("", enemyInfo.stream()
-                .filter(x -> x.moves != null && !x.moves.isEmpty())
-                .map(x -> String.format(GAME_ENEMY_LAST_TURN_TEMPLATE, x.name, x.moves.get(x.moves.size() - 1))).toList())
+            .filter(x -> x.moves != null && !x.moves.isEmpty())
+            .map(x -> String.format(GAME_ENEMY_LAST_TURN_TEMPLATE, x.name, x.moves.get(x.moves.size() - 1))).toList())
             + GAME_MY_TURN;
     }
 
@@ -222,20 +232,62 @@ public class ScreenUI {
             String.join(", ", ranks), String.join(", ", files));
     }
 
-    public static String currentGame(String gameName) {
-        var res = String.format(CURRENT_GAME_TEMPLATE, gameName);
-        return res;
+    public static StringBuilder attackMessage(boolean hasHitShip, boolean hasSunkShip) {
+        StringBuilder message = new StringBuilder();
+
+        if (!hasHitShip) {
+            message.append(ScreenUI.GAME_TILE_HIT_MISS);
+        }
+        if (hasHitShip) {
+            message.append(ScreenUI.GAME_TILE_HIT_SUCCESS);
+        }
+        if (hasSunkShip) {
+            message.append(ScreenUI.GAME_SHIP_HIT_SUNK);
+        }
+
+        return message;
     }
 
-    public static String defenderHitMiss(String tilePos) {
+    public static StringBuilder defendMessage(String tilePos, boolean hasHitShip, boolean hasSunkShip) {
+        StringBuilder message = new StringBuilder();
+
+        if (hasSunkShip) {
+            message.append(ScreenUI.defenderShipSunk(tilePos));
+        }
+        else if (hasHitShip) {
+            message.append(ScreenUI.defenderShipHit(tilePos));
+        }
+        else {
+            message.append(ScreenUI.defenderHitMiss(tilePos));
+        }
+
+        return message;
+    }
+
+    public static StringBuilder witnessMessage(String attacker, String defender, String tilePos, boolean hasHitShip, boolean hasSunkShip) {
+        //TODO: Right now, if the game has more than 2 players, player A will be able to tell on which tiles player B has hit player C.
+        StringBuilder message = new StringBuilder(String.format(ScreenUI.GAME_WITNESS_ATTACK_TEMPLATE, attacker, defender));
+
+        if (!hasHitShip) {
+            message.append(String.format(ScreenUI.GAME_WITNESS_HIT_MISSED_TEMPLATE, attacker, tilePos));
+        }
+        else if (hasHitShip) {
+            message.append(String.format(ScreenUI.GAME_WITNESS_SHIP_HIT_TEMPLATE, attacker, tilePos));
+        }
+        else if (hasSunkShip) {
+            message.append(String.format(ScreenUI.GAME_WITNESS_SHIP_SUNK_TEMPLATE, attacker, tilePos));
+        }
+
+        return message;
+    }
+
+    private static String defenderHitMiss(String tilePos) {
         return String.format(GAME_DEFENDER_HIT_MISSED_TEMPLATE, tilePos);
     }
-
-    public static String defenderShipHit(String tilePos) {
+    private static String defenderShipHit(String tilePos) {
         return String.format(GAME_DEFENDER_SHIP_HIT_TEMPLATE, tilePos);
     }
-
-    public static String defenderShipSunk(String tilePos) {
+    private static String defenderShipSunk(String tilePos) {
         return String.format(GAME_DEFENDER_SHIP_SUNK_TEMPLATE, tilePos);
     }
 
@@ -245,6 +297,29 @@ public class ScreenUI {
 
     public static String yourBoard(String board) {
         return boardWithAnnotation(GAME_YOUR_BOARD, board);
+    }
+
+    private static String boardWithAnnotation(String annotation, String board) {
+        var rowLength = board.indexOf("\n");
+
+        var rowBeginningWhitespaces = 0;
+
+        while(board.substring(0, rowLength).startsWith(" ".repeat(rowBeginningWhitespaces))) {
+            rowBeginningWhitespaces++;
+        }
+
+        rowBeginningWhitespaces-=2;
+
+        rowLength -= rowBeginningWhitespaces;
+
+        var annotationLength = annotation.strip().length();
+        int whiteSpace = 0;
+
+        while(Math.abs(whiteSpace - (rowLength - (whiteSpace + annotationLength))) >= 2) {
+            whiteSpace++;
+        }
+
+        return "\n" + " ".repeat(rowBeginningWhitespaces) + " ".repeat(whiteSpace) + annotation + board;
     }
 
     public static String listGames(List<Game> games, String emptyListMessage) {
@@ -327,38 +402,7 @@ public class ScreenUI {
         return table.toString();
     }
 
-    public static String cleanText(String text) {
-        while (text.contains("\n\n\n")) {
-            text = text.replace("\n\n\n", "\n\n");
-        }
-
-        return text;
-    }
-
     public static String invalidWithHelp(String invalidMessage) {
         return invalidMessage + HELP_PROMPT;
-    }
-
-    private static String boardWithAnnotation(String annotation, String board) {
-        var rowLength = board.indexOf("\n");
-
-        var rowBeginningWhitespaces = 0;
-
-        while(board.substring(0, rowLength).startsWith(" ".repeat(rowBeginningWhitespaces))) {
-            rowBeginningWhitespaces++;
-        }
-
-        rowBeginningWhitespaces-=2;
-
-        rowLength -= rowBeginningWhitespaces;
-
-        var annotationLength = annotation.strip().length();
-        int whiteSpace = 0;
-
-        while(Math.abs(whiteSpace - (rowLength - (whiteSpace + annotationLength))) >= 2) {
-            whiteSpace++;
-        }
-
-        return "\n" + " ".repeat(rowBeginningWhitespaces) + " ".repeat(whiteSpace) + annotation + board;
     }
 }

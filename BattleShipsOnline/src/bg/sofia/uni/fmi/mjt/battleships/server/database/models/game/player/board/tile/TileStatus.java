@@ -1,4 +1,4 @@
-package bg.sofia.uni.fmi.mjt.battleships.server.database.models;
+package bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.board.tile;
 
 public enum TileStatus {
     EMPTY("_"),

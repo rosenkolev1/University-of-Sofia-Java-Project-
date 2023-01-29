@@ -1,4 +1,6 @@
-package bg.sofia.uni.fmi.mjt.battleships.server.ui;
+package bg.sofia.uni.fmi.mjt.battleships.server.ui.quit;
+
+import bg.sofia.uni.fmi.mjt.battleships.server.ui.ScreenUI;
 
 public class AbandonGameUI extends QuitGameUI {
     private static final String GAME_ABANDON_CURRENT_USER = "\nYou have decided to abandon the game!";

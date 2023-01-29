@@ -6,10 +6,10 @@ import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.Game;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.GameStatus;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.QuitStatus;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.User;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.Game;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.GameStatus;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.QuitStatus;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.user.User;
 import bg.sofia.uni.fmi.mjt.battleships.server.ui.ScreenUI;
 
 import java.util.ArrayList;
@@ -300,7 +300,7 @@ public class HomeController extends Controller {
             serverResponse = helpResponse(request,
                 CommandInfo.CREATE_GAME_VERBOSE, CommandInfo.LIST_GAMES,
                 CommandInfo.JOIN_GAME_VERBOSE, CommandInfo.SAVED_GAMES,
-                CommandInfo.LOAD_GAME_VERBOSE, CommandInfo.DELETE_GAME,
+                CommandInfo.LOAD_GAME_VERBOSE, CommandInfo.DELETE_GAME_VERBOSE,
                 CommandInfo.LOG_OUT, CommandInfo.HELP);
         }
         else {

@@ -1,10 +1,9 @@
-package bg.sofia.uni.fmi.mjt.battleships.server.database.models;
+package bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.board.ship;
 
-import bg.sofia.uni.fmi.mjt.battleships.common.SessionCookie;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.board.tile.TilePos;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 
 public class Ship {
 

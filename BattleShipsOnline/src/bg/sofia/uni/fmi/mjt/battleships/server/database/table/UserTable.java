@@ -1,6 +1,6 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.database.table;
 
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.User;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.user.User;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,13 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserTable extends Table {
-
     private List<User> users;
-
-    public UserTable(Path tablePath, String entrySeparator, String fieldSeparator) {
-        super(tablePath, entrySeparator, fieldSeparator);
-        initialiseUsers();
-    }
 
     public UserTable(String tablePath, String entrySeparator, String fieldSeparator) {
         super(tablePath, entrySeparator, fieldSeparator);
@@ -33,17 +27,13 @@ public class UserTable extends Table {
         return null;
     }
 
-    public List<User> users() {
-        return users;
-    }
-
     public void addUser(User user) {
         try (var bufferedWriter = Files.newBufferedWriter(tablePath, StandardOpenOption.APPEND)) {
             //TODO: Add hashing with salt to passwords
             this.users.add(user);
 
             var userJson = gson.toJson(user);
-            bufferedWriter.append(userJson + entrySeparator);
+            bufferedWriter.append(userJson).append(entrySeparator);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -5,7 +5,7 @@ import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.User;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.user.User;
 import bg.sofia.uni.fmi.mjt.battleships.server.ui.ScreenUI;
 
 import java.util.List;

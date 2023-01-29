@@ -7,6 +7,7 @@ import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.Game;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.GameStatus;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.QuitStatus;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.PlayerStatus;
 import bg.sofia.uni.fmi.mjt.battleships.server.ui.quit.AbandonGameUI;
 import bg.sofia.uni.fmi.mjt.battleships.server.ui.quit.QuitGameUI;
 import bg.sofia.uni.fmi.mjt.battleships.server.ui.quit.SaveAndQuitGameUI;
@@ -218,7 +219,10 @@ public class ScreenUI {
 
     public static String myTurnPrompt(List<PlayerCookie> enemyInfo) {
         return String.join("", enemyInfo.stream()
-            .filter(x -> x.moves != null && !x.moves.isEmpty())
+            .filter(x ->
+                x.playerStatusCode == PlayerStatus.ALIVE.statusCode() &&
+                x.moves != null && !x.moves.isEmpty()
+            )
             .map(x -> String.format(GAME_ENEMY_LAST_TURN_TEMPLATE, x.name, x.moves.get(x.moves.size() - 1))).toList())
             + GAME_MY_TURN;
     }

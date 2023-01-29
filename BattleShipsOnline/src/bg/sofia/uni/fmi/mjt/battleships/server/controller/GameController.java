@@ -93,7 +93,7 @@ public class GameController extends Controller {
             message.append(quitGameUI.gameQuitWaiting());
 
             //Go to the next player and ask him if he wants to abandon the game!
-            request.cookies().game.nextTurn();
+            request.cookies().game.turn = game.turn;
 
             serverResponse = messageResponse(
                 ServerResponse
@@ -175,10 +175,14 @@ public class GameController extends Controller {
 
         //DEBUG. IN THIS CASE, HIT ALL THE TILES AND MAKE THE GAME END INSTANTLY
         if (targetTileString.equals("all")) {
+            var oldTurn = game.turn;
+
             targetTileString = "A1";
             for (var tile : enemyBoard.board()) {
                 game.hitTile(curPlayer, enemyPlayer, tile.pos());
             }
+
+            game.turn = oldTurn;
         }
         //Validate that the argument is a valid tile
         else if (!enemyBoard.validTilePos(targetTileString)) {
@@ -214,19 +218,15 @@ public class GameController extends Controller {
 
         curPlayerCookie.moves.add(targetTileString);
 
-        //Remove the dead players' from the game cookie
+        //If the defender player has lost, then mark him as dead in the game cookie
         if (playerHasLost) {
-            request.cookies().game.playersInfo = request.cookies().game.playersInfo.stream()
-                .filter(x -> x.name.equals(enemyName)).toList();
+            var enemyCookie = request.cookies().game.playersInfo.stream()
+                .filter(x -> x.name.equals(enemyName)).findFirst().get();
+
+            enemyCookie.playerStatusCode = PlayerStatus.DEAD.statusCode();
         }
 
-        //If the defender player has lost, then remove him from the game cookie
-        if (playerHasLost) {
-            request.cookies().game.playersInfo = request.cookies().game.playersInfo
-                .stream().filter(x -> !x.name.equals(enemyName)).toList();
-        }
-
-        List<ServerResponse> signals = createSignalResponsesUponHit(request, enemyName, targetTileString,
+        List<ServerResponse> signals = createSignalResponsesUponHit(request, game, enemyName, targetTileString,
             hasHitShip, hasSunkShip, playerHasLost, gameHasEnded);
 
         var message = ScreenUI.attackMessage(hasHitShip, hasSunkShip);
@@ -256,7 +256,7 @@ public class GameController extends Controller {
                 .append("\n").append(ScreenUI.enemyBoard(enemyBoardWithFogOfWarString)).append("\n");
 
             //Go to the next turn;
-            request.cookies().game.nextTurn();
+            request.cookies().game.turn = game.turn;
 
             serverResponse = messageResponse(
                 ServerResponse
@@ -400,7 +400,7 @@ public class GameController extends Controller {
         return signals;
     }
 
-    private List<ServerResponse> createSignalResponsesUponHit(ClientRequest request,
+    private List<ServerResponse> createSignalResponsesUponHit(ClientRequest request, Game game,
                                                        String defenderEnemyName, String tilePos,
                                                        boolean hasHitShip, boolean hasSunkShip,
                                                        boolean playerHasLost, boolean gameHasEnded) {
@@ -442,7 +442,7 @@ public class GameController extends Controller {
                 cookies.session.currentScreen = ScreenInfo.GAME_SCREEN;
 
                 cookies.game = new GameCookie(request.cookies().game);
-                cookies.game.nextTurn();
+                cookies.game.turn = game.turn;
 
                 responseStatus = ResponseStatus.OK;
             }

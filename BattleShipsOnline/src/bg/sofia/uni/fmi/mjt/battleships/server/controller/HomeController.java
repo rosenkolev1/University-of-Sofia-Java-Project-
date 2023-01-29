@@ -104,7 +104,7 @@ public class HomeController extends Controller {
 
         var curUser = db.userTable.getUser(request.cookies().session.username);
 
-        var game = db.gameTable.createGame(gameName, 2, GameStatus.PENDING, true, List.of(curUser));
+        var game = db.gameTable.createGame(gameName, 3, GameStatus.PENDING, true, List.of(curUser));
 
         db.gameTable.addGame(game);
 

@@ -178,21 +178,28 @@ public class Server {
     }
 
     private String getClientInput(SocketChannel clientChannel) throws IOException {
-        buffer.clear();
+        var result = new StringBuilder();
 
-        int readBytes = clientChannel.read(buffer);
+        while(true) {
+            buffer.clear();
 
-        if (readBytes < 0) {
-            clientChannel.close();
-            return null;
+            int readBytes = clientChannel.read(buffer);
+
+            if (readBytes <= 0) {
+//                clientChannel.close();
+//                return null;
+                break;
+            }
+
+            buffer.flip();
+
+            byte[] clientInputBytes = new byte[buffer.remaining()];
+            buffer.get(clientInputBytes);
+
+            result.append(new String(clientInputBytes, StandardCharsets.UTF_8));
         }
 
-        buffer.flip();
-
-        byte[] clientInputBytes = new byte[buffer.remaining()];
-        buffer.get(clientInputBytes);
-
-        return new String(clientInputBytes, StandardCharsets.UTF_8);
+        return result.toString();
     }
 
     private void writeClientOutput(SocketChannel clientChannel, String output) throws IOException {

@@ -51,11 +51,15 @@ public class Game {
     }
 
     private void increaseTurn() {
-        this.turn++;
+        do {
+            //Increase the turn while the player is dead
+            this.turn++;
 
-        if (this.turn == this.players.size()) {
-            this.turn = 0;
+            if (this.turn == this.players.size()) {
+                this.turn = 0;
+            }
         }
+        while (this.players.get(this.turn).status == PlayerStatus.DEAD);
     }
 
     public void quitGame(Player player, QuitStatus quitStatus) {
@@ -117,6 +121,7 @@ public class Game {
     public void hitTile(Player attacker, Player defender, TilePos pos) {
         defender.board.hitTile(pos);
         this.turnHistory.add(new PlayerTurn(attacker.user.username(), defender.board.getTilePosAsString(pos)));
+
         increaseTurn();
 
         if (defender.board.allShipsHaveSunk()) {

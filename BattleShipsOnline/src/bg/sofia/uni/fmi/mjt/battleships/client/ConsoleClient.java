@@ -171,7 +171,6 @@ public class ConsoleClient {
     }
 
     private void sendToServer(PrintWriter writer, String input) throws IOException {
-//        printlnClean("Sending message <" + input + "> to the server...");
         writer.print(input);
         writer.flush();
     }

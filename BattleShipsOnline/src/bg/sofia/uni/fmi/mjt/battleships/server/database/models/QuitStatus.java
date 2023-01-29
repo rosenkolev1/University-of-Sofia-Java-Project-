@@ -1,14 +1,16 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.database.models;
 
 public enum QuitStatus {
-    NONE(0),
-    ABANDON(1),
-    SAVE_AND_QUIT(2);
+    NONE(0, "None"),
+    ABANDON(1, "Abandoned"),
+    SAVE_AND_QUIT(2, "Saved");
 
     private final int statusCode;
+    private final String statusName;
 
-    QuitStatus(int statusCode) {
+    QuitStatus(int statusCode, String statusName) {
         this.statusCode = statusCode;
+        this.statusName = statusName;
     }
 
     public static QuitStatus getByCode(int statusCode) {
@@ -23,5 +25,9 @@ public enum QuitStatus {
 
     public int statusCode() {
         return statusCode;
+    }
+
+    public String statusName() {
+        return this.statusName;
     }
 }

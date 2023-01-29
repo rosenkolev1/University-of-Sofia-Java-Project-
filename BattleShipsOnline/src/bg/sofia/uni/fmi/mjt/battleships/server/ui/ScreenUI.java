@@ -5,6 +5,7 @@ import bg.sofia.uni.fmi.mjt.battleships.common.PlayerCookie;
 import bg.sofia.uni.fmi.mjt.battleships.common.ScreenInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.Game;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.GameStatus;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.QuitStatus;
 
 import java.util.*;
@@ -63,11 +64,19 @@ public class ScreenUI {
 
     public static final String INVALID_GAME_NAME_NULL_EMPTY_BLANK = "\nInvalid name! The name of the game cannot be null, empty or blank!\n";
     public static final String INVALID_GAME_ALREADY_EXISTS = "\nA game with this name already exists! Choose a different name!\n";
-    public static final String INVALID_GAME_DOES_NOT_EXIST = "\nA game with this name does not exist!\n";
-    public static final String INVALID_GAME_EXISTS_BUT_NOT_PENDING = "\nThe game with this name is full!\n";
+    public static final String INVALID_GAME_DOES_NOT_EXIST = "\nA pending game with this name does not exist!\n";
+    public static final String INVALID_GAME_EXISTS_BUT_IS_FULL = "\nThe game with this name is full!\n";
+    public static final String INVALID_GAME_EXISTS_BUT_IS_PAUSED = "\nThe game with this name is paused!\n";
     public static final String INVALID_NO_GAMES_AVAILABLE = "\nThere are no pending games available at this time!\n";
 
-    public static final String INVALID_SAVE_GAME_DOES_NOT_EXIST = "\nNo saved game create by you with this name exists!\n";
+    public static final String INVALID_SAVED_GAME_NOT_YOURS =
+    """
+    
+    A pending game with this name exists, but it is a saved game that you were not a part of! 
+    Only users who were part of that game before it got saved can re-enter it! Find a different game!
+    
+    """;
+    public static final String INVALID_SAVE_GAME_DOES_NOT_EXIST = "\nNo saved game created by you with this name exists!\n";
 
     public static final String GAMES_LIST_EMPTY = "\nThere are currently no games!\n";
     public static final String GAMES_SAVED_EMPTY = "\nThere are no saved games that you have been a part of!\n";
@@ -76,17 +85,19 @@ public class ScreenUI {
     public static final String GAMES_LIST_HEADER_CREATOR = "CREATOR";
     public static final String GAMES_LIST_HEADER_STATUS = "STATUS";
     public static final String GAMES_LIST_HEADER_PLAYERS = "PLAYERS";
+    public static final String GAMES_LIST_HEADER_QUIT_STATUS = "QUIT STATUS";
     public static final List<String> GAMES_LIST_HEADERS = List.of(
         GAMES_LIST_HEADER_NAME,
         GAMES_LIST_HEADER_CREATOR,
         GAMES_LIST_HEADER_STATUS,
-        GAMES_LIST_HEADER_PLAYERS
+        GAMES_LIST_HEADER_PLAYERS,
+        GAMES_LIST_HEADER_QUIT_STATUS
     );
 
     public static final String GAMES_LIST_HEADER_SEPARATOR = "-";
-    public static final String GAMES_LIST_HEADER_SEPARATOR_LINE_TEMPLATE = "|%s+%s+%s+%s|";
+    public static final String GAMES_LIST_HEADER_SEPARATOR_LINE_TEMPLATE = "|%s+%s+%s+%s+%s|";
     public static final String GAMES_LIST_PLAYERS = "%s/%s";
-    public static final String GAMES_LIST_ROW_TEMPLATE = "| %s | %s | %s | %s |";
+    public static final String GAMES_LIST_ROW_TEMPLATE = "| %s | %s | %s | %s | %s |";
 
     public static final String SUCCESSFUL_LOGOUT = "\nSuccessful logout!\n";
 
@@ -238,17 +249,24 @@ public class ScreenUI {
             return emptyListMessage;
         }
 
+        //Order the games by game Status
+        games = games.stream().sorted(Comparator.comparingInt(f -> f.status.ordinal())).toList();
+
         Function<Game, String> nameMapper = (Game x) -> x.name;
         Function<Game, String> creatorMapper = (Game x) -> x.players.get(0).user.username();
         Function<Game, String> statusMapper = (Game x) -> x.status.status();
         Function<Game, String> playersMapper = (Game x) -> String.format(GAMES_LIST_PLAYERS,
-            x.players.stream().filter(y -> y.quitStatus == QuitStatus.NONE).count(), x.playerCapacity);
+            x.players.stream().filter(
+                y -> y.quitStatus == QuitStatus.NONE || x.status == GameStatus.IN_PROGRESS
+            ).count(), x.playerCapacity);
+        Function<Game, String> quitStatusMapper = (Game x) -> x.quitStatus.statusName();
 
         List<Function<Game, String>> fieldMappers = List.of(
             nameMapper,
             creatorMapper,
             statusMapper,
-            playersMapper
+            playersMapper,
+            quitStatusMapper
         );
 
         List<Integer> longestFields = new ArrayList<>();

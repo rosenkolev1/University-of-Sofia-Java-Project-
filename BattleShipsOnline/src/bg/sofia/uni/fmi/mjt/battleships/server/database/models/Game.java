@@ -7,12 +7,15 @@ public class Game {
 
     public final long id;
     public String name;
-    public int playerCapacity;
     public int turn;
     public GameStatus status;
     public QuitStatus quitStatus;
+    private final boolean randomizedBoards;
+    public int playerCapacity;
+
     public List<Player> players;
-    private boolean randomizedBoards;
+    public List<PlayerTurn> turnHistory;
+
 
     public Game(long id, String name, int playerCapacity, GameStatus status, boolean randomizedBoards, List<User> users) {
         this.id = id;
@@ -23,6 +26,7 @@ public class Game {
         this.turn = 0;
         this.quitStatus = QuitStatus.NONE;
 
+        this.turnHistory = new ArrayList<>();
         this.players = new ArrayList<>();
 
         for (var user : users) {
@@ -101,12 +105,13 @@ public class Game {
         return alivePlayer.size() == 1;
     }
 
-    public void hitTile(Player player, TilePos pos) {
-        player.board.hitTile(pos);
+    public void hitTile(Player attacker, Player defender, TilePos pos) {
+        defender.board.hitTile(pos);
+        this.turnHistory.add(new PlayerTurn(attacker.user.username(), defender.board.getTilePosAsString(pos)));
         increaseTurn();
 
-        if (player.board.allShipsHaveSunk()) {
-            player.status = PlayerStatus.DEAD;
+        if (defender.board.allShipsHaveSunk()) {
+            defender.status = PlayerStatus.DEAD;
 
             if (hasEnded()) {
                 this.status = GameStatus.ENDED;
@@ -114,9 +119,10 @@ public class Game {
         }
     }
 
-    public void hitTile(String playerName, TilePos pos) {
-        var player = this.getPlayer(playerName);
-        hitTile(player, pos);
+    public void hitTile(String attackerName, String defenderName, TilePos pos) {
+        var attacker = this.getPlayer(attackerName);
+        var defender = this.getPlayer(defenderName);
+        hitTile(attacker, defender, pos);
     }
 
     public Player getPlayer(String playerName) {

@@ -1,10 +1,5 @@
 package bg.sofia.uni.fmi.mjt.battleships.common;
 
-import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandExecutor;
-
-import java.util.List;
-import java.util.Map;
-
 public class ScreenInfo {
     public static final String GUEST_HOME_SCREEN = "guestHomeScreen";
     public static final String REGISTER_SCREEN = "registerScreen";

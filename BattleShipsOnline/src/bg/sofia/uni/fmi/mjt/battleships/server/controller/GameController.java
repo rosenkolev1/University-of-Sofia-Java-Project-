@@ -68,7 +68,8 @@ public class GameController extends Controller {
             //Delete game or save game depending on the quitStatus
             if (quitStatus == QuitStatus.ABANDON) {
                 game.status = GameStatus.ENDED;
-                db.gameTable.deleteGameFile(game);
+                db.gameTable.saveGameFile(game);
+//                db.gameTable.deleteGameFile(game);
             }
             else if (quitStatus == QuitStatus.SAVE_AND_QUIT) {
                 game.status = GameStatus.PAUSED;
@@ -173,7 +174,7 @@ public class GameController extends Controller {
         if (targetTileString.equals("all")) {
             targetTileString = "A1";
             for (var tile : enemyBoard.board()) {
-                game.hitTile(enemyPlayer, tile.pos());
+                game.hitTile(curPlayer, enemyPlayer, tile.pos());
             }
         }
         //Validate that the argument is a valid tile
@@ -191,7 +192,7 @@ public class GameController extends Controller {
 
         var oldTargetTileStatus = targetTile.status;
 
-        game.hitTile(enemyName, tilePos);
+        game.hitTile(curUsername, enemyName, tilePos);
 
         var targetShip = enemyBoard.getShipForTile(tilePos);
 

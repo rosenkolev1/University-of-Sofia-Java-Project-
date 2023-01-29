@@ -1,13 +1,5 @@
 import bg.sofia.uni.fmi.mjt.battleships.server.Server;
-import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandExecutor;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.Game;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.GameStatus;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.models.User;
-import com.google.gson.Gson;
-import org.junit.jupiter.api.Assertions;
-
-import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
@@ -37,8 +29,7 @@ public class Main {
 //        Assertions.assertIterableEquals(game.players.get(0).board.ships(), gameFromJson.players.get(0).board.ships());
 //        Assertions.assertIterableEquals(game.players.get(1).board.ships(), gameFromJson.players.get(1).board.ships());
 
-        var commandExecutor = new CommandExecutor();
-        var server = new Server(7777, commandExecutor, database);
+        var server = new Server(7777, database);
 
         server.start();
     }

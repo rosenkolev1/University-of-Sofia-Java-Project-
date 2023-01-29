@@ -129,6 +129,12 @@ public class Board {
         return true;
     }
 
+    public String getTilePosAsString(TilePos pos) {
+        var rank = pos.rank().toString();
+        var file = String.valueOf(pos.file());
+
+        return rank + file;
+    }
     public TilePos getTilePosFrom(String tilePos) {
         var rank = BoardRank.getBoardRankFrom(String.valueOf(tilePos.charAt(0)));
         var file = Integer.valueOf(tilePos.substring(1));

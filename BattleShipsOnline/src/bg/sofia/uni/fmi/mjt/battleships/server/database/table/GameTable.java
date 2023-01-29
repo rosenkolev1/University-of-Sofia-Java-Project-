@@ -80,8 +80,6 @@ public class GameTable extends Table {
     }
 
     public void deleteGameFile(Game game) {
-//        games.remove(game);
-
         //Check if game already exists in the file
         var entryInfo = getGameEntryInfo(game);
         entryInfo.entry = null;

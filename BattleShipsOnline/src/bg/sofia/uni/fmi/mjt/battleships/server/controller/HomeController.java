@@ -131,6 +131,7 @@ public class HomeController extends Controller {
 
         //If there is no gameName, then choose a random game to join
         if (gameName == null) {
+
             var games = db.gameTable.games.stream().filter(x ->
                 x.status == GameStatus.PENDING &&
                 (x.quitStatus == QuitStatus.NONE || x.playerBelongsToSavedGame(curUsername))).toList();
@@ -156,6 +157,17 @@ public class HomeController extends Controller {
                 return serverResponse;
             }
 
+            var savedGameWithNameExists = db.gameTable.games.stream().anyMatch(x ->
+                x.status == GameStatus.PENDING && x.quitStatus == QuitStatus.SAVE_AND_QUIT);
+
+            var notSavedGameWithNameExists = db.gameTable.games.stream().anyMatch(x ->
+                x.status == GameStatus.PENDING && x.quitStatus == QuitStatus.NONE);
+
+            if (savedGameWithNameExists && !notSavedGameWithNameExists) {
+                serverResponse = invalidCommandResponse(ScreenUI.INVALID_SAVED_GAME_NOT_YOURS, request);
+                return serverResponse;
+            }
+
             var game = db.gameTable.games
                 .stream().filter(x ->
                     x.name.equals(gameName) &&
@@ -167,7 +179,15 @@ public class HomeController extends Controller {
             if (db.gameTable.games
                 .stream().anyMatch(x -> x.name.equals(gameName) && x.status == GameStatus.IN_PROGRESS)) {
 
-                serverResponse = invalidCommandResponse(ScreenUI.INVALID_GAME_EXISTS_BUT_NOT_PENDING, request);
+                serverResponse = invalidCommandResponse(ScreenUI.INVALID_GAME_EXISTS_BUT_IS_FULL, request);
+                return serverResponse;
+            }
+
+            var pausedGameWithThisNameExists = db.gameTable.games.stream().anyMatch(x ->
+                x.status == GameStatus.PAUSED);
+
+            if (pausedGameWithThisNameExists) {
+                serverResponse = invalidCommandResponse(ScreenUI.INVALID_GAME_EXISTS_BUT_IS_PAUSED, request);
                 return serverResponse;
             }
 
@@ -271,6 +291,13 @@ public class HomeController extends Controller {
             for (int i = 0; i < game.players.size(); i++) {
                 var player = game.players.get(i);
                 var playerCookie = new PlayerCookie(player.user.username(), i);
+
+                //Add all the previous moves from the turn history of the game for this player
+                var playerPreviousMoves = game.turnHistory.stream()
+                    .filter(x -> x.playerName().equals(player.user.username()))
+                    .map(x -> x.turn()).toList();
+
+                playerCookie.moves = playerPreviousMoves;
 
                 if (playerCookie.player.equals(curUser.username())) {
                     curPlayerCookie = playerCookie;

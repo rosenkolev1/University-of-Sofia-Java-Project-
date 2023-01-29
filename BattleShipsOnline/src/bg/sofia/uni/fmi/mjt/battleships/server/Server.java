@@ -1,7 +1,6 @@
 package bg.sofia.uni.fmi.mjt.battleships.server;
 
 import bg.sofia.uni.fmi.mjt.battleships.common.*;
-import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandExecutor;
 import bg.sofia.uni.fmi.mjt.battleships.server.controller.GameController;
 import bg.sofia.uni.fmi.mjt.battleships.server.controller.GuestHomeController;
 import bg.sofia.uni.fmi.mjt.battleships.server.controller.HomeController;
@@ -28,8 +27,6 @@ public class Server {
     //This string signifies that there is more to read from the socket channel than there is space for in the buffer
     private static final String BUFFER_CONTINUES_STRING = "#c";
 
-    private final CommandExecutor commandExecutor;
-
     private final int port;
     private final Gson gson;
 
@@ -44,9 +41,8 @@ public class Server {
     private final GuestHomeController guestHomeController;
     private final GameController gameController;
 
-    public Server(int port, CommandExecutor commandExecutor, Database db) {
+    public Server(int port, Database db) {
         this.port = port;
-        this.commandExecutor = commandExecutor;
         this.db = db;
         this.gson = new Gson();
         this.userController = new UserController(db);

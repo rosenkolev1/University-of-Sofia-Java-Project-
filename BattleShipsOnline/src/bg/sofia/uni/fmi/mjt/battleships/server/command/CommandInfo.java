@@ -48,7 +48,7 @@ public class CommandInfo {
 
     public static final Map<String, ListCommandInfo> COMMAND_LIST_INFO_MAP = Map.of(
         CommandInfo.LIST_GAMES, new ListCommandInfo(
-            (Game x, ClientRequest request) -> x.status != GameStatus.ENDED,
+            (Game x, ClientRequest request) -> true, //x.status != GameStatus.ENDED,
             (List<Game> games) -> ScreenUI.listGames(games, ScreenUI.GAMES_LIST_EMPTY)),
 
         CommandInfo.SAVED_GAMES, new ListCommandInfo(

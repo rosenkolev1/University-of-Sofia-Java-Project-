@@ -82,37 +82,35 @@ public class ConsoleClient {
     }
 
     public ServerResponse guestHomeScreen() throws IOException {
-        var serverResponse = sendAndReceive();
-
-        this.cookies = serverResponse.cookies;
-
-        printMessage(serverResponse.message);
-
-        return serverResponse;
+        return sendAndReceiveDefaultHandler();
     }
 
     public ServerResponse registerScreen() throws IOException {
-        var serverResponse = sendAndReceive();
-
-        this.cookies = serverResponse.cookies;
-
-        printMessage(serverResponse.message);
-
-        return serverResponse;
+        return sendAndReceiveDefaultHandler();
     }
 
     public ServerResponse loginScreen() throws IOException {
-        var serverResponse = sendAndReceive();
-
-        this.cookies = serverResponse.cookies;
-
-        printMessage(serverResponse.message);
-
-        return serverResponse;
+        return sendAndReceiveDefaultHandler();
     }
 
     public ServerResponse homeScreen() throws IOException {
-        var serverResponse = sendAndReceive();
+        return sendAndReceiveDefaultHandler();
+    }
+
+    public ServerResponse gameScreen() throws IOException {
+        //Handler when it is this client's turn
+        if (cookies.game != null && cookies.game.turn == cookies.player.myTurn) {
+            return sendAndReceiveDefaultHandler();
+        }
+
+        //Handler when it is not this client's turn (or the game has not even started at all)
+        return receiveSignalDefaultHandler();
+    }
+
+    public ServerResponse receiveSignalDefaultHandler() throws IOException {
+        var serverResponseRaw = receiveFromServer(socketChannel);
+
+        var serverResponse = gson.fromJson(serverResponseRaw, ServerResponse.class);
 
         this.cookies = serverResponse.cookies;
 
@@ -121,57 +119,12 @@ public class ConsoleClient {
         return serverResponse;
     }
 
-    public ServerResponse gameScreen() throws IOException, InterruptedException {
-        ServerResponse serverResponse = null;
+    public ServerResponse sendAndReceiveDefaultHandler() throws IOException {
+        var serverResponse = sendAndReceive();
 
-        if (cookies.game == null) {
-            //Make this user sleep until another user joins the game
-            var serverResponseRaw = receiveFromServer(socketChannel);
+        this.cookies = serverResponse.cookies;
 
-            serverResponse = gson.fromJson(serverResponseRaw, ServerResponse.class);
-
-            this.cookies = serverResponse.cookies;
-
-            printMessage(serverResponse.message);
-        }
-        //Handler when it is this client's turn
-        else if (cookies.game.turn == cookies.player.myTurn) {
-            serverResponse = sendAndReceive();
-
-            this.cookies = serverResponse.cookies;
-
-            printMessage(serverResponse.message);
-        }
-        //Handler when it is not client's turn
-        else {
-            //Make this user sleep until another enemy makes a move
-            var serverResponseRaw = receiveFromServer(socketChannel);
-
-            serverResponse = gson.fromJson(serverResponseRaw, ServerResponse.class);
-
-            this.cookies.session = serverResponse.cookies.session;
-
-            //In this case, the game has been abandoned by all players
-            if (serverResponse.status == ResponseStatus.QUIT_GAME) {
-                this.cookies.game = null;
-                this.cookies.player = null;
-            }
-            //In this case, the abandon has been denied and the game is resuming
-            else if (serverResponse.status == ResponseStatus.RESUME_GAME) {
-                this.cookies = serverResponse.cookies;
-            }
-            //In this case the game has not ended
-            else if (serverResponse.cookies.game != null) {
-                this.cookies = serverResponse.cookies;
-            }
-            //In this case, the games has ended and our client has lost
-            else {
-                this.cookies.game = null;
-                this.cookies.player = null;
-            }
-
-            printMessage(serverResponse.message);
-        }
+        printMessage(serverResponse.message);
 
         return serverResponse;
     }

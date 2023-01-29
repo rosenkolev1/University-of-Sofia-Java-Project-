@@ -45,7 +45,7 @@ public class ScreenHandler {
         try {
             return client.gameScreen();
         }
-        catch (IOException | InterruptedException e) {
+        catch (IOException e) {
             throw new RuntimeException(e);
         }
     };

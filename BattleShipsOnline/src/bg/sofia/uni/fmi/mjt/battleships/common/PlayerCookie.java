@@ -5,23 +5,21 @@ import java.util.HashSet;
 import java.util.List;
 
 public class PlayerCookie {
-
-    //TODO: rename field "player" to "name"
-    public String player;
+    public String name;
     public final int myTurn;
     public List<String> moves;
     public int quitStatusCode;
 
-    public PlayerCookie(String player, int myTurn) {
-        this(player, myTurn, new ArrayList<>());
+    public PlayerCookie(String name, int myTurn) {
+        this(name, myTurn, new ArrayList<>());
     }
 
-    public PlayerCookie(String player, int myTurn, List<String> moves) {
-        this(player, myTurn, moves, 0);
+    public PlayerCookie(String name, int myTurn, List<String> moves) {
+        this(name, myTurn, moves, 0);
     }
 
-    public PlayerCookie(String player, int myTurn, List<String> moves, int quitStatusCode) {
-        this.player = player;
+    public PlayerCookie(String name, int myTurn, List<String> moves, int quitStatusCode) {
+        this.name = name;
         this.myTurn = myTurn;
         this.moves = moves;
         this.quitStatusCode = quitStatusCode;
@@ -38,7 +36,7 @@ public class PlayerCookie {
             return false;
         }
 
-        return this.player.equals(castOther.player) &&
+        return this.name.equals(castOther.name) &&
             this.myTurn == castOther.myTurn &&
             this.quitStatusCode == castOther.quitStatusCode &&
             new HashSet<>(this.moves).containsAll(castOther.moves) &&

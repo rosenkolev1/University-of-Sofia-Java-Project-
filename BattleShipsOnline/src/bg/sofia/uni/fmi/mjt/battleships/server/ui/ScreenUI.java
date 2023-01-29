@@ -172,7 +172,7 @@ public class ScreenUI {
                 }
             }
             else {
-                return ScreenUI.enemyTurnPrompt(cookies.game.playersInfo.get(cookies.game.turn).player);
+                return ScreenUI.enemyTurnPrompt(cookies.game.playersInfo.get(cookies.game.turn).name);
             }
         }
     );
@@ -206,7 +206,7 @@ public class ScreenUI {
     public static String myTurnPrompt(List<PlayerCookie> enemyInfo) {
         return String.join("", enemyInfo.stream()
                 .filter(x -> x.moves != null && !x.moves.isEmpty())
-                .map(x -> String.format(GAME_ENEMY_LAST_TURN_TEMPLATE, x.player, x.moves.get(x.moves.size() - 1))).toList())
+                .map(x -> String.format(GAME_ENEMY_LAST_TURN_TEMPLATE, x.name, x.moves.get(x.moves.size() - 1))).toList())
             + GAME_MY_TURN;
     }
 

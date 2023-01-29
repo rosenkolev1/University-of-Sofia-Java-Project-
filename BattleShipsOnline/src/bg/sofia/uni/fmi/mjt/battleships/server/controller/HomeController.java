@@ -1,7 +1,6 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.controller;
 
 import bg.sofia.uni.fmi.mjt.battleships.common.*;
-import bg.sofia.uni.fmi.mjt.battleships.server.Server;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.Command;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 
@@ -16,7 +15,6 @@ import bg.sofia.uni.fmi.mjt.battleships.server.ui.ScreenUI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Predicate;
 
 public class HomeController extends Controller {
     private Database db;
@@ -299,7 +297,7 @@ public class HomeController extends Controller {
 
                 playerCookie.moves = playerPreviousMoves;
 
-                if (playerCookie.player.equals(curUser.username())) {
+                if (playerCookie.name.equals(curUser.username())) {
                     curPlayerCookie = playerCookie;
                 }
 
@@ -354,7 +352,7 @@ public class HomeController extends Controller {
 
         for (var enemy : enemyPlayers) {
             var playerCookie = playersCookies.stream()
-                .filter(x -> x.player.equals(enemy.user.username()))
+                .filter(x -> x.name.equals(enemy.user.username()))
                 .findFirst().orElse(null);
 
             var enemyClientCookies = new ClientState(

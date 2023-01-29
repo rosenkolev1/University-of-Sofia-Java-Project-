@@ -164,8 +164,8 @@ public class GameController extends Controller {
 
         var curUsername = request.cookies().session.username;
         var enemyName = request.cookies().game.playersInfo.stream()
-            .filter(x -> !x.player.equals(curUsername))
-            .findFirst().get().player;
+            .filter(x -> !x.name.equals(curUsername))
+            .findFirst().get().name;
 
         var enemyPlayer = game.getPlayer(enemyName);
         var enemyBoard = enemyPlayer.board;
@@ -205,16 +205,16 @@ public class GameController extends Controller {
         var playerHasLost = enemyPlayer.status == PlayerStatus.DEAD;
         var gameHasEnded = game.status == GameStatus.ENDED;
 
-        //Add the attacker's last move to the moves of the player cookie
+        //Add the attacker's last move to the moves of the name cookie
         var curPlayerCookie = request.cookies().game.playersInfo.stream()
-            .filter(x -> x.player.equals(curUsername)).findFirst().get();
+            .filter(x -> x.name.equals(curUsername)).findFirst().get();
 
         curPlayerCookie.moves.add(targetTileString);
 
         //Remove the dead players' from the game cookie
         if (playerHasLost) {
             request.cookies().game.playersInfo = request.cookies().game.playersInfo.stream()
-                .filter(x -> x.player.equals(enemyName)).toList();
+                .filter(x -> x.name.equals(enemyName)).toList();
         }
 
         List<ServerResponse> signals = createSignalResponsesUponHit(request, enemyName, targetTileString,
@@ -269,7 +269,7 @@ public class GameController extends Controller {
             .stream().filter(x -> x.name.equals(request.cookies().game.name) && x.status != GameStatus.ENDED).findFirst()
             .get();
 
-        var curPlayer = game.getPlayer(request.cookies().player.player);
+        var curPlayer = game.getPlayer(request.cookies().player.name);
 
         var quitStatus = game.players.stream()
             .map(x -> x.quitStatus)
@@ -340,13 +340,13 @@ public class GameController extends Controller {
         List<ServerResponse> signals = new ArrayList<>();
 
         var enemies = request.cookies().game.playersInfo.stream()
-            .filter(x -> !x.player.equals(request.cookies().session.username)).toList();
+            .filter(x -> !x.name.equals(request.cookies().session.username)).toList();
 
         for (var enemy : enemies) {
             ResponseStatus responseStatus = null;
 
             var cookies = new ClientState(
-                new SessionCookie(null , enemy.player),
+                new SessionCookie(null , enemy.name),
                 enemy,
                 null
             );
@@ -385,13 +385,13 @@ public class GameController extends Controller {
         List<ServerResponse> signals = new ArrayList<>();
 
         var enemies = request.cookies().game.playersInfo.stream()
-            .filter(x -> !x.player.equals(request.cookies().session.username)).toList();
+            .filter(x -> !x.name.equals(request.cookies().session.username)).toList();
 
         for (var enemy : enemies) {
             ResponseStatus responseStatus = ResponseStatus.RESUME_GAME;
 
             var cookies = new ClientState(
-                new SessionCookie(ScreenInfo.GAME_SCREEN , enemy.player),
+                new SessionCookie(ScreenInfo.GAME_SCREEN , enemy.name),
                 enemy,
                 new GameCookie(request.cookies().game)
             );
@@ -426,14 +426,14 @@ public class GameController extends Controller {
         List<ServerResponse> signals = new ArrayList<>();
 
         var enemies = request.cookies().game.playersInfo.stream()
-            .filter(x -> !x.player.equals(request.cookies().session.username)).toList();
+            .filter(x -> !x.name.equals(request.cookies().session.username)).toList();
 
         for (var enemy : enemies) {
-            var isDefenderPlayer = enemy.player.equals(enemyName);
+            var isDefenderPlayer = enemy.name.equals(enemyName);
 
             ResponseStatus responseStatus = null;
             var cookies = new ClientState(
-                new SessionCookie(null, enemy.player),
+                new SessionCookie(null, enemy.name),
                 enemy,
                 null
             );
@@ -452,7 +452,7 @@ public class GameController extends Controller {
                 responseStatus = ResponseStatus.FINISH_GAME;
             }
             else {
-                message = enemy.player.equals(enemyName) ?
+                message = enemy.name.equals(enemyName) ?
                     defenderMessage(tilePos, hasHitShip, hasSunkShip) :
                     new StringBuilder(ScreenUI.PLACEHOLDER);
 

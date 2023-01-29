@@ -3,8 +3,6 @@ package bg.sofia.uni.fmi.mjt.battleships.server.database.models;
 import java.util.*;
 
 public class Game {
-    //TODO: Add a list containing the history of all the moves maybe!
-
     public final long id;
     public String name;
     public int turn;

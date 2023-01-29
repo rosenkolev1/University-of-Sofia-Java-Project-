@@ -99,6 +99,9 @@ public class ScreenUI {
     public static final String GAMES_LIST_PLAYERS = "%s/%s";
     public static final String GAMES_LIST_ROW_TEMPLATE = "| %s | %s | %s | %s | %s |";
 
+    public static final String DELETE_GAME_SUCCESS = "\nThe given game has been deleted successfully\n";
+    public static final String INVALID_DELETE_GAME_DOES_NOT_EXISTS = "\nA paused game with this name that you have created does not exist!\n";
+
     public static final String SUCCESSFUL_LOGOUT = "\nSuccessful logout!\n";
 
     public static final String CURRENT_GAME_TEMPLATE = "\nCurrent game room: %s";

@@ -69,7 +69,6 @@ public class GameController extends Controller {
             if (quitStatus == QuitStatus.ABANDON) {
                 game.status = GameStatus.ENDED;
                 db.gameTable.saveGameFile(game);
-//                db.gameTable.deleteGameFile(game);
             }
             else if (quitStatus == QuitStatus.SAVE_AND_QUIT) {
                 game.status = GameStatus.PAUSED;
@@ -266,7 +265,8 @@ public class GameController extends Controller {
         var command = CommandCreator.newCommand(request.input());
 
         var game = db.gameTable.games
-            .stream().filter(x -> x.name.equals(request.cookies().game.name) && x.status != GameStatus.ENDED).findFirst()
+            .stream().filter(x -> x.name.equals(request.cookies().game.name) &&
+               !x.gameIsEndedOrDeleted()).findFirst()
             .get();
 
         var curPlayer = game.getPlayer(request.cookies().player.name);

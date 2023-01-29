@@ -65,6 +65,10 @@ public class Game {
         this.quitStatus = QuitStatus.NONE;
     }
 
+    public boolean gameIsEndedOrDeleted() {
+        return this.status == GameStatus.ENDED || this.status == GameStatus.DELETED;
+    }
+
     public boolean playerBelongsToSavedGame(String playerName) {
         return this.players.stream().anyMatch(x -> x.user.username().equals(playerName) && x.quitStatus == QuitStatus.SAVE_AND_QUIT);
     }

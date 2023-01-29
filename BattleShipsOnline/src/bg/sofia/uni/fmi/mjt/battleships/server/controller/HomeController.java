@@ -23,7 +23,7 @@ public class HomeController extends Controller {
         this.db = db;
     }
 
-    private ServerResponse validateCreateOrLoadGameArgument(Command command, ClientRequest request) {
+    private ServerResponse validateCommandWithGameArgument(Command command, ClientRequest request) {
         ServerResponse serverResponse = null;
 
         var args = command.arguments();
@@ -46,7 +46,7 @@ public class HomeController extends Controller {
     }
 
     private ServerResponse respondLoadGame(Command command, ClientRequest request) {
-        ServerResponse serverResponse = validateCreateOrLoadGameArgument(command, request);
+        ServerResponse serverResponse = validateCommandWithGameArgument(command, request);
 
         if (serverResponse != null) {
             return serverResponse;
@@ -70,7 +70,6 @@ public class HomeController extends Controller {
 
         var curUser = db.userTable.getUser(curUsername);
 
-//        var game = db.gameTable.createGame(gameName, 2, GameStatus.PENDING, true, List.of(curUser));
         var game = db.gameTable.games
             .stream().filter(x -> x.name.equals(gameName) && x.status == GameStatus.PAUSED).findFirst().get();
 
@@ -86,7 +85,7 @@ public class HomeController extends Controller {
     }
 
     private ServerResponse respondCreateGame(Command command, ClientRequest request) {
-        ServerResponse serverResponse = validateCreateOrLoadGameArgument(command, request);
+        ServerResponse serverResponse = validateCommandWithGameArgument(command, request);
 
         if (serverResponse != null) {
             return serverResponse;
@@ -96,7 +95,8 @@ public class HomeController extends Controller {
 
         //Validate that an unfinished game with the same name has not been created already
         if (db.gameTable.games.stream()
-            .anyMatch(x -> x.name.equals(gameName) && x.status != GameStatus.ENDED)) {
+            .anyMatch(x -> x.name.equals(gameName) &&
+                !x.gameIsEndedOrDeleted())) {
 
             serverResponse = invalidCommandResponse(ScreenUI.INVALID_GAME_ALREADY_EXISTS, request);
             return serverResponse;
@@ -155,13 +155,24 @@ public class HomeController extends Controller {
                 return serverResponse;
             }
 
-            var savedGameWithNameExists = db.gameTable.games.stream().anyMatch(x ->
-                x.status == GameStatus.PENDING && x.quitStatus == QuitStatus.SAVE_AND_QUIT);
+            var savedGameNotYours = db.gameTable.games
+                .stream()
+                .anyMatch(x ->
+                    x.name.equals(gameName) &&
+                    x.status == GameStatus.PENDING &&
+                    x.quitStatus == QuitStatus.SAVE_AND_QUIT &&
+                    !x.playerBelongsToSavedGame(curUsername)
+                );
 
-            var notSavedGameWithNameExists = db.gameTable.games.stream().anyMatch(x ->
-                x.status == GameStatus.PENDING && x.quitStatus == QuitStatus.NONE);
+            var notSavedGameWithNameExists = db.gameTable.games
+                .stream()
+                .anyMatch(x ->
+                    x.name.equals(gameName) &&
+                    x.status == GameStatus.PENDING &&
+                    x.quitStatus == QuitStatus.NONE
+                );
 
-            if (savedGameWithNameExists && !notSavedGameWithNameExists) {
+            if (savedGameNotYours && !notSavedGameWithNameExists) {
                 serverResponse = invalidCommandResponse(ScreenUI.INVALID_SAVED_GAME_NOT_YOURS, request);
                 return serverResponse;
             }
@@ -224,6 +235,41 @@ public class HomeController extends Controller {
         );
     }
 
+    private ServerResponse respondDeleteGame(Command command, ClientRequest request) {
+        ServerResponse serverResponse = validateCommandWithGameArgument(command, request);
+
+        if (serverResponse != null) {
+            return serverResponse;
+        }
+
+        var curUsername = request.cookies().session.username;
+        var gameName = command.arguments()[0];
+
+        var game = this.db.gameTable.games.stream()
+            .filter(x ->
+                x.name.equals(gameName) &&
+                x.status == GameStatus.PAUSED &&
+                x.players.get(0).user.username().equals(curUsername))
+            .findFirst().orElse(null);
+
+        if (game == null) {
+            serverResponse = invalidCommandResponse(ScreenUI.INVALID_DELETE_GAME_DOES_NOT_EXISTS, request);
+            return serverResponse;
+        }
+
+        //Set status and quitStatus of the game to Deleted and None
+        this.db.gameTable.deleteGame(game);
+        //Save the game as deleted in the table
+        this.db.gameTable.saveGameFile(game);
+
+        serverResponse = messageResponse(ServerResponse
+            .builder()
+            .setMessage(ScreenUI.DELETE_GAME_SUCCESS)
+            .setCookies(request.cookies()));
+
+        return serverResponse;
+    }
+
     public ServerResponse respond(ClientRequest request) {
         ServerResponse serverResponse = null;
 
@@ -242,10 +288,9 @@ public class HomeController extends Controller {
         else if (command.command().equals(CommandInfo.LOAD_GAME)) {
             serverResponse = respondLoadGame(command, request);
         }
-//        else if (command.command().equals(CommandInfo.DELETE_GAME)) {
-////            serverResponse = new ServerResponse(ResponseStatus.JOINING_GAME, null,
-////                ScreenUI.PLACEHOLDER, request.session());
-//        }
+        else if (command.command().equals(CommandInfo.DELETE_GAME)) {
+            serverResponse = respondDeleteGame(command, request);
+        }
         else if (request.input().equals(CommandInfo.LOG_OUT)) {
             request.cookies().session.username = null;
             serverResponse = redirectResponse(ScreenInfo.GUEST_HOME_SCREEN, request, ScreenUI.SUCCESSFUL_LOGOUT);

@@ -2,6 +2,7 @@ package bg.sofia.uni.fmi.mjt.battleships.server.database.table;
 
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.Game;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.GameStatus;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.QuitStatus;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.User;
 import com.google.gson.Gson;
 
@@ -77,6 +78,11 @@ public class GameTable extends Table {
 
     public void addGame(Game game) {
         this.games.add(game);
+    }
+
+    public void deleteGame(Game game) {
+        game.status = GameStatus.DELETED;
+        game.quitStatus = QuitStatus.NONE;
     }
 
     public void deleteGameFile(Game game) {

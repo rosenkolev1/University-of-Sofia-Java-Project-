@@ -41,7 +41,8 @@ public class Game {
     }
 
     private boolean hasBeenQuit(QuitStatus quitStatus) {
-        for (var player : players) {
+        //Make the check only for the players that are still alive
+        for (var player : alivePlayers()) {
             if (player.quitStatus != quitStatus) {
                 return false;
             }
@@ -62,6 +63,11 @@ public class Game {
         while (this.players.get(this.turn).status == PlayerStatus.DEAD);
     }
 
+    public List<Player> alivePlayers() {
+        var alivePlayers = players.stream().filter(x -> x.status == PlayerStatus.ALIVE).toList();
+        return alivePlayers;
+    }
+
     public void quitGame(Player player, QuitStatus quitStatus) {
         player.quitStatus = quitStatus;
         increaseTurn();
@@ -76,16 +82,23 @@ public class Game {
         this.quitStatus = QuitStatus.NONE;
     }
 
+    public Player gameCreator() {
+        return this.alivePlayers().get(0);
+    }
+
     public boolean gameIsEndedOrDeleted() {
         return this.status == GameStatus.ENDED || this.status == GameStatus.DELETED;
     }
 
     public boolean playerBelongsToSavedGame(String playerName) {
-        return this.players.stream().anyMatch(x -> x.user.username().equals(playerName) && x.quitStatus == QuitStatus.SAVE_AND_QUIT);
+        return this.players.stream().anyMatch(x ->
+            x.user.username().equals(playerName) &&
+            x.status == PlayerStatus.ALIVE &&
+            x.quitStatus == QuitStatus.SAVE_AND_QUIT );
     }
 
     public boolean savedGameIsResumed() {
-        for (var gamePlayer : players) {
+        for (var gamePlayer : alivePlayers()) {
             if (gamePlayer.quitStatus != QuitStatus.NONE) {
                 return false;
             }
@@ -113,9 +126,7 @@ public class Game {
     }
 
     private boolean hasEnded() {
-        var alivePlayer = this.players.stream().filter(x -> x.status == PlayerStatus.ALIVE).toList();
-
-        return alivePlayer.size() == 1;
+        return alivePlayers().size() == 1;
     }
 
     public void hitTile(Player attacker, Player defender, TilePos pos) {

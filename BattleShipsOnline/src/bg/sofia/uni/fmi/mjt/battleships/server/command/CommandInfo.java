@@ -39,7 +39,7 @@ public class CommandInfo {
     public static final String DELETE_GAME_VERBOSE = "delete-game " + GAME_NAME_ARG;
     public static final String DELETE_GAME = "delete-game";
 
-    public static final String GAME_HIT_VERBOSE = "hit <rank><file>";
+    public static final String GAME_HIT_VERBOSE = "hit <rank><file> [<username>] // Username is accepted only when the game has more than 2 players!";
     public static final String GAME_HIT = "hit";
     public static final String GAME_ABANDON = "abandon";
     public static final String GAME_SAVE_AND_QUIT = "sq";
@@ -53,7 +53,7 @@ public class CommandInfo {
             (Game x, ClientRequest request) ->
                 (x.status == GameStatus.PAUSED || (x.status == GameStatus.PENDING && x.quitStatus == QuitStatus.SAVE_AND_QUIT))
                     &&
-                x.players.stream().map(y -> y.user.username()).anyMatch(y -> y.equals(request.cookies().session.username)),
+                x.alivePlayers().stream().anyMatch(y -> y.user.username().equals(request.cookies().session.username)),
             (List<Game> games) -> ScreenUI.listGames(games, ScreenUI.GAMES_SAVED_EMPTY))
         );
 

@@ -119,6 +119,7 @@ public class ScreenUI {
     public static final String GAME_MY_TURN = "\nIt's your turn now! Enter your turn:";
     public static final String GAME_ENEMY_TURN_TEMPLATE = "\nWaiting for %s's turn now!";
 
+    public static final String INVALID_GAME_HIT_TARGET_PLAYER_DOES_NOT_EXIST = "\nThe target player does not exist!\n";
     public static final String INVALID_GAME_HIT_TILE_TEMPLATE =
         """
 
@@ -141,6 +142,7 @@ public class ScreenUI {
     public static final String GAME_WITNESS_HIT_MISSED_TEMPLATE = "\n%s's attack on tile \"%s\" has missed! -_- \n";
     public static final String GAME_WITNESS_SHIP_HIT_TEMPLATE = "\n%s's attack on tile \"%s\" has hit a ship! 0_o \n";
     public static final String GAME_WITNESS_SHIP_SUNK_TEMPLATE = "\n%s's attack on tile \"%s\" has hit a ship and that ship has sunk! 0_0 \n";
+    public static final String GAME_WITNESS_PLAYER_DEAD_TEMPLATE = "%s has slain \"%s\" (0)_(0) \n";
 
     public static final String GAME_YOUR_BOARD = "YOUR BOARD\n";
     public static final String GAME_ENEMY_BOARD = "ENEMY BOARD\n";
@@ -268,7 +270,8 @@ public class ScreenUI {
         return message;
     }
 
-    public static StringBuilder witnessMessage(String attacker, String defender, String tilePos, boolean hasHitShip, boolean hasSunkShip) {
+    public static StringBuilder witnessMessage(String attacker, String defender, String tilePos,
+                                               boolean hasHitShip, boolean hasSunkShip, boolean defenderIsDead) {
         //TODO: Right now, if the game has more than 2 players, player A will be able to tell on which tiles player B has hit player C.
         StringBuilder message = new StringBuilder(String.format(ScreenUI.GAME_WITNESS_ATTACK_TEMPLATE, attacker, defender));
 
@@ -280,6 +283,9 @@ public class ScreenUI {
         }
         else if (hasSunkShip) {
             message.append(String.format(ScreenUI.GAME_WITNESS_SHIP_SUNK_TEMPLATE, attacker, tilePos));
+        }
+        if (defenderIsDead) {
+            message.append(String.format(ScreenUI.GAME_WITNESS_PLAYER_DEAD_TEMPLATE, attacker, defender));
         }
 
         return message;
@@ -335,12 +341,20 @@ public class ScreenUI {
         games = games.stream().sorted(Comparator.comparingInt(f -> f.status.ordinal())).toList();
 
         Function<Game, String> nameMapper = (Game x) -> x.name;
-        Function<Game, String> creatorMapper = (Game x) -> x.players.get(0).user.username();
+        Function<Game, String> creatorMapper = (Game x) -> x.gameCreator().user.username();
         Function<Game, String> statusMapper = (Game x) -> x.status.status();
-        Function<Game, String> playersMapper = (Game x) -> String.format(GAMES_LIST_PLAYERS,
-            x.players.stream().filter(
-                y -> y.quitStatus == QuitStatus.NONE || x.status == GameStatus.IN_PROGRESS
-            ).count(), x.playerCapacity);
+
+        Function<Game, String> playersMapper = (Game x) -> {
+            var playersInsideGameCount =  x.alivePlayers()
+                .stream()
+                .filter(y -> y.quitStatus == QuitStatus.NONE || x.status == GameStatus.IN_PROGRESS)
+                .count();
+
+            var maxPlayersOfGame = x.players.size() == x.playerCapacity  ? x.alivePlayers().size() : x.playerCapacity;
+
+            return String.format(GAMES_LIST_PLAYERS, playersInsideGameCount, maxPlayersOfGame);
+        };
+
         Function<Game, String> quitStatusMapper = (Game x) -> x.quitStatus.statusName();
 
         List<Function<Game, String>> fieldMappers = List.of(

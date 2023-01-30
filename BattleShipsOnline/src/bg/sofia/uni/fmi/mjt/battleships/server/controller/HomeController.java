@@ -9,6 +9,7 @@ import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.Game;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.GameStatus;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.QuitStatus;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.PlayerStatus;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.user.User;
 import bg.sofia.uni.fmi.mjt.battleships.server.ui.ScreenUI;
 
@@ -61,7 +62,7 @@ public class HomeController extends Controller {
             .anyMatch(x ->
                 x.name.equals(gameName) &&
                 x.status == GameStatus.PAUSED &&
-                x.players.get(0).user.username().equals(curUsername)
+                x.gameCreator().user.username().equals(curUsername)
             )) {
 
             serverResponse = invalidCommandResponse(ScreenUI.INVALID_SAVE_GAME_DOES_NOT_EXIST, request);
@@ -250,7 +251,7 @@ public class HomeController extends Controller {
             .filter(x ->
                 x.name.equals(gameName) &&
                 x.status == GameStatus.PAUSED &&
-                x.players.get(0).user.username().equals(curUsername))
+                x.gameCreator().user.username().equals(curUsername))
             .findFirst().orElse(null);
 
         if (game == null) {
@@ -334,14 +335,14 @@ public class HomeController extends Controller {
 
             for (int i = 0; i < game.players.size(); i++) {
                 var player = game.players.get(i);
-                var playerCookie = new PlayerCookie(player.user.username(), i);
 
                 //Add all the previous moves from the turn history of the game for this player
                 var playerPreviousMoves = game.turnHistory.stream()
                     .filter(x -> x.playerName().equals(player.user.username()))
                     .map(x -> x.turn()).toList();
 
-                playerCookie.moves = playerPreviousMoves;
+                var playerCookie = new PlayerCookie(player.user.username(), i,
+                    playerPreviousMoves, player.status.statusCode(), player.quitStatus.statusCode());
 
                 if (playerCookie.name.equals(curUser.username())) {
                     curPlayerCookie = playerCookie;
@@ -394,7 +395,9 @@ public class HomeController extends Controller {
     private List<ServerResponse> createSignalResponsesUponJoin(Game game, List<PlayerCookie> playersCookies, User curUser) {
         List<ServerResponse> signals = new ArrayList<>();
 
-        var enemyPlayers = game.players.stream().filter(x -> !x.user.username().equals(curUser.username())).toList();
+        var enemyPlayers = game.players.stream().filter(
+            x -> x.status == PlayerStatus.ALIVE &&
+                !x.user.username().equals(curUser.username())).toList();
 
         for (var enemy : enemyPlayers) {
             var playerCookie = playersCookies.stream()

@@ -24,7 +24,7 @@ public class HomeController extends Controller {
         this.db = db;
     }
 
-    private ServerResponse validateCommandWithGameArgument(Command command, ClientRequest request) {
+    private ServerResponse validateCommandWithSingleArgumentGame(Command command, ClientRequest request) {
         ServerResponse serverResponse = null;
 
         var args = command.arguments();
@@ -47,7 +47,7 @@ public class HomeController extends Controller {
     }
 
     private ServerResponse respondLoadGame(Command command, ClientRequest request) {
-        ServerResponse serverResponse = validateCommandWithGameArgument(command, request);
+        ServerResponse serverResponse = validateCommandWithSingleArgumentGame(command, request);
 
         if (serverResponse != null) {
             return serverResponse;
@@ -86,13 +86,32 @@ public class HomeController extends Controller {
     }
 
     private ServerResponse respondCreateGame(Command command, ClientRequest request) {
-        ServerResponse serverResponse = validateCommandWithGameArgument(command, request);
+        ServerResponse serverResponse = null;
 
-        if (serverResponse != null) {
+        var args = command.arguments();
+
+        //Validate arguments
+        if (args.length < 1 || args.length > 2) {
+            serverResponse = invalidCommandResponse(request);
             return serverResponse;
         }
 
-        var gameName = command.arguments()[0];
+        var gameName = args[0];
+
+        //Validate that the game name is valid
+        if (gameName.isBlank()) {
+            serverResponse = invalidCommandResponse(ScreenUI.INVALID_GAME_NAME_NULL_EMPTY_BLANK, request);
+            return serverResponse;
+        }
+
+        var playersCountArg = args.length == 2 ? args[1] : String.valueOf(Game.PLAYERS_CAPACITY_DEFAULT);
+
+        if (!playersCountArg.matches("-?\\d+(\\.\\d+)?")) {
+            serverResponse = invalidCommandResponse(ScreenUI.INVALID_CREATE_GAME_INVALID_PLAYERS_COUNT, request);
+            return serverResponse;
+        }
+
+        var playersCount = Integer.valueOf(playersCountArg);
 
         //Validate that an unfinished game with the same name has not been created already
         if (db.gameTable.games.stream()
@@ -105,7 +124,7 @@ public class HomeController extends Controller {
 
         var curUser = db.userTable.getUser(request.cookies().session.username);
 
-        var game = db.gameTable.createGame(gameName, 3, GameStatus.PENDING, true, List.of(curUser));
+        var game = db.gameTable.createGame(gameName, playersCount, GameStatus.PENDING, true, List.of(curUser));
 
         db.gameTable.addGame(game);
 
@@ -145,8 +164,6 @@ public class HomeController extends Controller {
             var gameIndex = random.nextInt(0, games.size());
 
             var chosenGame = games.get(gameIndex);
-
-            var isSavedGame = chosenGame.quitStatus == QuitStatus.SAVE_AND_QUIT;
 
             return joinGameResponse(request, chosenGame);
         }
@@ -238,7 +255,7 @@ public class HomeController extends Controller {
     }
 
     private ServerResponse respondDeleteGame(Command command, ClientRequest request) {
-        ServerResponse serverResponse = validateCommandWithGameArgument(command, request);
+        ServerResponse serverResponse = validateCommandWithSingleArgumentGame(command, request);
 
         if (serverResponse != null) {
             return serverResponse;
@@ -353,7 +370,7 @@ public class HomeController extends Controller {
 
             var curClientGameCookie = new GameCookie(game.name, game.turn, playersCookies);
 
-            List<ServerResponse> signals = createSignalResponsesUponJoin(game, playersCookies, curUser);
+            List<ServerResponse> signals = createSignalResponsesUponJoinAndStartGame(game, playersCookies, curUser);
 
             request.cookies().player = curPlayerCookie;
             request.cookies().game = curClientGameCookie;
@@ -365,24 +382,7 @@ public class HomeController extends Controller {
             return serverResponse;
         }
         else {
-            var enemies = game.players
-                .stream().filter(x -> !x.user.username().equals(curUser.username()))
-                .toList();
-
-            List<ServerResponse> signals = new ArrayList<>();
-
-            for (var enemy : enemies) {
-                var enemyResponseMessage = ScreenUI.GAME_JOINED_OPPONENT + ScreenUI.GAME_PENDING_PROMPT;
-
-                var enemySignalResponse = messageResponse(
-                    ServerResponse
-                        .builder()
-                        .setMessage(enemyResponseMessage)
-                        .setCookies(new ClientState(new SessionCookie(ScreenInfo.GAME_SCREEN, enemy.user.username()), null, null))
-                );
-
-                signals.add(enemySignalResponse);
-            }
+            List<ServerResponse> signals = createSignalResponsesUponJoinGame(game, curUser);
 
             var serverResponse = redirectResponse(ScreenInfo.GAME_SCREEN, request,
                 ScreenUI.gameJoined(game.name) + ScreenUI.GAME_PENDING_PROMPT,
@@ -392,7 +392,33 @@ public class HomeController extends Controller {
         }
     }
 
-    private List<ServerResponse> createSignalResponsesUponJoin(Game game, List<PlayerCookie> playersCookies, User curUser) {
+    private List<ServerResponse> createSignalResponsesUponJoinGame(Game game, User curUser) {
+        List<ServerResponse> signals = new ArrayList<>();
+
+        //Send a messaged only to the enemies who have already joined the game before you
+        var enemies = game.alivePlayers()
+            .stream().filter(x ->
+                x.quitStatus == QuitStatus.NONE &&
+                    !x.user.username().equals(curUser.username()))
+            .toList();
+
+        for (var enemy : enemies) {
+            var enemyResponseMessage = ScreenUI.opponentJoinedGame(curUser.username()) + ScreenUI.GAME_PENDING_PROMPT;
+
+            var enemySignalResponse = messageResponse(
+                ServerResponse
+                    .builder()
+                    .setMessage(enemyResponseMessage)
+                    .setCookies(new ClientState(new SessionCookie(ScreenInfo.GAME_SCREEN, enemy.user.username()), null, null))
+            );
+
+            signals.add(enemySignalResponse);
+        }
+
+        return signals;
+    }
+
+    private List<ServerResponse> createSignalResponsesUponJoinAndStartGame(Game game, List<PlayerCookie> playersCookies, User curUser) {
         List<ServerResponse> signals = new ArrayList<>();
 
         var enemyPlayers = game.players.stream().filter(
@@ -410,7 +436,7 @@ public class HomeController extends Controller {
                 new GameCookie(game.name, game.turn, playersCookies)
             );
 
-            var responseMessage = ScreenUI.GAME_JOINED_OPPONENT + ScreenUI.GAME_FILLED + ScreenUI.GAME_STARTING;
+            var responseMessage = ScreenUI.opponentJoinedGame(curUser.username()) + ScreenUI.GAME_FILLED + ScreenUI.GAME_STARTING;
 
             var signalResponse = messageResponse(
                 ServerResponse

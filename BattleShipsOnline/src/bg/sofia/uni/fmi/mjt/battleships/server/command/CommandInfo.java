@@ -25,18 +25,15 @@ public class CommandInfo {
     public static final String LOGIN_CREDENTIALS = "<username> <password>";
 
     public static final String LOG_OUT = "logout";
-
-    public static final String GAME_NAME_ARG = "<game-name>";
-
-    public static final String CREATE_GAME_VERBOSE = "create-game " + GAME_NAME_ARG;
+    public static final String CREATE_GAME_VERBOSE = "create-game <game-name> [<players-count>] // Default is 2";
     public static final String CREATE_GAME = "create-game";
     public static final String LIST_GAMES = "list-games";
-    public static final String JOIN_GAME_VERBOSE = "join-game [" + GAME_NAME_ARG + "]";
+    public static final String JOIN_GAME_VERBOSE = "join-game [<game-name>]";
     public static final String JOIN_GAME = "join-game";
     public static final String SAVED_GAMES = "saved-games";
-    public static final String LOAD_GAME_VERBOSE = "load-game " + GAME_NAME_ARG;
+    public static final String LOAD_GAME_VERBOSE = "load-game <game-name>";
     public static final String LOAD_GAME = "load-game";
-    public static final String DELETE_GAME_VERBOSE = "delete-game " + GAME_NAME_ARG;
+    public static final String DELETE_GAME_VERBOSE = "delete-game <game-name>";
     public static final String DELETE_GAME = "delete-game";
 
     public static final String GAME_HIT_VERBOSE = "hit <rank><file> [<username>] // Username is accepted only when the game has more than 2 players!";

@@ -66,6 +66,7 @@ public class ScreenUI {
 
     public static final String HOME_PROMPT = "\nHello %s! You can start playing!";
 
+    public static final String INVALID_CREATE_GAME_INVALID_PLAYERS_COUNT = "\nThe given player count for the game is invalid!\n";
     public static final String INVALID_GAME_NAME_NULL_EMPTY_BLANK = "\nInvalid name! The name of the game cannot be null, empty or blank!\n";
     public static final String INVALID_GAME_ALREADY_EXISTS = "\nA game with this name already exists! Choose a different name!\n";
     public static final String INVALID_GAME_DOES_NOT_EXIST = "\nA pending game with this name does not exist!\n";
@@ -83,7 +84,7 @@ public class ScreenUI {
     public static final String INVALID_SAVE_GAME_DOES_NOT_EXIST = "\nNo saved game created by you with this name exists!\n";
 
     public static final String GAMES_LIST_EMPTY = "\nThere are currently no games!\n";
-    public static final String GAMES_SAVED_EMPTY = "\nThere are no saved games that you have been a part of!\n";
+    public static final String GAMES_SAVED_EMPTY = "\nThere are no saved games that you can join!\n";
 
     public static final String GAMES_LIST_HEADER_NAME = "NAME";
     public static final String GAMES_LIST_HEADER_CREATOR = "CREATOR";
@@ -110,12 +111,13 @@ public class ScreenUI {
 
     public static final String CURRENT_GAME_TEMPLATE = "\nCurrent game room: %s";
     public static final String GAME_PENDING_PROMPT = "\nCurrently waiting for the room to fill up fully...\n";
-    public static final String GAME_JOINED_OPPONENT = "\nAn opponent has joined the game!";
+    public static final String GAME_JOINED_OPPONENT = "\n%s has joined the game!";
     public static final String GAME_FILLED = "\nAll the opponents have joined!";
     public static final String GAME_STARTING = "\nGame is starting...\n";
     public static final String GAME_JOINED_TEMPLATE = "\nJoined game \"%s\"";
 
     public static final String GAME_ENEMY_LAST_TURN_TEMPLATE = "\n%s's last turn: %s";
+    public static final String GAME_MY_TURN_POSSIBLE_OPPONENTS = "\nYour opponents are: ";
     public static final String GAME_MY_TURN = "\nIt's your turn now! Enter your turn:";
     public static final String GAME_ENEMY_TURN_TEMPLATE = "\nWaiting for %s's turn now!";
 
@@ -184,7 +186,7 @@ public class ScreenUI {
                     return quitGameUI.gameMyTurnQuitPrompt();
                 }
                 else {
-                    return ScreenUI.myTurnPrompt(cookies.game.playersInfo);
+                    return ScreenUI.myTurnPrompt(cookies.game.playersInfo, cookies.player.name);
                 }
             }
             else {
@@ -192,6 +194,10 @@ public class ScreenUI {
             }
         }
     );
+
+    public static String opponentJoinedGame(String opponentName) {
+        return String.format(ScreenUI.GAME_JOINED_OPPONENT, opponentName);
+    }
 
     public static String enterCommandPrompt(String... commands) {
         if (commands.length > 0) {
@@ -220,14 +226,26 @@ public class ScreenUI {
         return res;
     }
 
-    public static String myTurnPrompt(List<PlayerCookie> enemyInfo) {
-        return String.join("", enemyInfo.stream()
+    public static String myTurnPrompt(List<PlayerCookie> enemyInfo, String currentPlayer) {
+        var enemiesActive = enemyInfo.stream()
             .filter(x ->
                 x.playerStatusCode == PlayerStatus.ALIVE.statusCode() &&
-                x.moves != null && !x.moves.isEmpty()
-            )
-            .map(x -> String.format(GAME_ENEMY_LAST_TURN_TEMPLATE, x.name, x.moves.get(x.moves.size() - 1))).toList())
-            + GAME_MY_TURN;
+                    x.moves != null && !x.moves.isEmpty()
+            ).toList();
+
+        var lastTurns = String.join("", enemiesActive.stream()
+            .map(x -> String.format(GAME_ENEMY_LAST_TURN_TEMPLATE, x.name, x.moves.get(x.moves.size() - 1))).toList());
+
+        var opponentsInGame = enemyInfo.stream()
+            .filter(x ->
+                x.playerStatusCode == PlayerStatus.ALIVE.statusCode() &&
+                !x.name.equals(currentPlayer)
+            ).toList();
+
+        String opponents = GAME_MY_TURN_POSSIBLE_OPPONENTS + String.join(", ", opponentsInGame.stream()
+            .map(x -> x.name).toList());
+
+        return lastTurns + opponents +  GAME_MY_TURN;
     }
 
     public static String enemyTurnPrompt(String enemy) {
@@ -346,6 +364,7 @@ public class ScreenUI {
         Function<Game, String> statusMapper = (Game x) -> x.status.status();
 
         Function<Game, String> playersMapper = (Game x) -> {
+
             var playersInsideGameCount =  x.alivePlayers()
                 .stream()
                 .filter(y -> y.quitStatus == QuitStatus.NONE || x.status == GameStatus.IN_PROGRESS)

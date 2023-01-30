@@ -10,6 +10,8 @@ import bg.sofia.uni.fmi.mjt.battleships.server.database.models.user.User;
 import java.util.*;
 
 public class Game {
+    public static final int PLAYERS_CAPACITY_DEFAULT = 2;
+
     public final long id;
     public String name;
     public int turn;

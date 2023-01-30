@@ -120,6 +120,7 @@ public class ScreenUI {
     public static final String GAME_ENEMY_TURN_TEMPLATE = "\nWaiting for %s's turn now!";
 
     public static final String INVALID_GAME_HIT_TARGET_PLAYER_DOES_NOT_EXIST = "\nThe target player does not exist!\n";
+    public static final String INVALID_GAME_HIT_TARGET_CANNOT_HIT_SELF = "\nYou cannot attack yourself! *_*\n";
     public static final String INVALID_GAME_HIT_TILE_TEMPLATE =
         """
 

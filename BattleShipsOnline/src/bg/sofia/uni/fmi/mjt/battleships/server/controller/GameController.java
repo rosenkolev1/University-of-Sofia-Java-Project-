@@ -192,6 +192,12 @@ public class GameController extends Controller {
 
         }
 
+        //Validate that you are not trying to attack yourself
+        if (enemyName.equals(curUsername)) {
+            serverResponse = invalidCommandResponse(ScreenUI.INVALID_GAME_HIT_TARGET_CANNOT_HIT_SELF, request);
+            return serverResponse;
+        }
+
         var enemyPlayer = game.getPlayer(enemyName);
         var enemyBoard = enemyPlayer.board;
 

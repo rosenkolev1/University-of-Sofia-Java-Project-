@@ -1,18 +1,21 @@
 package bg.sofia.uni.fmi.mjt.battleships.client;
 
-import bg.sofia.uni.fmi.mjt.battleships.common.ClientRequest;
-import bg.sofia.uni.fmi.mjt.battleships.common.ClientState;
-import bg.sofia.uni.fmi.mjt.battleships.common.ResponseStatus;
-import bg.sofia.uni.fmi.mjt.battleships.common.ServerResponse;
+import bg.sofia.uni.fmi.mjt.battleships.common.*;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.Expose;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.SocketChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Scanner;
 
 // NIO specifics wrapped & hidden
@@ -52,36 +55,44 @@ public class ConsoleClient {
 
             var client = new ConsoleClient(socketChannel, writer, scanner);
 
-            //Send initial request and set initial client state
-            //Also set the bufferContinuesString to the initialServerResponse message
-            var initialServerResponse = client.sendAndReceiveNoInput();
-            client.cookies = initialServerResponse.cookies;
-            BUFFER_CONTINUES_STRING = initialServerResponse.message;
+            try {
+                //Send initial request and set initial client state
+                //Also set the bufferContinuesString to the initialServerResponse message
+                var initialServerResponse = client.sendAndReceiveNoInput();
+                client.cookies = initialServerResponse.cookies;
+                BUFFER_CONTINUES_STRING = initialServerResponse.message;
 
-            //Now get the first screen info
-            client.sendAndReceiveNoInputDefaultHandler();
+                //Now get the first screen info
+                client.sendAndReceiveNoInputDefaultHandler();
 
-            var currentScreenHandler = new ScreenHandler(client, client.cookies.session.currentScreen);
+                var currentScreenHandler = new ScreenHandler(client, client.cookies.session.currentScreen);
 
-            while (true) {
-                var currentScreenResponse = currentScreenHandler.executeHandler();
+                while (true) {
+                    var currentScreenResponse = currentScreenHandler.executeHandler();
 
-                //Handle call to exit the application
-                if (currentScreenResponse.status == ResponseStatus.EXIT) {
-                    break;
+                    //Handle call to exit the application
+                    if (currentScreenResponse.status == ResponseStatus.EXIT) {
+                        break;
+                    }
+                    //Handle error
+                    else if (currentScreenResponse.status == ResponseStatus.INVALID_COMMAND) {
+
+                    }
+
+                    //Force client-side error
+                    Object a = 1;
+                    String b = (String) a;
+
+                    //Handle screen change
+                    currentScreenHandler.setHandler(client.cookies.session.currentScreen);
                 }
-                //Handle error
-                else if (currentScreenResponse.status == ResponseStatus.INVALID_COMMAND) {
-
-                }
-
-                //Handle screen change
-                currentScreenHandler.setHandler(client.cookies.session.currentScreen);
             }
-
+            catch (Exception e) {
+                handleClientError(e, client);
+            }
         }
-        catch (IOException e) {
-            throw new RuntimeException("There is a problem with the network communication", e);
+        catch (Exception e) {
+            handleClientError(e, null);
         }
     }
 
@@ -216,5 +227,52 @@ public class ConsoleClient {
         }
 
         return reply.toString();
+    }
+
+    private static void handleClientError(Exception e, ConsoleClient client) {
+
+        if (e instanceof IOException) {
+            System.out.print("\nThere is a problem with the network communication!\nTry again later!\n");
+        }
+        else {
+            System.out.print("\nAn unknown error has occurred!");
+        }
+
+        System.out.println(" Attempting to save the error to a log file...");
+
+        //Save exception to log
+        try (
+            BufferedWriter bufferedWriter = Files.newBufferedWriter(Path.of("logs.txt"),
+                StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+
+            PrintWriter writer = new PrintWriter(bufferedWriter, true)) {
+
+            if (client != null) {
+                var gson = new GsonBuilder()
+                    .setPrettyPrinting()
+                    .create();
+
+                var clientExceptionInfo = new ClientExceptionInfo(ConsoleClient.SERVER_PORT, ConsoleClient.SERVER_HOST, client.cookies);
+
+                writer
+                    .append("\n")
+                    .append("Error occurred for client: ")
+                    .append(gson.toJson(clientExceptionInfo))
+                    .append("\n");
+            }
+
+            e.printStackTrace(writer);
+
+            writer.append("\n");
+
+            System.out.println("Successfully saved the error to a log file!\n");
+            System.out.println("Contact administrator by providing the logs in \"logs.txt\"");
+        }
+        catch (Exception ex) {
+            System.out.println("Could not save the error to a log file because an unknown error has occurred!");
+        }
+        finally {
+            System.out.println("\nExiting the application!");
+        }
     }
 }

@@ -1,0 +1,35 @@
+Error occurred for client: {
+  "cookies": {}
+}
+java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.String (java.lang.Integer and java.lang.String are in module java.base of loader 'bootstrap')
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.main(ConsoleClient.java:87)
+Error occurred for client: {
+  "cookies": {}
+}
+java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.String (java.lang.Integer and java.lang.String are in module java.base of loader 'bootstrap')
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.main(ConsoleClient.java:87)
+Error occurred for client: {
+  "cookies": {}
+}
+java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.String (java.lang.Integer and java.lang.String are in module java.base of loader 'bootstrap')
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.main(ConsoleClient.java:87)
+
+Error occurred for client: {
+  "port": 7777,
+  "host": "localhost",
+  "cookies": {
+    "session": {
+      "currentScreen": "guestHomeScreen"
+    }
+  }
+}
+java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.String (java.lang.Integer and java.lang.String are in module java.base of loader 'bootstrap')
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.main(ConsoleClient.java:84)
+
+java.net.ConnectException: Connection refused: connect
+	at java.base/sun.nio.ch.Net.connect0(Native Method)
+	at java.base/sun.nio.ch.Net.connect(Net.java:579)
+	at java.base/sun.nio.ch.Net.connect(Net.java:586)
+	at java.base/sun.nio.ch.SocketChannelImpl.connect(SocketChannelImpl.java:880)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.main(ConsoleClient.java:53)
+

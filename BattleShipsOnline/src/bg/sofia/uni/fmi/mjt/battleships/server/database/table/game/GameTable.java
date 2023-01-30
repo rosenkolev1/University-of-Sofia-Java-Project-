@@ -1,9 +1,10 @@
-package bg.sofia.uni.fmi.mjt.battleships.server.database.table;
+package bg.sofia.uni.fmi.mjt.battleships.server.database.table.game;
 
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.Game;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.GameStatus;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.QuitStatus;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.user.User;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.table.Table;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.table.entry.TableEntryInfo;
 
 import java.io.IOException;

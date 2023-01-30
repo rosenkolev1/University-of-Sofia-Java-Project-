@@ -1,4 +1,4 @@
-package bg.sofia.uni.fmi.mjt.battleships.common;
+package bg.sofia.uni.fmi.mjt.battleships.common.cookie;
 
 import java.util.HashSet;
 import java.util.List;

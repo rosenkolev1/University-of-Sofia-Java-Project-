@@ -1,4 +1,4 @@
-package bg.sofia.uni.fmi.mjt.battleships.common;
+package bg.sofia.uni.fmi.mjt.battleships.common.screen;
 
 public class ScreenInfo {
     public static final String GUEST_HOME_SCREEN = "guestHomeScreen";

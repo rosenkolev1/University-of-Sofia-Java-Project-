@@ -1,13 +1,13 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.controller.user;
 
-import bg.sofia.uni.fmi.mjt.battleships.common.*;
+import bg.sofia.uni.fmi.mjt.battleships.common.cookie.SessionCookie;
+import bg.sofia.uni.fmi.mjt.battleships.common.request.ClientRequest;
+import bg.sofia.uni.fmi.mjt.battleships.common.response.ServerResponse;
+import bg.sofia.uni.fmi.mjt.battleships.common.screen.ScreenInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
 import bg.sofia.uni.fmi.mjt.battleships.server.controller.Controller;
-import bg.sofia.uni.fmi.mjt.battleships.server.controller.IController;
-import bg.sofia.uni.fmi.mjt.battleships.server.controller.game.GameController;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.IDatabase;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.user.User;
 import bg.sofia.uni.fmi.mjt.battleships.server.ui.ScreenUI;

@@ -1,14 +1,17 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.controller.home;
 
-import bg.sofia.uni.fmi.mjt.battleships.common.*;
+import bg.sofia.uni.fmi.mjt.battleships.common.cookie.ClientState;
+import bg.sofia.uni.fmi.mjt.battleships.common.cookie.GameCookie;
+import bg.sofia.uni.fmi.mjt.battleships.common.cookie.PlayerCookie;
+import bg.sofia.uni.fmi.mjt.battleships.common.cookie.SessionCookie;
+import bg.sofia.uni.fmi.mjt.battleships.common.request.ClientRequest;
+import bg.sofia.uni.fmi.mjt.battleships.common.response.ServerResponse;
+import bg.sofia.uni.fmi.mjt.battleships.common.screen.ScreenInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.Command;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
 import bg.sofia.uni.fmi.mjt.battleships.server.controller.Controller;
-import bg.sofia.uni.fmi.mjt.battleships.server.controller.IController;
-import bg.sofia.uni.fmi.mjt.battleships.server.controller.game.GameController;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.IDatabase;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.Game;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.GameStatus;

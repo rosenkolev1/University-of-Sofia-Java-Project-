@@ -1,8 +1,8 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.ui;
 
-import bg.sofia.uni.fmi.mjt.battleships.common.ClientState;
-import bg.sofia.uni.fmi.mjt.battleships.common.PlayerCookie;
-import bg.sofia.uni.fmi.mjt.battleships.common.ScreenInfo;
+import bg.sofia.uni.fmi.mjt.battleships.common.cookie.ClientState;
+import bg.sofia.uni.fmi.mjt.battleships.common.cookie.PlayerCookie;
+import bg.sofia.uni.fmi.mjt.battleships.common.screen.ScreenInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.Game;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.GameStatus;

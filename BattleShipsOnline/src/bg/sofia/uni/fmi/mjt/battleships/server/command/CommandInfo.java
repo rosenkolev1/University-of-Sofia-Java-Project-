@@ -1,6 +1,6 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.command;
 
-import bg.sofia.uni.fmi.mjt.battleships.common.ClientRequest;
+import bg.sofia.uni.fmi.mjt.battleships.common.request.ClientRequest;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.Game;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.GameStatus;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.QuitStatus;

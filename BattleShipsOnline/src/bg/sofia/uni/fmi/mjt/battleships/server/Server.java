@@ -1,16 +1,14 @@
 package bg.sofia.uni.fmi.mjt.battleships.server;
 
-import bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient;
-import bg.sofia.uni.fmi.mjt.battleships.common.*;
-import bg.sofia.uni.fmi.mjt.battleships.server.controller.game.GameController;
+import bg.sofia.uni.fmi.mjt.battleships.common.cookie.ClientState;
+import bg.sofia.uni.fmi.mjt.battleships.common.cookie.SessionCookie;
+import bg.sofia.uni.fmi.mjt.battleships.common.request.ClientRequest;
+import bg.sofia.uni.fmi.mjt.battleships.common.response.ServerResponse;
+import bg.sofia.uni.fmi.mjt.battleships.common.screen.ScreenInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.controller.game.IGameController;
-import bg.sofia.uni.fmi.mjt.battleships.server.controller.guest.home.GuestHomeController;
 import bg.sofia.uni.fmi.mjt.battleships.server.controller.guest.home.IGuestHomeController;
-import bg.sofia.uni.fmi.mjt.battleships.server.controller.home.HomeController;
 import bg.sofia.uni.fmi.mjt.battleships.server.controller.home.IHomeController;
 import bg.sofia.uni.fmi.mjt.battleships.server.controller.user.IUserController;
-import bg.sofia.uni.fmi.mjt.battleships.server.controller.user.UserController;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.IDatabase;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -18,7 +16,6 @@ import com.google.gson.GsonBuilder;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -132,8 +129,8 @@ public class Server {
                                 var serverResponse = getServerResponse(selector, key, clientRequest);
 
                                 //Force client-side error by uncommenting this
-                                Object a = 1;
-                                String b = (String) a;
+//                                Object a = 1;
+//                                String b = (String) a;
 
                                 //Attach the cookies to the selectionKey so that this client can be identified by other clients
                                 key.attach(serverResponse.cookies);
@@ -329,7 +326,6 @@ public class Server {
                         .append("\n");
                 }
 
-//                e.printStackTrace();
                 e.printStackTrace(writer);
 
                 writer.append("\n");

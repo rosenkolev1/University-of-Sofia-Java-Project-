@@ -1,13 +1,17 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.controller.game;
 
-import bg.sofia.uni.fmi.mjt.battleships.common.*;
+import bg.sofia.uni.fmi.mjt.battleships.common.cookie.ClientState;
+import bg.sofia.uni.fmi.mjt.battleships.common.cookie.GameCookie;
+import bg.sofia.uni.fmi.mjt.battleships.common.cookie.PlayerCookie;
+import bg.sofia.uni.fmi.mjt.battleships.common.cookie.SessionCookie;
+import bg.sofia.uni.fmi.mjt.battleships.common.request.ClientRequest;
+import bg.sofia.uni.fmi.mjt.battleships.common.response.ResponseStatus;
+import bg.sofia.uni.fmi.mjt.battleships.common.response.ServerResponse;
+import bg.sofia.uni.fmi.mjt.battleships.common.screen.ScreenInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.Command;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
 import bg.sofia.uni.fmi.mjt.battleships.server.controller.Controller;
-import bg.sofia.uni.fmi.mjt.battleships.server.controller.IController;
-import bg.sofia.uni.fmi.mjt.battleships.server.controller.guest.home.GuestHomeController;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.IDatabase;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.*;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.board.ship.ShipStatus;
@@ -136,7 +140,6 @@ public class GameController extends Controller implements IGameController {
                 ScreenInfo.HOME_SCREEN,
                 ServerResponse
                     .builder()
-                    .setStatus(ResponseStatus.QUIT_GAME)
                     .setCookies(request.cookies())
                     .setMessage(message.toString())
                     .setSignals(signals)
@@ -173,21 +176,20 @@ public class GameController extends Controller implements IGameController {
             return serverResponse;
         }
 
-        List<ServerResponse> signals = createSignalResponsesUponQuitDenied(request, curPlayer, quitGameUI);
+        game.resumeGameFromQuitAttempt();
 
-        request.cookies().game.turn = request.cookies().game.quitPlayer.myTurn;
+        List<ServerResponse> signals = createSignalResponsesUponQuitDenied(request, game, curPlayer, quitGameUI);
+
+        request.cookies().game.turn = game.turn;
         request.cookies().game.quitPlayer = null;
 
         var message = new StringBuilder()
             .append(quitGameUI.gameQuitDeniedCurrentUser())
             .append(ScreenUI.GAME_RESUMING);
 
-        game.resumeGameFromQuitAttempt();
-
         serverResponse = messageResponse(
             ServerResponse
                 .builder()
-                .setStatus(ResponseStatus.RESUME_GAME)
                 .setCookies(request.cookies())
                 .setMessage(message.toString())
                 .setSignals(signals)
@@ -361,8 +363,6 @@ public class GameController extends Controller implements IGameController {
             .filter(filterAliveEnemyCookies(request)).toList();
 
         for (var enemy : enemies) {
-            ResponseStatus responseStatus = null;
-
             var cookies = new ClientState(
                 new SessionCookie(null , enemy.name),
                 null,
@@ -375,25 +375,21 @@ public class GameController extends Controller implements IGameController {
             if (gameQuitStatus != QuitStatus.NONE) {
                 message.append(quitGameUI.gameEndingQuit());
                 cookies.session.currentScreen = ScreenInfo.HOME_SCREEN;
-                responseStatus = ResponseStatus.QUIT_GAME;
             }
             else {
                 message.append(quitGameUI.gameQuitWaiting());
                 cookies.session.currentScreen = ScreenInfo.GAME_SCREEN;
-                responseStatus = ResponseStatus.OK;
 
                 cookies.player = enemy;
 
                 cookies.game = new GameCookie(request.cookies().game);
                 cookies.game.turn = curGame.turn;
-//                cookies.game.nextTurn();
             }
 
             signals.add(messageResponse(
                 ServerResponse
                     .builder()
                     .setMessage(message.toString())
-                    .setStatus(responseStatus)
                     .setCookies(cookies)
                     .build()
             ));
@@ -402,15 +398,13 @@ public class GameController extends Controller implements IGameController {
         return signals;
     }
 
-    private List<ServerResponse> createSignalResponsesUponQuitDenied(ClientRequest request, Player curPlayer, QuitGameUI quitGameUI) {
+    private List<ServerResponse> createSignalResponsesUponQuitDenied(ClientRequest request, Game game, Player curPlayer, QuitGameUI quitGameUI) {
         List<ServerResponse> signals = new ArrayList<>();
 
         var enemies = request.cookies().game.playersInfo.stream()
             .filter(filterAliveEnemyCookies(request)).toList();
 
         for (var enemy : enemies) {
-            ResponseStatus responseStatus = ResponseStatus.RESUME_GAME;
-
             var cookies = new ClientState(
                 new SessionCookie(ScreenInfo.GAME_SCREEN , enemy.name),
                 enemy,
@@ -418,7 +412,7 @@ public class GameController extends Controller implements IGameController {
             );
 
             //Return the game's turn back to the player who first tried to abandon the game
-            cookies.game.turn = cookies.game.quitPlayer.myTurn;
+            cookies.game.turn = game.turn;
 
             //Now remove the abandonPlayer from the cookie
             cookies.game.quitPlayer = null;
@@ -431,7 +425,6 @@ public class GameController extends Controller implements IGameController {
                 ServerResponse
                     .builder()
                     .setMessage(message.toString())
-                    .setStatus(responseStatus)
                     .setCookies(cookies)
                     .build()
             ));
@@ -459,7 +452,6 @@ public class GameController extends Controller implements IGameController {
         for (var enemy : enemies) {
             var isDefenderPlayer = enemy.name.equals(defenderEnemyName);
 
-            ResponseStatus responseStatus = null;
             var cookies = new ClientState(
                 new SessionCookie(null, enemy.name),
                 enemy,
@@ -476,8 +468,6 @@ public class GameController extends Controller implements IGameController {
                 cookies.session.currentScreen = ScreenInfo.HOME_SCREEN;
                 cookies.game = null;
                 cookies.player = null;
-
-                responseStatus = ResponseStatus.FINISH_GAME;
             }
             else {
                 message = enemy.name.equals(defenderEnemyName) ?
@@ -488,14 +478,11 @@ public class GameController extends Controller implements IGameController {
 
                 cookies.game = new GameCookie(request.cookies().game);
                 cookies.game.turn = game.turn;
-
-                responseStatus = ResponseStatus.OK;
             }
 
             var response = messageResponse(
                 ServerResponse
                     .builder()
-                    .setStatus(responseStatus)
                     .setMessage(message.toString())
                     .setCookies(cookies)
             );

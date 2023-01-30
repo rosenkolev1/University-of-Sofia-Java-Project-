@@ -1,7 +1,7 @@
 package bg.sofia.uni.fmi.mjt.battleships.client;
 
-import bg.sofia.uni.fmi.mjt.battleships.common.ScreenInfo;
-import bg.sofia.uni.fmi.mjt.battleships.common.ServerResponse;
+import bg.sofia.uni.fmi.mjt.battleships.common.screen.ScreenInfo;
+import bg.sofia.uni.fmi.mjt.battleships.common.response.ServerResponse;
 
 import java.io.IOException;
 import java.util.Map;

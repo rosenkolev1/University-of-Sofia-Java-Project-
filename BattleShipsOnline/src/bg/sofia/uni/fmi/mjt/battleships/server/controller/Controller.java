@@ -1,12 +1,13 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.controller;
 
-import bg.sofia.uni.fmi.mjt.battleships.common.*;
-import bg.sofia.uni.fmi.mjt.battleships.server.Server;
+import bg.sofia.uni.fmi.mjt.battleships.common.cookie.ClientState;
+import bg.sofia.uni.fmi.mjt.battleships.common.request.ClientRequest;
+import bg.sofia.uni.fmi.mjt.battleships.common.response.ResponseStatus;
+import bg.sofia.uni.fmi.mjt.battleships.common.response.ServerResponse;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.IDatabase;
 import bg.sofia.uni.fmi.mjt.battleships.server.ui.ScreenUI;
 
 
-import javax.naming.ldap.Control;
 import java.util.List;
 
 public abstract class Controller implements IController {

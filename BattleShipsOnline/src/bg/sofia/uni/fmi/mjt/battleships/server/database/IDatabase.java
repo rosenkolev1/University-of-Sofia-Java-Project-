@@ -1,7 +1,7 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.database;
 
-import bg.sofia.uni.fmi.mjt.battleships.server.database.table.IGameTable;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.table.IUserTable;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.table.game.IGameTable;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.table.user.IUserTable;
 
 public interface IDatabase {
 

@@ -1,4 +1,4 @@
-package bg.sofia.uni.fmi.mjt.battleships.server.database.table;
+package bg.sofia.uni.fmi.mjt.battleships.server.database.table.user;
 
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.user.User;
 

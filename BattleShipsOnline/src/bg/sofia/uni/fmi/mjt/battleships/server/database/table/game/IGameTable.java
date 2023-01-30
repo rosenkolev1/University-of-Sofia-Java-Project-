@@ -1,4 +1,4 @@
-package bg.sofia.uni.fmi.mjt.battleships.server.database.table;
+package bg.sofia.uni.fmi.mjt.battleships.server.database.table.game;
 
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.Game;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.GameStatus;

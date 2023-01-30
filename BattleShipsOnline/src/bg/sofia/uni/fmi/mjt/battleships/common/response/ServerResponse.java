@@ -1,6 +1,6 @@
-package bg.sofia.uni.fmi.mjt.battleships.common;
+package bg.sofia.uni.fmi.mjt.battleships.common.response;
 
-import bg.sofia.uni.fmi.mjt.battleships.server.Server;
+import bg.sofia.uni.fmi.mjt.battleships.common.cookie.ClientState;
 
 import java.util.List;
 

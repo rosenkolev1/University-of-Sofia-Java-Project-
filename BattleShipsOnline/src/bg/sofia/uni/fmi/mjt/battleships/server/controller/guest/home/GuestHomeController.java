@@ -1,9 +1,12 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.controller.guest.home;
 
-import bg.sofia.uni.fmi.mjt.battleships.common.*;
+import bg.sofia.uni.fmi.mjt.battleships.common.cookie.SessionCookie;
+import bg.sofia.uni.fmi.mjt.battleships.common.request.ClientRequest;
+import bg.sofia.uni.fmi.mjt.battleships.common.response.ResponseStatus;
+import bg.sofia.uni.fmi.mjt.battleships.common.response.ServerResponse;
+import bg.sofia.uni.fmi.mjt.battleships.common.screen.ScreenInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.controller.Controller;
-import bg.sofia.uni.fmi.mjt.battleships.server.controller.IController;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.IDatabase;
 import bg.sofia.uni.fmi.mjt.battleships.server.ui.ScreenUI;
 

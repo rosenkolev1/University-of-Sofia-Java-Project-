@@ -1,9 +1,7 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.database;
 
-import bg.sofia.uni.fmi.mjt.battleships.server.database.table.GameTable;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.table.IGameTable;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.table.IUserTable;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.table.UserTable;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.table.game.IGameTable;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.table.user.IUserTable;
 
 public class Database implements IDatabase {
 //    private static final String defaultEntrySeparator = "\n";

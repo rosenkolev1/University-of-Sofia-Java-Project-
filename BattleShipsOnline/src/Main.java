@@ -5,13 +5,11 @@ import bg.sofia.uni.fmi.mjt.battleships.server.controller.guest.home.GuestHomeCo
 import bg.sofia.uni.fmi.mjt.battleships.server.controller.home.HomeController;
 import bg.sofia.uni.fmi.mjt.battleships.server.controller.user.UserController;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.table.GameTable;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.table.IGameTable;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.table.IUserTable;
-import bg.sofia.uni.fmi.mjt.battleships.server.database.table.UserTable;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.table.game.GameTable;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.table.game.IGameTable;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.table.user.IUserTable;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.table.user.UserTable;
 import com.google.gson.Gson;
-
-import java.lang.reflect.InvocationTargetException;
 
 public class Main {
     public static void main(String[] args)

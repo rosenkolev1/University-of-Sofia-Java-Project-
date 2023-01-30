@@ -23,7 +23,6 @@ public class Game {
     public List<Player> players;
     public List<PlayerTurn> turnHistory;
 
-
     public Game(long id, String name, int playerCapacity, GameStatus status, boolean randomizedBoards, List<User> users) {
         this.id = id;
         this.name = name;
@@ -120,20 +119,15 @@ public class Game {
     }
 
     public void resumeGameFromQuitAttempt() {
-        var quitStarterIndex = -1;
+        //reset the turn back to the first player who started trying to quit
+        do {
+            increaseTurn();
+        }
+        while(players.get(turn).quitStatus == QuitStatus.NONE);
 
-        for (int i = 0; i < alivePlayers().size(); i++) {
-            var player = alivePlayers().get(i);
-
-            if (player.quitStatus != QuitStatus.NONE && quitStarterIndex == -1) {
-                quitStarterIndex = i;
-            }
-
+        for (var player : alivePlayers()) {
             player.quitStatus = QuitStatus.NONE;
         }
-
-        //reset the turn back to the first player who started trying to quit
-        this.turn = quitStarterIndex;
 
         changeGameStateWhenResumed();
     }

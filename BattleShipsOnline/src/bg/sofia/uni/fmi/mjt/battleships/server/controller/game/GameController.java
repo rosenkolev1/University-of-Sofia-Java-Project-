@@ -183,7 +183,6 @@ public class GameController extends Controller implements IGameController {
             .append(ScreenUI.GAME_RESUMING);
 
         game.resumeGameFromQuitAttempt();
-//        game.turn = request.cookies().game.turn;
 
         serverResponse = messageResponse(
             ServerResponse

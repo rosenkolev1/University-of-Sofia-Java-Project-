@@ -1,6 +1,7 @@
 package bg.sofia.uni.fmi.mjt.battleships.common.screen;
 
 public class ScreenInfo {
+    public static final String NO_SCREEN = "none";
     public static final String GUEST_HOME_SCREEN = "guestHomeScreen";
     public static final String REGISTER_SCREEN = "registerScreen";
     public static final String LOGIN_SCREEN = "loginScreen";

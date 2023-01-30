@@ -1,4 +1,4 @@
-package bg.sofia.uni.fmi.mjt.battleships.common.predicate;
+package bg.sofia.uni.fmi.mjt.battleships.common.custom.function.interfaces.predicate;
 
 @FunctionalInterface
 public interface Predicate<T1, T2> {

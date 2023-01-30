@@ -4,6 +4,7 @@ import bg.sofia.uni.fmi.mjt.battleships.common.cookie.SessionCookie;
 import bg.sofia.uni.fmi.mjt.battleships.common.request.ClientRequest;
 import bg.sofia.uni.fmi.mjt.battleships.common.response.ServerResponse;
 import bg.sofia.uni.fmi.mjt.battleships.common.screen.ScreenInfo;
+import bg.sofia.uni.fmi.mjt.battleships.server.annotation.Screen;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
@@ -22,8 +23,9 @@ public class UserController extends Controller implements IUserController {
         super(db);
     }
 
+    @Screen(screen = ScreenInfo.LOGIN_SCREEN)
     @Override
-    public ServerResponse loginRespond(List<SessionCookie> sessions, ClientRequest request) {
+    public ServerResponse loginRespond(ClientRequest request, List<SessionCookie> sessions) {
         ServerResponse serverResponse = null;
 
         var command = CommandCreator.newCommand(request.input());
@@ -72,6 +74,7 @@ public class UserController extends Controller implements IUserController {
         return serverResponse;
     }
 
+    @Screen(screen = ScreenInfo.REGISTER_SCREEN)
     @Override
     public ServerResponse registerRespond(ClientRequest request) {
         ServerResponse serverResponse = null;

@@ -8,6 +8,7 @@ import bg.sofia.uni.fmi.mjt.battleships.common.request.ClientRequest;
 import bg.sofia.uni.fmi.mjt.battleships.common.response.ResponseStatus;
 import bg.sofia.uni.fmi.mjt.battleships.common.response.ServerResponse;
 import bg.sofia.uni.fmi.mjt.battleships.common.screen.ScreenInfo;
+import bg.sofia.uni.fmi.mjt.battleships.server.annotation.Screen;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.Command;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
@@ -31,6 +32,7 @@ public class GameController extends Controller implements IGameController {
         super(db);
     }
 
+    @Screen(screen = ScreenInfo.GAME_SCREEN)
     @Override
     public ServerResponse respond(ClientRequest request) {
         ServerResponse serverResponse = null;

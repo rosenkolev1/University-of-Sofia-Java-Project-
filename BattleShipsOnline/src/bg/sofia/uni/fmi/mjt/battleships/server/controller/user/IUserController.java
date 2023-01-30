@@ -8,7 +8,7 @@ import bg.sofia.uni.fmi.mjt.battleships.server.controller.IController;
 import java.util.List;
 
 public interface IUserController extends IController {
-    ServerResponse loginRespond(List<SessionCookie> sessions, ClientRequest request);
+    ServerResponse loginRespond(ClientRequest request, List<SessionCookie> sessions);
 
     ServerResponse registerRespond(ClientRequest request);
 }

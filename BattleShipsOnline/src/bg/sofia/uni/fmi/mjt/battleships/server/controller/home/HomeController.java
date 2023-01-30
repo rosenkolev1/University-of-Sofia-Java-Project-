@@ -7,6 +7,7 @@ import bg.sofia.uni.fmi.mjt.battleships.common.cookie.SessionCookie;
 import bg.sofia.uni.fmi.mjt.battleships.common.request.ClientRequest;
 import bg.sofia.uni.fmi.mjt.battleships.common.response.ServerResponse;
 import bg.sofia.uni.fmi.mjt.battleships.common.screen.ScreenInfo;
+import bg.sofia.uni.fmi.mjt.battleships.server.annotation.Screen;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.Command;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 
@@ -28,6 +29,47 @@ public class HomeController extends Controller implements IHomeController {
 
     public HomeController(IDatabase db) {
         super(db);
+    }
+
+    @Screen(screen = ScreenInfo.HOME_SCREEN)
+    @Override
+    public ServerResponse respond(ClientRequest request) {
+        ServerResponse serverResponse = null;
+
+        var command = CommandCreator.newCommand(request.input());
+        var args = command.arguments();
+
+        if (command.command().equals(CommandInfo.CREATE_GAME)) {
+            serverResponse = respondCreateGame(command, request);
+        }
+        else if (command.command().equals(CommandInfo.JOIN_GAME)) {
+            serverResponse = respondJoinGame(command, request);
+        }
+        else if (CommandInfo.COMMAND_LIST_INFO_MAP.containsKey(command.command())) {
+            serverResponse = respondListGames(command, request);
+        }
+        else if (command.command().equals(CommandInfo.LOAD_GAME)) {
+            serverResponse = respondLoadGame(command, request);
+        }
+        else if (command.command().equals(CommandInfo.DELETE_GAME)) {
+            serverResponse = respondDeleteGame(command, request);
+        }
+        else if (request.input().equals(CommandInfo.LOG_OUT)) {
+            request.cookies().session.username = null;
+            serverResponse = redirectResponse(ScreenInfo.GUEST_HOME_SCREEN, request, ScreenUI.SUCCESSFUL_LOGOUT);
+        }
+        else if (request.input().equals(CommandInfo.HELP)) {
+            serverResponse = helpResponse(request,
+                CommandInfo.CREATE_GAME_VERBOSE, CommandInfo.LIST_GAMES,
+                CommandInfo.JOIN_GAME_VERBOSE, CommandInfo.SAVED_GAMES,
+                CommandInfo.LOAD_GAME_VERBOSE, CommandInfo.DELETE_GAME_VERBOSE,
+                CommandInfo.LOG_OUT, CommandInfo.HELP);
+        }
+        else {
+            serverResponse = invalidCommandResponse(request);
+        }
+
+        return serverResponse;
     }
 
     private ServerResponse validateCommandWithSingleArgumentGame(Command command, ClientRequest request) {
@@ -291,46 +333,6 @@ public class HomeController extends Controller implements IHomeController {
             .builder()
             .setMessage(ScreenUI.DELETE_GAME_SUCCESS)
             .setCookies(request.cookies()));
-
-        return serverResponse;
-    }
-
-    @Override
-    public ServerResponse respond(ClientRequest request) {
-        ServerResponse serverResponse = null;
-
-        var command = CommandCreator.newCommand(request.input());
-        var args = command.arguments();
-
-        if (command.command().equals(CommandInfo.CREATE_GAME)) {
-            serverResponse = respondCreateGame(command, request);
-        }
-        else if (command.command().equals(CommandInfo.JOIN_GAME)) {
-            serverResponse = respondJoinGame(command, request);
-        }
-        else if (CommandInfo.COMMAND_LIST_INFO_MAP.containsKey(command.command())) {
-            serverResponse = respondListGames(command, request);
-        }
-        else if (command.command().equals(CommandInfo.LOAD_GAME)) {
-            serverResponse = respondLoadGame(command, request);
-        }
-        else if (command.command().equals(CommandInfo.DELETE_GAME)) {
-            serverResponse = respondDeleteGame(command, request);
-        }
-        else if (request.input().equals(CommandInfo.LOG_OUT)) {
-            request.cookies().session.username = null;
-            serverResponse = redirectResponse(ScreenInfo.GUEST_HOME_SCREEN, request, ScreenUI.SUCCESSFUL_LOGOUT);
-        }
-        else if (request.input().equals(CommandInfo.HELP)) {
-            serverResponse = helpResponse(request,
-                CommandInfo.CREATE_GAME_VERBOSE, CommandInfo.LIST_GAMES,
-                CommandInfo.JOIN_GAME_VERBOSE, CommandInfo.SAVED_GAMES,
-                CommandInfo.LOAD_GAME_VERBOSE, CommandInfo.DELETE_GAME_VERBOSE,
-                CommandInfo.LOG_OUT, CommandInfo.HELP);
-        }
-        else {
-            serverResponse = invalidCommandResponse(request);
-        }
 
         return serverResponse;
     }

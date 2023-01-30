@@ -110,3 +110,108 @@ java.lang.ClassCastException: class java.lang.Integer cannot be cast to class ja
 	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:136)
 	at Main.main(Main.java:39)
 
+
+Error occurred for client: {
+  "cookies": {
+    "session": {
+      "currentScreen": "none"
+    }
+  }
+}
+java.lang.IllegalArgumentException: object is not an instance of declaring class
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.checkReceiver(DirectMethodHandleAccessor.java:202)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:100)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:578)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.lambda$new$1(Server.java:98)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.getServerResponse(Server.java:235)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:153)
+	at Main.main(Main.java:37)
+
+
+Error occurred for client: {
+  "cookies": {
+    "session": {
+      "currentScreen": "none"
+    }
+  }
+}
+java.lang.IllegalArgumentException: wrong number of arguments: 1 expected: 2
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.checkArgumentCount(DirectMethodHandleAccessor.java:337)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:102)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:578)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.lambda$new$1(Server.java:98)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.getServerResponse(Server.java:235)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:153)
+	at Main.main(Main.java:37)
+
+
+Error occurred for client: {
+  "cookies": {
+    "session": {
+      "currentScreen": "none"
+    }
+  }
+}
+java.lang.IllegalArgumentException: wrong number of arguments: 1 expected: 2
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.checkArgumentCount(DirectMethodHandleAccessor.java:337)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:102)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:578)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.lambda$new$1(Server.java:98)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.getServerResponse(Server.java:235)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:153)
+	at Main.main(Main.java:37)
+
+
+Error occurred for client: {
+  "input": "back",
+  "cookies": {
+    "session": {
+      "currentScreen": "loginScreen"
+    }
+  }
+}
+java.lang.IllegalArgumentException: wrong number of arguments: 1 expected: 2
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.checkArgumentCount(DirectMethodHandleAccessor.java:337)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:102)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:578)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.lambda$new$1(Server.java:98)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.getServerResponse(Server.java:235)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:153)
+	at Main.main(Main.java:37)
+
+
+Error occurred for client: {
+  "input": "back",
+  "cookies": {
+    "session": {
+      "currentScreen": "loginScreen"
+    }
+  }
+}
+java.lang.IllegalArgumentException: wrong number of arguments: 1 expected: 2
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.checkArgumentCount(DirectMethodHandleAccessor.java:337)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:102)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:578)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.lambda$new$1(Server.java:98)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.getServerResponse(Server.java:235)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:153)
+	at Main.main(Main.java:37)
+
+
+Error occurred for client: {
+  "input": "back",
+  "cookies": {
+    "session": {
+      "currentScreen": "loginScreen"
+    }
+  }
+}
+java.lang.IllegalArgumentException: wrong number of arguments: 1 expected: 2
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.checkArgumentCount(DirectMethodHandleAccessor.java:337)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:102)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:578)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.lambda$new$1(Server.java:98)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.getServerResponse(Server.java:235)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:153)
+	at Main.main(Main.java:37)
+

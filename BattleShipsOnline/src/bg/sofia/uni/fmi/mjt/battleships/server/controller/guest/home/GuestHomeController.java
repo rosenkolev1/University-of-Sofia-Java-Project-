@@ -5,6 +5,7 @@ import bg.sofia.uni.fmi.mjt.battleships.common.request.ClientRequest;
 import bg.sofia.uni.fmi.mjt.battleships.common.response.ResponseStatus;
 import bg.sofia.uni.fmi.mjt.battleships.common.response.ServerResponse;
 import bg.sofia.uni.fmi.mjt.battleships.common.screen.ScreenInfo;
+import bg.sofia.uni.fmi.mjt.battleships.server.annotation.Screen;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.controller.Controller;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.IDatabase;
@@ -17,6 +18,7 @@ public class GuestHomeController extends Controller implements IGuestHomeControl
         super(db);
     }
 
+    @Screen(screen = ScreenInfo.GUEST_HOME_SCREEN)
     @Override
     public ServerResponse respond(ClientRequest request) {
         ServerResponse serverResponse = null;
@@ -46,6 +48,7 @@ public class GuestHomeController extends Controller implements IGuestHomeControl
         return serverResponse;
     }
 
+    @Screen(screen = ScreenInfo.NO_SCREEN)
     @Override
     public ServerResponse initialResponse(ClientRequest request, String channelNotEmptyString) {
         request.cookies().session = new SessionCookie(null, null);

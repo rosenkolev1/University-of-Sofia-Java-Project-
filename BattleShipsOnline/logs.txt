@@ -33,3 +33,168 @@ java.net.ConnectException: Connection refused: connect
 	at java.base/sun.nio.ch.SocketChannelImpl.connect(SocketChannelImpl.java:880)
 	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.main(ConsoleClient.java:53)
 
+java.net.ConnectException: Connection refused: connect
+	at java.base/sun.nio.ch.Net.connect0(Native Method)
+	at java.base/sun.nio.ch.Net.connect(Net.java:579)
+	at java.base/sun.nio.ch.Net.connect(Net.java:586)
+	at java.base/sun.nio.ch.SocketChannelImpl.connect(SocketChannelImpl.java:880)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.main(ConsoleClient.java:53)
+
+java.net.ConnectException: Connection refused: connect
+	at java.base/sun.nio.ch.Net.connect0(Native Method)
+	at java.base/sun.nio.ch.Net.connect(Net.java:579)
+	at java.base/sun.nio.ch.Net.connect(Net.java:586)
+	at java.base/sun.nio.ch.SocketChannelImpl.connect(SocketChannelImpl.java:880)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.main(ConsoleClient.java:53)
+
+
+Error occurred for client: {
+  "port": 7777,
+  "host": "localhost",
+  "cookies": {
+    "session": {
+      "currentScreen": "guestHomeScreen"
+    }
+  }
+}
+java.lang.RuntimeException: java.net.SocketException: Connection reset
+	at bg.sofia.uni.fmi.mjt.battleships.client.ScreenHandler.lambda$static$0(ScreenHandler.java:16)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ScreenHandler.executeHandler(ScreenHandler.java:76)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.main(ConsoleClient.java:71)
+Caused by: java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:401)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:434)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.receiveFromServer(ConsoleClient.java:203)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendRequestAndReceive(ConsoleClient.java:167)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendAndReceive(ConsoleClient.java:185)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendAndReceiveDefaultHandler(ConsoleClient.java:136)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.guestHomeScreen(ConsoleClient.java:100)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ScreenHandler.lambda$static$0(ScreenHandler.java:14)
+	... 2 more
+
+
+Error occurred for client: {
+  "port": 7777,
+  "host": "localhost",
+  "cookies": {}
+}
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:401)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:434)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.receiveFromServer(ConsoleClient.java:203)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendRequestAndReceive(ConsoleClient.java:167)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendAndReceiveNoInput(ConsoleClient.java:177)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.main(ConsoleClient.java:61)
+
+
+Error occurred for client: {
+  "port": 7777,
+  "host": "localhost",
+  "cookies": {}
+}
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:401)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:434)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.receiveFromServer(ConsoleClient.java:203)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendRequestAndReceive(ConsoleClient.java:167)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendAndReceiveNoInput(ConsoleClient.java:177)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.main(ConsoleClient.java:61)
+
+
+Error occurred for client: {
+  "port": 7777,
+  "host": "localhost",
+  "cookies": {}
+}
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:401)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:434)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.receiveFromServer(ConsoleClient.java:203)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendRequestAndReceive(ConsoleClient.java:167)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendAndReceiveNoInput(ConsoleClient.java:177)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.main(ConsoleClient.java:61)
+
+
+Error occurred for client: {
+  "port": 7777,
+  "host": "localhost",
+  "cookies": {}
+}
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:401)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:434)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.receiveFromServer(ConsoleClient.java:203)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendRequestAndReceive(ConsoleClient.java:167)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendAndReceiveNoInput(ConsoleClient.java:177)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.main(ConsoleClient.java:61)
+
+
+Error occurred for client: {
+  "port": 7777,
+  "host": "localhost",
+  "cookies": {}
+}
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:401)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:434)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.receiveFromServer(ConsoleClient.java:203)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendRequestAndReceive(ConsoleClient.java:167)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendAndReceiveNoInput(ConsoleClient.java:177)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.main(ConsoleClient.java:61)
+
+
+Error occurred for client: {
+  "port": 7777,
+  "host": "localhost",
+  "cookies": {}
+}
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:401)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:434)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.receiveFromServer(ConsoleClient.java:203)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendRequestAndReceive(ConsoleClient.java:167)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendAndReceiveNoInput(ConsoleClient.java:177)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.main(ConsoleClient.java:61)
+
+
+Error occurred for client: {
+  "port": 7777,
+  "host": "localhost",
+  "cookies": {}
+}
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:401)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:434)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.receiveFromServer(ConsoleClient.java:203)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendRequestAndReceive(ConsoleClient.java:167)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendAndReceiveNoInput(ConsoleClient.java:177)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.main(ConsoleClient.java:61)
+
+
+Error occurred for client: {
+  "port": 7777,
+  "host": "localhost",
+  "cookies": {}
+}
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:401)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:434)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.receiveFromServer(ConsoleClient.java:203)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendRequestAndReceive(ConsoleClient.java:167)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendAndReceiveNoInput(ConsoleClient.java:177)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.main(ConsoleClient.java:61)
+
+
+Error occurred for client: {
+  "port": 7777,
+  "host": "localhost",
+  "cookies": {}
+}
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:401)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:434)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.receiveFromServer(ConsoleClient.java:203)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendRequestAndReceive(ConsoleClient.java:167)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.sendAndReceiveNoInput(ConsoleClient.java:177)
+	at bg.sofia.uni.fmi.mjt.battleships.client.ConsoleClient.main(ConsoleClient.java:61)
+

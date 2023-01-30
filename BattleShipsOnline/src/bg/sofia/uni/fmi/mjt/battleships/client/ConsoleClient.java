@@ -79,9 +79,9 @@ public class ConsoleClient {
 
                     }
 
-                    //Force client-side error
-                    Object a = 1;
-                    String b = (String) a;
+                    //Force client-side error by uncommenting this
+//                    Object a = 1;
+//                    String b = (String) a;
 
                     //Handle screen change
                     currentScreenHandler.setHandler(client.cookies.session.currentScreen);
@@ -232,13 +232,13 @@ public class ConsoleClient {
     private static void handleClientError(Exception e, ConsoleClient client) {
 
         if (e instanceof IOException) {
-            System.out.print("\nThere is a problem with the network communication!\nTry again later!\n");
+            System.out.println("\nThere is a problem with the network communication!\nTry again later!");
         }
         else {
-            System.out.print("\nAn unknown error has occurred!");
+            System.out.println("\nAn unknown error has occurred!");
         }
 
-        System.out.println(" Attempting to save the error to a log file...");
+        System.out.println("\nAttempting to save the error to a log file...");
 
         //Save exception to log
         try (

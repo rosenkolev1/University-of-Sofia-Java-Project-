@@ -1,0 +1,112 @@
+java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.String (java.lang.Integer and java.lang.String are in module java.base of loader 'bootstrap')
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:135)
+	at Main.main(Main.java:39)
+
+
+Error occurred for client: {
+  "cookies": {
+    "session": {
+      "currentScreen": "guestHomeScreen"
+    }
+  }
+}
+java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.String (java.lang.Integer and java.lang.String are in module java.base of loader 'bootstrap')
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:136)
+	at Main.main(Main.java:39)
+
+
+Error occurred for client: {
+  "cookies": {
+    "session": {
+      "currentScreen": "guestHomeScreen"
+    }
+  }
+}
+java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.String (java.lang.Integer and java.lang.String are in module java.base of loader 'bootstrap')
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:136)
+	at Main.main(Main.java:39)
+
+
+Error occurred for client: {
+  "cookies": {
+    "session": {
+      "currentScreen": "guestHomeScreen"
+    }
+  }
+}
+java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.String (java.lang.Integer and java.lang.String are in module java.base of loader 'bootstrap')
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:136)
+	at Main.main(Main.java:39)
+
+
+Error occurred for client: {
+  "cookies": {
+    "session": {
+      "currentScreen": "guestHomeScreen"
+    }
+  }
+}
+java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.String (java.lang.Integer and java.lang.String are in module java.base of loader 'bootstrap')
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:136)
+	at Main.main(Main.java:39)
+
+
+Error occurred for client: {
+  "cookies": {
+    "session": {
+      "currentScreen": "guestHomeScreen"
+    }
+  }
+}
+java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.String (java.lang.Integer and java.lang.String are in module java.base of loader 'bootstrap')
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:136)
+	at Main.main(Main.java:39)
+
+
+Error occurred for client: {
+  "cookies": {
+    "session": {
+      "currentScreen": "guestHomeScreen"
+    }
+  }
+}
+java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.String (java.lang.Integer and java.lang.String are in module java.base of loader 'bootstrap')
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:136)
+	at Main.main(Main.java:39)
+
+
+Error occurred for client: {
+  "cookies": {
+    "session": {
+      "currentScreen": "guestHomeScreen"
+    }
+  }
+}
+java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.String (java.lang.Integer and java.lang.String are in module java.base of loader 'bootstrap')
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:136)
+	at Main.main(Main.java:39)
+
+
+Error occurred for client: {
+  "cookies": {
+    "session": {
+      "currentScreen": "guestHomeScreen"
+    }
+  }
+}
+java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.String (java.lang.Integer and java.lang.String are in module java.base of loader 'bootstrap')
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:136)
+	at Main.main(Main.java:39)
+
+
+Error occurred for client: {
+  "cookies": {
+    "session": {
+      "currentScreen": "guestHomeScreen"
+    }
+  }
+}
+java.lang.ClassCastException: class java.lang.Integer cannot be cast to class java.lang.String (java.lang.Integer and java.lang.String are in module java.base of loader 'bootstrap')
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:136)
+	at Main.main(Main.java:39)
+

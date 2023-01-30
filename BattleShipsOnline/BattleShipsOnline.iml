@@ -15,5 +15,6 @@
     <orderEntry type="library" name="mockito.core" level="project" />
     <orderEntry type="library" name="mockito.junit.jupiter" level="project" />
     <orderEntry type="library" name="google.code.gson" level="project" />
+    <orderEntry type="library" name="reflections" level="project" />
   </component>
 </module>

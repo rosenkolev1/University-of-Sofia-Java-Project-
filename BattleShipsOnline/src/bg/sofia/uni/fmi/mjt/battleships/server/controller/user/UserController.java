@@ -1,26 +1,29 @@
-package bg.sofia.uni.fmi.mjt.battleships.server.controller;
+package bg.sofia.uni.fmi.mjt.battleships.server.controller.user;
 
 import bg.sofia.uni.fmi.mjt.battleships.common.*;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
+import bg.sofia.uni.fmi.mjt.battleships.server.controller.Controller;
+import bg.sofia.uni.fmi.mjt.battleships.server.controller.IController;
+import bg.sofia.uni.fmi.mjt.battleships.server.controller.game.GameController;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.IDatabase;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.user.User;
 import bg.sofia.uni.fmi.mjt.battleships.server.ui.ScreenUI;
 
 import java.util.List;
 
-public class UserController extends Controller {
+public class UserController extends Controller implements IUserController {
 
     private static final String VALID_REGISTRATION_REGEX = "^\\w{1,}$";
 
-    private Database db;
-
-    public UserController(Database db) {
-        this.db = db;
+    public UserController(IDatabase db) {
+        super(db);
     }
 
-    public ServerResponse loginResponse(List<SessionCookie> sessions, ClientRequest request) {
+    @Override
+    public ServerResponse loginRespond(List<SessionCookie> sessions, ClientRequest request) {
         ServerResponse serverResponse = null;
 
         var command = CommandCreator.newCommand(request.input());
@@ -38,7 +41,7 @@ public class UserController extends Controller {
         var user = new User(username, password);
 
         //Validate that user exists
-        if (password != null && !db.userTable.userExists(user)) {
+        if (password != null && !db.userTable().userExists(user)) {
             serverResponse = invalidCommandResponse(ScreenUI.INVALID_USER_DOES_NOT_EXIST, request);
             return serverResponse;
         }
@@ -69,7 +72,8 @@ public class UserController extends Controller {
         return serverResponse;
     }
 
-    public ServerResponse registerResponse(ClientRequest request) {
+    @Override
+    public ServerResponse registerRespond(ClientRequest request) {
         ServerResponse serverResponse = null;
 
         var command = CommandCreator.newCommand(request.input());
@@ -100,18 +104,18 @@ public class UserController extends Controller {
             }
 
             //Check if username is taken
-            if (db.userTable.userExistWithName(username)) {
+            if (db.userTable().userExistWithName(username)) {
                 serverResponse = invalidCommandResponse(ScreenUI.INVALID_USERNAME_TAKEN, request);
                 return serverResponse;
             }
 
             //Check if password is taken
-            if (db.userTable.userExistWithPassword(password)) {
+            if (db.userTable().userExistWithPassword(password)) {
                 serverResponse = invalidCommandResponse(ScreenUI.INVALID_PASSWORD_TAKEN, request);
                 return serverResponse;
             }
 
-            db.userTable.addUser(username, password);
+            db.userTable().addUser(username, password);
 
             serverResponse = redirectResponse(ScreenInfo.GUEST_HOME_SCREEN, request, ScreenUI.SUCCESSFUL_REGISTRATION);
         }
@@ -128,5 +132,4 @@ public class UserController extends Controller {
 
         return serverResponse;
     }
-
 }

@@ -10,7 +10,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Table {
+public abstract class Table<T> {
+    public abstract List<T> entries();
+
     protected final Path tablePath;
     protected final String entrySeparator;
     protected final String fieldSeparator;
@@ -40,7 +42,7 @@ public abstract class Table {
         }
     }
 
-    protected <T> void overwriteEntry(TableEntryInfo<T> entryInfo) {
+    protected void overwriteEntry(TableEntryInfo<T> entryInfo) {
         if (entryInfo.entryIndex != -1) {
             try (var bufferedWriter = Files.newBufferedWriter(tablePath)) {
                 for (int i = 0; i < entryInfo.tableEntries.size(); i++) {

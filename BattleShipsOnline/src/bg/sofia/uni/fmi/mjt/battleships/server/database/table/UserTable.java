@@ -4,19 +4,24 @@ import bg.sofia.uni.fmi.mjt.battleships.server.database.models.user.User;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserTable extends Table {
+public class UserTable extends Table<User> implements IUserTable {
     private List<User> users;
+
+    @Override
+    public List<User> entries() {
+        return this.users;
+    }
 
     public UserTable(String tablePath, String entrySeparator, String fieldSeparator) {
         super(tablePath, entrySeparator, fieldSeparator);
         initialiseUsers();
     }
 
+    @Override
     public User getUser(String username) {
         for (var user : users) {
             if (user.username().equals(username)) {
@@ -27,6 +32,7 @@ public class UserTable extends Table {
         return null;
     }
 
+    @Override
     public void addUser(User user) {
         try (var bufferedWriter = Files.newBufferedWriter(tablePath, StandardOpenOption.APPEND)) {
             //TODO: Add hashing with salt to passwords
@@ -39,18 +45,22 @@ public class UserTable extends Table {
         }
     }
 
+    @Override
     public void addUser(String username, String password) {
         addUser(new User(username, password));
     }
 
+    @Override
     public boolean userExists(User user) {
         return this.users.contains(user);
     }
 
+    @Override
     public boolean userExistWithName(String username) {
         return this.users.stream().anyMatch(x -> x.username().equals(username));
     }
 
+    @Override
     public boolean userExistWithPassword(String password) {
         return this.users.stream().anyMatch(x -> x.password().equals(password));
     }

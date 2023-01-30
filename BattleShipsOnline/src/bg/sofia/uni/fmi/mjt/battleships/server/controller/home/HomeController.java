@@ -1,11 +1,15 @@
-package bg.sofia.uni.fmi.mjt.battleships.server.controller;
+package bg.sofia.uni.fmi.mjt.battleships.server.controller.home;
 
 import bg.sofia.uni.fmi.mjt.battleships.common.*;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.Command;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
+import bg.sofia.uni.fmi.mjt.battleships.server.controller.Controller;
+import bg.sofia.uni.fmi.mjt.battleships.server.controller.IController;
+import bg.sofia.uni.fmi.mjt.battleships.server.controller.game.GameController;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.IDatabase;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.Game;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.GameStatus;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.QuitStatus;
@@ -17,11 +21,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class HomeController extends Controller {
-    private Database db;
+public class HomeController extends Controller implements IHomeController {
 
-    public HomeController(Database db) {
-        this.db = db;
+    public HomeController(IDatabase db) {
+        super(db);
     }
 
     private ServerResponse validateCommandWithSingleArgumentGame(Command command, ClientRequest request) {
@@ -58,7 +61,7 @@ public class HomeController extends Controller {
         var curUsername = request.cookies().session.username;
 
         //Validate that a paused game with the same name exists and that the current user is its creator
-        if (!db.gameTable.games.stream()
+        if (!db.gameTable().games().stream()
             .anyMatch(x ->
                 x.name.equals(gameName) &&
                 x.status == GameStatus.PAUSED &&
@@ -69,16 +72,16 @@ public class HomeController extends Controller {
             return serverResponse;
         }
 
-        var curUser = db.userTable.getUser(curUsername);
+        var curUser = db.userTable().getUser(curUsername);
 
-        var game = db.gameTable.games
+        var game = db.gameTable().games()
             .stream().filter(x -> x.name.equals(gameName) && x.status == GameStatus.PAUSED).findFirst().get();
 
         var curPlayer = game.players
             .stream().filter(x -> x.user.username().equals(curUser.username())).findFirst().get();
 
         //When reloading the game,
-        game.resumeGame(curPlayer);
+        game.resumeSavedGame(curPlayer);
 
         serverResponse = redirectResponse(ScreenInfo.GAME_SCREEN, request, ScreenUI.currentGame(gameName) + ScreenUI.GAME_PENDING_PROMPT);
 
@@ -114,7 +117,7 @@ public class HomeController extends Controller {
         var playersCount = Integer.valueOf(playersCountArg);
 
         //Validate that an unfinished game with the same name has not been created already
-        if (db.gameTable.games.stream()
+        if (db.gameTable().games().stream()
             .anyMatch(x -> x.name.equals(gameName) &&
                 !x.gameIsEndedOrDeleted())) {
 
@@ -122,11 +125,11 @@ public class HomeController extends Controller {
             return serverResponse;
         }
 
-        var curUser = db.userTable.getUser(request.cookies().session.username);
+        var curUser = db.userTable().getUser(request.cookies().session.username);
 
-        var game = db.gameTable.createGame(gameName, playersCount, GameStatus.PENDING, true, List.of(curUser));
+        var game = db.gameTable().createGame(gameName, playersCount, GameStatus.PENDING, true, List.of(curUser));
 
-        db.gameTable.addGame(game);
+        db.gameTable().addGame(game);
 
         serverResponse = redirectResponse(ScreenInfo.GAME_SCREEN, request, ScreenUI.currentGame(gameName) + ScreenUI.GAME_PENDING_PROMPT);
 
@@ -150,7 +153,7 @@ public class HomeController extends Controller {
         //If there is no gameName, then choose a random game to join
         if (gameName == null) {
 
-            var games = db.gameTable.games.stream().filter(x ->
+            var games = db.gameTable().games().stream().filter(x ->
                 x.status == GameStatus.PENDING &&
                 (x.quitStatus == QuitStatus.NONE || x.playerBelongsToSavedGame(curUsername))).toList();
 
@@ -173,7 +176,7 @@ public class HomeController extends Controller {
                 return serverResponse;
             }
 
-            var savedGameNotYours = db.gameTable.games
+            var savedGameNotYours = db.gameTable().games()
                 .stream()
                 .anyMatch(x ->
                     x.name.equals(gameName) &&
@@ -182,7 +185,7 @@ public class HomeController extends Controller {
                     !x.playerBelongsToSavedGame(curUsername)
                 );
 
-            var notSavedGameWithNameExists = db.gameTable.games
+            var notSavedGameWithNameExists = db.gameTable().games()
                 .stream()
                 .anyMatch(x ->
                     x.name.equals(gameName) &&
@@ -195,7 +198,7 @@ public class HomeController extends Controller {
                 return serverResponse;
             }
 
-            var game = db.gameTable.games
+            var game = db.gameTable().games()
                 .stream().filter(x ->
                     x.name.equals(gameName) &&
                     x.status == GameStatus.PENDING &&
@@ -203,14 +206,14 @@ public class HomeController extends Controller {
                 )
                 .findFirst().orElse(null);
 
-            if (db.gameTable.games
+            if (db.gameTable().games()
                 .stream().anyMatch(x -> x.name.equals(gameName) && x.status == GameStatus.IN_PROGRESS)) {
 
                 serverResponse = invalidCommandResponse(ScreenUI.INVALID_GAME_EXISTS_BUT_IS_FULL, request);
                 return serverResponse;
             }
 
-            var pausedGameWithThisNameExists = db.gameTable.games.stream().anyMatch(x ->
+            var pausedGameWithThisNameExists = db.gameTable().games().stream().anyMatch(x ->
                 x.name.equals(gameName) &&
                 x.status == GameStatus.PAUSED);
 
@@ -243,7 +246,7 @@ public class HomeController extends Controller {
 
         var listCommandInfo = CommandInfo.COMMAND_LIST_INFO_MAP.get(command.command());
 
-        var games = db.gameTable.games.stream().filter(x -> listCommandInfo.filter().test(x, request)).toList();
+        var games = db.gameTable().games().stream().filter(x -> listCommandInfo.filter().test(x, request)).toList();
         var message = listCommandInfo.listFunction().apply(games);
 
         return messageResponse(
@@ -264,7 +267,7 @@ public class HomeController extends Controller {
         var curUsername = request.cookies().session.username;
         var gameName = command.arguments()[0];
 
-        var game = this.db.gameTable.games.stream()
+        var game = this.db.gameTable().games().stream()
             .filter(x ->
                 x.name.equals(gameName) &&
                 x.status == GameStatus.PAUSED &&
@@ -277,9 +280,9 @@ public class HomeController extends Controller {
         }
 
         //Set status and quitStatus of the game to Deleted and None
-        this.db.gameTable.deleteGame(game);
+        this.db.gameTable().deleteGame(game);
         //Save the game as deleted in the table
-        this.db.gameTable.saveGameFile(game);
+        this.db.gameTable().saveGameFile(game);
 
         serverResponse = messageResponse(ServerResponse
             .builder()
@@ -289,6 +292,7 @@ public class HomeController extends Controller {
         return serverResponse;
     }
 
+    @Override
     public ServerResponse respond(ClientRequest request) {
         ServerResponse serverResponse = null;
 
@@ -329,12 +333,12 @@ public class HomeController extends Controller {
     }
 
     private ServerResponse joinGameResponse(ClientRequest request, Game game) {
-        var curUser = db.userTable.getUser(request.cookies().session.username);
+        var curUser = db.userTable().getUser(request.cookies().session.username);
 
         //Resume the game if the current player had saved and quit before
         if (game.quitStatus == QuitStatus.SAVE_AND_QUIT) {
             var curPlayer = game.players.stream().filter(x -> x.user.username().equals(curUser.username())).findFirst().get();
-            game.resumeGame(curPlayer);
+            game.resumeSavedGame(curPlayer);
         }
         else {
             game.addPlayer(curUser);

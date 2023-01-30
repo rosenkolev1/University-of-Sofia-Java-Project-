@@ -1,11 +1,16 @@
 package bg.sofia.uni.fmi.mjt.battleships.server;
 
 import bg.sofia.uni.fmi.mjt.battleships.common.*;
-import bg.sofia.uni.fmi.mjt.battleships.server.controller.GameController;
-import bg.sofia.uni.fmi.mjt.battleships.server.controller.GuestHomeController;
-import bg.sofia.uni.fmi.mjt.battleships.server.controller.HomeController;
-import bg.sofia.uni.fmi.mjt.battleships.server.controller.UserController;
+import bg.sofia.uni.fmi.mjt.battleships.server.controller.game.GameController;
+import bg.sofia.uni.fmi.mjt.battleships.server.controller.game.IGameController;
+import bg.sofia.uni.fmi.mjt.battleships.server.controller.guest.home.GuestHomeController;
+import bg.sofia.uni.fmi.mjt.battleships.server.controller.guest.home.IGuestHomeController;
+import bg.sofia.uni.fmi.mjt.battleships.server.controller.home.HomeController;
+import bg.sofia.uni.fmi.mjt.battleships.server.controller.home.IHomeController;
+import bg.sofia.uni.fmi.mjt.battleships.server.controller.user.IUserController;
+import bg.sofia.uni.fmi.mjt.battleships.server.controller.user.UserController;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.IDatabase;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -22,10 +27,10 @@ import java.util.Iterator;
 import java.util.List;
 
 public class Server {
-    private static final int BUFFER_SIZE = 512;
-    private static final String HOST = "localhost";
+    private final int bufferSize;
+    private final String host;
     //This string signifies that there is more to read from the socket channel than there is space for in the buffer
-    private static final String BUFFER_CONTINUES_STRING = "#c";
+    private final String channelNotEmptyString;
 
     private final int port;
     private final Gson gson;
@@ -35,28 +40,65 @@ public class Server {
     private ByteBuffer buffer;
     private Selector selector;
 
-    private final Database db;
-    private final UserController userController;
-    private final HomeController homeController;
-    private final GuestHomeController guestHomeController;
-    private final GameController gameController;
+    private final IDatabase db;
+    private final IGuestHomeController guestHomeController;
+    private final IUserController userController;
+    private final IHomeController homeController;
+    private final IGameController gameController;
 
-    public Server(int port, Database db) {
-        this.port = port;
-        this.db = db;
-        this.gson = new Gson();
-        this.userController = new UserController(db);
-        this.homeController = new HomeController(db);
-        this.guestHomeController = new GuestHomeController();
-        this.gameController = new GameController(db);
+    public Server (ServerOption options) {
+        this.host = options.host();
+        this.port = options.port();
+
+        this.bufferSize = options.bufferSize();
+        this.channelNotEmptyString = options.channelNotEmptyString();
+
+        this.gson = options.jsonProvider();
+
+        this.db = options.database();
+
+        IGuestHomeController tempGuestHomeController = null;
+        IUserController tempUserController = null;
+        IHomeController tempHomeController = null;
+        IGameController tempGameController = null;
+
+        //TODO: Change to be more generic
+        for (var controller : options.controllers()) {
+            if (controller instanceof IGuestHomeController castController) {
+                tempGuestHomeController = castController;
+            }
+            else if (controller instanceof IUserController castController) {
+                tempUserController = castController;
+            }
+            else if (controller instanceof IHomeController castController) {
+                tempHomeController = castController;
+            }
+            else if (controller instanceof IGameController castController) {
+                tempGameController = castController;
+            }
+        }
+
+        this.guestHomeController = tempGuestHomeController;
+        this.userController = tempUserController;
+        this.homeController = tempHomeController;
+        this.gameController = tempGameController;
     }
+
+//    public Server(int port, Database db, IUserController userController) {
+//        this.port = port;
+//        this.db = db;
+//        this.gson = new Gson();
+//        this.userController = new UserController(db);
+//        this.homeController = new HomeController(db);
+//        this.guestHomeController = new GuestHomeController();
+//        this.gameController = new GameController(db);
+//    }
 
     public void start() {
         try (ServerSocketChannel serverSocketChannel = ServerSocketChannel.open()) {
-
             selector = Selector.open();
             configureServerSocketChannel(serverSocketChannel, selector);
-            this.buffer = ByteBuffer.allocate(BUFFER_SIZE);
+            this.buffer = ByteBuffer.allocate(bufferSize);
             isServerWorking = true;
 
             System.out.println("The server is working!");
@@ -101,7 +143,7 @@ public class Server {
                                             keySession.session != null &&
                                             keySession.session.username != null &&
                                             keySession.session.username.equals(signalResponse.cookies.session.username)) {
-                                            writeClientOutput((SocketChannel) selectionKey.channel(), gson.toJson(signalResponse));
+                                            sendResponseToClient((SocketChannel) selectionKey.channel(), gson.toJson(signalResponse));
                                         }
 
                                     }
@@ -113,7 +155,7 @@ public class Server {
 
                             var serverResponseJson = gson.toJson(serverResponse);
 
-                            writeClientOutput(clientChannel, serverResponseJson);
+                            sendResponseToClient(clientChannel, serverResponseJson);
 
                         } else if (key.isAcceptable()) {
                             accept(selector, key);
@@ -131,16 +173,24 @@ public class Server {
         }
     }
 
-    private ServerResponse getServerResponse(Selector selector, SelectionKey key, ClientRequest clientRequest) {
-        ServerResponse serverResponse = null;
+    public void stop() {
+        this.isServerWorking = false;
+        if (selector.isOpen()) {
+            selector.wakeup();
+        }
+    }
 
-        if (clientRequest.cookies().session == null || clientRequest.cookies().session.currentScreen.equals(ScreenInfo.GUEST_HOME_SCREEN)) {
+    private ServerResponse getServerResponse(Selector selector, SelectionKey key, ClientRequest clientRequest) {
+        if (clientRequest.cookies().session == null) {
+            return guestHomeController.initialResponse(clientRequest, channelNotEmptyString);
+        }
+        else if (clientRequest.cookies().session.currentScreen.equals(ScreenInfo.GUEST_HOME_SCREEN)) {
             return guestHomeController.respond(clientRequest);
         }
-        if (clientRequest.cookies().session.currentScreen.equals(ScreenInfo.LOGIN_SCREEN)) {
+        else if (clientRequest.cookies().session.currentScreen.equals(ScreenInfo.LOGIN_SCREEN)) {
             List<SessionCookie> sessions = new ArrayList<>();
 
-            //Get all the currently logged users' session cookies
+            //Get all the currently logged users' cookies
             for (var selectionKey : selector.keys()) {
                 var cookies = (ClientState)selectionKey.attachment();
 
@@ -149,10 +199,10 @@ public class Server {
                 }
             }
 
-            return userController.loginResponse(sessions, clientRequest);
+            return userController.loginRespond(sessions, clientRequest);
         }
         else if (clientRequest.cookies().session.currentScreen.equals(ScreenInfo.REGISTER_SCREEN)) {
-            return userController.registerResponse(clientRequest);
+            return userController.registerRespond(clientRequest);
         }
         else if (clientRequest.cookies().session.currentScreen.equals(ScreenInfo.HOME_SCREEN)) {
             return homeController.respond(clientRequest);
@@ -164,15 +214,8 @@ public class Server {
         throw new RuntimeException("An fatal error has occurred! The client's current screen does not exist!");
     }
 
-    public void stop() {
-        this.isServerWorking = false;
-        if (selector.isOpen()) {
-            selector.wakeup();
-        }
-    }
-
     private void configureServerSocketChannel(ServerSocketChannel channel, Selector selector) throws IOException {
-        channel.bind(new InetSocketAddress(HOST, this.port));
+        channel.bind(new InetSocketAddress(host, this.port));
         channel.configureBlocking(false);
         channel.register(selector, SelectionKey.OP_ACCEPT);
     }
@@ -205,15 +248,15 @@ public class Server {
         return result.toString();
     }
 
-    private void writeClientOutput(SocketChannel clientChannel, String output) throws IOException {
+    private void sendResponseToClient(SocketChannel clientChannel, String output) throws IOException {
 
         int remainingOutput = output.length();
         int outputIndex = 0;
 
         while(remainingOutput != 0) {
-            boolean bufferHasEnoughSpace = remainingOutput <= BUFFER_SIZE;
+            boolean bufferHasEnoughSpace = remainingOutput <= bufferSize;
 
-            var nextReadCount = bufferHasEnoughSpace ? remainingOutput : (BUFFER_SIZE - BUFFER_CONTINUES_STRING.length());
+            var nextReadCount = bufferHasEnoughSpace ? remainingOutput : (bufferSize - channelNotEmptyString.length());
             remainingOutput -= nextReadCount;
 
             String chunk = output.substring(outputIndex, outputIndex + nextReadCount);
@@ -221,7 +264,7 @@ public class Server {
             outputIndex += nextReadCount;
 
             if (!bufferHasEnoughSpace) {
-                chunk += BUFFER_CONTINUES_STRING;
+                chunk += channelNotEmptyString;
             }
 
             buffer.clear();

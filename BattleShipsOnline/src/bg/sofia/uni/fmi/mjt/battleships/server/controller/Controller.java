@@ -1,16 +1,25 @@
 package bg.sofia.uni.fmi.mjt.battleships.server.controller;
 
-import bg.sofia.uni.fmi.mjt.battleships.common.ClientRequest;
-import bg.sofia.uni.fmi.mjt.battleships.common.ClientState;
-import bg.sofia.uni.fmi.mjt.battleships.common.ResponseStatus;
-import bg.sofia.uni.fmi.mjt.battleships.common.ServerResponse;
+import bg.sofia.uni.fmi.mjt.battleships.common.*;
 import bg.sofia.uni.fmi.mjt.battleships.server.Server;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.IDatabase;
 import bg.sofia.uni.fmi.mjt.battleships.server.ui.ScreenUI;
 
 
+import javax.naming.ldap.Control;
 import java.util.List;
 
-public class Controller {
+public abstract class Controller implements IController {
+
+    protected IDatabase db;
+
+    protected Controller(IDatabase db) {
+        this.db = db;
+    }
+
+    public IDatabase db() {
+        return db;
+    }
 
     protected ServerResponse messageResponse(ServerResponse response) {
         response.message += getScreenPrompt(response.cookies.session.currentScreen, response.cookies);

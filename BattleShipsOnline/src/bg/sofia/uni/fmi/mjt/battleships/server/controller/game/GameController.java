@@ -1,10 +1,14 @@
-package bg.sofia.uni.fmi.mjt.battleships.server.controller;
+package bg.sofia.uni.fmi.mjt.battleships.server.controller.game;
 
 import bg.sofia.uni.fmi.mjt.battleships.common.*;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.Command;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandCreator;
+import bg.sofia.uni.fmi.mjt.battleships.server.controller.Controller;
+import bg.sofia.uni.fmi.mjt.battleships.server.controller.IController;
+import bg.sofia.uni.fmi.mjt.battleships.server.controller.guest.home.GuestHomeController;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.Database;
+import bg.sofia.uni.fmi.mjt.battleships.server.database.IDatabase;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.*;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.board.ship.ShipStatus;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.player.board.tile.TileStatus;
@@ -17,11 +21,56 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class GameController extends Controller {
-    private Database db;
+public class GameController extends Controller implements IGameController {
 
-    public GameController(Database db) {
-        this.db = db;
+    public GameController(IDatabase db) {
+        super(db);
+    }
+
+    @Override
+    public ServerResponse respond(ClientRequest request) {
+        ServerResponse serverResponse = null;
+
+        var command = CommandCreator.newCommand(request.input());
+
+        var game = db.gameTable().games()
+            .stream().filter(x -> x.name.equals(request.cookies().game.name) &&
+                !x.gameIsEndedOrDeleted()).findFirst()
+            .get();
+
+        var curPlayer = game.getPlayer(request.cookies().player.name);
+
+        var quitStatus = game.players.stream()
+            .map(x -> x.quitStatus)
+            .filter(x -> x != QuitStatus.NONE)
+            .findFirst()
+            .orElse(null);
+
+        var tryingToQuit = quitStatus != null;
+
+        if (tryingToQuit && command.command().equals(CommandInfo.GAME_HIT)) {
+            serverResponse = respondQuitGameDenied(command, request, game, curPlayer, quitStatus);
+        }
+        else if (tryingToQuit && command.command().equals(CommandInfo.HELP)) {
+            serverResponse = helpResponse(request,
+                CommandInfo.GAME_HIT, CommandInfo.QUIT_STATUS_COMMAND_MAP.get(quitStatus), CommandInfo.HELP);
+        }
+        else if (command.command().equals(CommandInfo.GAME_HIT)) {
+            serverResponse = respondHit(command, request, game, curPlayer);
+        }
+        else if (CommandInfo.COMMAND_QUIT_STATUS_MAP.containsKey(command.command())) {
+            serverResponse = respondQuitGame(command, request, game, curPlayer, quitStatus);
+        }
+        else if (request.input().equals(CommandInfo.HELP)) {
+            serverResponse = helpResponse(request,
+                CommandInfo.GAME_HIT_VERBOSE, CommandInfo.GAME_ABANDON,
+                CommandInfo.GAME_SAVE_AND_QUIT, CommandInfo.HELP);
+        }
+        else {
+            serverResponse = invalidCommandResponse(request);
+        }
+
+        return serverResponse;
     }
 
     private ServerResponse respondQuitGame(Command command, ClientRequest request, Game game, Player curPlayer, QuitStatus quitStatus) {
@@ -76,11 +125,11 @@ public class GameController extends Controller {
             //Delete game or save game depending on the quitStatus
             if (quitStatus == QuitStatus.ABANDON) {
                 game.status = GameStatus.ENDED;
-                db.gameTable.saveGameFile(game);
+                db.gameTable().saveGameFile(game);
             }
             else if (quitStatus == QuitStatus.SAVE_AND_QUIT) {
                 game.status = GameStatus.PAUSED;
-                db.gameTable.saveGameFile(game);
+                db.gameTable().saveGameFile(game);
             }
 
             serverResponse = redirectResponse(
@@ -133,8 +182,8 @@ public class GameController extends Controller {
             .append(quitGameUI.gameQuitDeniedCurrentUser())
             .append(ScreenUI.GAME_RESUMING);
 
-        game.resumeGame();
-        game.turn = request.cookies().game.turn;
+        game.resumeGameFromQuitAttempt();
+//        game.turn = request.cookies().game.turn;
 
         serverResponse = messageResponse(
             ServerResponse
@@ -265,7 +314,7 @@ public class GameController extends Controller {
             message.append("\n").append(ScreenUI.GAME_ENDING_WINNER);
 
             //Save the finished game to a file
-            this.db.gameTable.saveGameFile(game);
+            this.db.gameTable().saveGameFile(game);
 
             request.cookies().player = null;
             request.cookies().game = null;
@@ -294,51 +343,6 @@ public class GameController extends Controller {
                     .setCookies(request.cookies())
                     .setSignals(signals)
             );
-        }
-
-        return serverResponse;
-    }
-
-    public ServerResponse respond(ClientRequest request) {
-        ServerResponse serverResponse = null;
-
-        var command = CommandCreator.newCommand(request.input());
-
-        var game = db.gameTable.games
-            .stream().filter(x -> x.name.equals(request.cookies().game.name) &&
-               !x.gameIsEndedOrDeleted()).findFirst()
-            .get();
-
-        var curPlayer = game.getPlayer(request.cookies().player.name);
-
-        var quitStatus = game.players.stream()
-            .map(x -> x.quitStatus)
-            .filter(x -> x != QuitStatus.NONE)
-            .findFirst()
-            .orElse(null);
-
-        var tryingToQuit = quitStatus != null;
-
-        if (tryingToQuit && command.command().equals(CommandInfo.GAME_HIT)) {
-            serverResponse = respondQuitGameDenied(command, request, game, curPlayer, quitStatus);
-        }
-        else if (tryingToQuit && command.command().equals(CommandInfo.HELP)) {
-            serverResponse = helpResponse(request,
-                CommandInfo.GAME_HIT, CommandInfo.QUIT_STATUS_COMMAND_MAP.get(quitStatus), CommandInfo.HELP);
-        }
-        else if (command.command().equals(CommandInfo.GAME_HIT)) {
-            serverResponse = respondHit(command, request, game, curPlayer);
-        }
-        else if (CommandInfo.COMMAND_QUIT_STATUS_MAP.containsKey(command.command())) {
-            serverResponse = respondQuitGame(command, request, game, curPlayer, quitStatus);
-        }
-        else if (request.input().equals(CommandInfo.HELP)) {
-            serverResponse = helpResponse(request,
-                CommandInfo.GAME_HIT_VERBOSE, CommandInfo.GAME_ABANDON,
-                CommandInfo.GAME_SAVE_AND_QUIT, CommandInfo.HELP);
-        }
-        else {
-            serverResponse = invalidCommandResponse(request);
         }
 
         return serverResponse;

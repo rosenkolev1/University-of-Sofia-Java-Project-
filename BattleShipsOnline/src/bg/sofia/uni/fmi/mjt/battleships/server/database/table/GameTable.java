@@ -12,8 +12,18 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GameTable extends Table {
-    public List<Game> games;
+public class GameTable extends Table<Game> implements IGameTable {
+    private List<Game> games;
+
+    @Override
+    public List<Game> games() {
+        return this.games;
+    }
+
+    @Override
+    public List<Game> entries() {
+        return this.games;
+    }
 
     public GameTable(String tablePath, String entrySeparator, String fieldSeparator) {
         super(tablePath, entrySeparator, fieldSeparator);
@@ -25,29 +35,6 @@ public class GameTable extends Table {
             .map(x -> x.id).max(Long::compare).orElse(0L) + 1;
 
         return new Game(gameId, name, playerCount, status, randomizedBoards, users);
-    }
-
-    public TableEntryInfo<Game> getGameEntryInfo(int id) {
-        var entries = getTableEntries();
-        var matchEntryIndex = -1;
-        Game targetEntry = null;
-
-        for (int i = 0; i < entries.size(); i++) {
-            var curEntry = entries.get(i);
-            var curGame = gson.fromJson(curEntry, Game.class);
-
-            if (curGame.id == id) {
-                matchEntryIndex = i;
-                targetEntry = curGame;
-                break;
-            }
-        }
-
-        return new TableEntryInfo<>(targetEntry, matchEntryIndex, entries);
-    }
-
-    public TableEntryInfo<Game> getGameEntryInfo(Game game) {
-        return getGameEntryInfo((int) game.id);
     }
 
     public void saveGameFile(Game game) {
@@ -104,5 +91,28 @@ public class GameTable extends Table {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private TableEntryInfo<Game> getGameEntryInfo(int id) {
+        var entries = getTableEntries();
+        var matchEntryIndex = -1;
+        Game targetEntry = null;
+
+        for (int i = 0; i < entries.size(); i++) {
+            var curEntry = entries.get(i);
+            var curGame = gson.fromJson(curEntry, Game.class);
+
+            if (curGame.id == id) {
+                matchEntryIndex = i;
+                targetEntry = curGame;
+                break;
+            }
+        }
+
+        return new TableEntryInfo<>(targetEntry, matchEntryIndex, entries);
+    }
+
+    private TableEntryInfo<Game> getGameEntryInfo(Game game) {
+        return getGameEntryInfo((int) game.id);
     }
 }

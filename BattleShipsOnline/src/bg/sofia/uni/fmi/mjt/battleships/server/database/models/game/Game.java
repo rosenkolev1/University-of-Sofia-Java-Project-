@@ -109,7 +109,7 @@ public class Game {
         return true;
     }
 
-    public void resumeGame(Player player) {
+    public void resumeSavedGame(Player player) {
         player.quitStatus = QuitStatus.NONE;
         this.status = GameStatus.PENDING;
 
@@ -119,10 +119,21 @@ public class Game {
         }
     }
 
-    public void resumeGame() {
-        for (var player : players) {
+    public void resumeGameFromQuitAttempt() {
+        var quitStarterIndex = -1;
+
+        for (int i = 0; i < alivePlayers().size(); i++) {
+            var player = alivePlayers().get(i);
+
+            if (player.quitStatus != QuitStatus.NONE && quitStarterIndex == -1) {
+                quitStarterIndex = i;
+            }
+
             player.quitStatus = QuitStatus.NONE;
         }
+
+        //reset the turn back to the first player who started trying to quit
+        this.turn = quitStarterIndex;
 
         changeGameStateWhenResumed();
     }

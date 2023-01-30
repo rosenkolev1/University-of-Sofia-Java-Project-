@@ -20,10 +20,11 @@ public class ConsoleClient {
     private static final int SERVER_PORT = 7777;
     private static final String SERVER_HOST = "localhost";
 
-    //This string signifies that there is more to read from the socket channel than there is space for in the buffer
-    private static final String BUFFER_CONTINUES_STRING = "#c";
     private static final int BUFFER_SIZE = 512;
     private static ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
+
+    //This string signifies that there is more to read from the socket channel than there is space for in the buffer
+    private static String BUFFER_CONTINUES_STRING = null;
 
     private final SocketChannel socketChannel;
     private final PrintWriter writer;
@@ -52,7 +53,13 @@ public class ConsoleClient {
             var client = new ConsoleClient(socketChannel, writer, scanner);
 
             //Send initial request and set initial client state
-            var initialServerResponse = client.sendAndReceiveInitialHandler();
+            //Also set the bufferContinuesString to the initialServerResponse message
+            var initialServerResponse = client.sendAndReceiveNoInput();
+            client.cookies = initialServerResponse.cookies;
+            BUFFER_CONTINUES_STRING = initialServerResponse.message;
+
+            //Now get the first screen info
+            client.sendAndReceiveNoInputDefaultHandler();
 
             var currentScreenHandler = new ScreenHandler(client, client.cookies.session.currentScreen);
 
@@ -104,7 +111,7 @@ public class ConsoleClient {
         return receiveSignalDefaultHandler();
     }
 
-    public ServerResponse receiveSignalDefaultHandler() throws IOException {
+    private ServerResponse receiveSignalDefaultHandler() throws IOException {
         var serverResponseRaw = receiveFromServer(socketChannel);
 
         var serverResponse = gson.fromJson(serverResponseRaw, ServerResponse.class);
@@ -114,7 +121,7 @@ public class ConsoleClient {
         return serverResponse;
     }
 
-    public ServerResponse sendAndReceiveDefaultHandler() throws IOException {
+    private ServerResponse sendAndReceiveDefaultHandler() throws IOException {
         var serverResponse = sendAndReceive();
 
         actOnResponseDefault(serverResponse);
@@ -122,8 +129,8 @@ public class ConsoleClient {
         return serverResponse;
     }
 
-    private ServerResponse sendAndReceiveInitialHandler() throws IOException {
-        var initialServerResponse = this.sendAndReceiveInitial();
+    private ServerResponse sendAndReceiveNoInputDefaultHandler() throws IOException {
+        var initialServerResponse = this.sendAndReceiveNoInput();
 
         actOnResponseDefault(initialServerResponse);
 
@@ -153,7 +160,7 @@ public class ConsoleClient {
         return serverResponse;
     }
 
-    private ServerResponse sendAndReceiveInitial() throws IOException {
+    private ServerResponse sendAndReceiveNoInput() throws IOException {
         var request = new ClientRequest(null, cookies);
 
         return sendRequestAndReceive(request);
@@ -195,7 +202,7 @@ public class ConsoleClient {
 
             String replyChunk = new String(byteArray, "UTF-8");
 
-            if (replyChunk.endsWith(BUFFER_CONTINUES_STRING)) {
+            if (BUFFER_CONTINUES_STRING != null && replyChunk.endsWith(BUFFER_CONTINUES_STRING)) {
 
                 //Strip away the continues string
                 replyChunk = replyChunk.substring(0, replyChunk.lastIndexOf(BUFFER_CONTINUES_STRING));

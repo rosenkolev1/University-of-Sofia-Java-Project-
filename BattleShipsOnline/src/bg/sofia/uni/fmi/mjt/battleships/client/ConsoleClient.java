@@ -71,6 +71,7 @@ public class ConsoleClient {
                 //Handle screen change
                 currentScreenHandler.setHandler(client.cookies.session.currentScreen);
             }
+
         }
         catch (IOException e) {
             throw new RuntimeException("There is a problem with the network communication", e);

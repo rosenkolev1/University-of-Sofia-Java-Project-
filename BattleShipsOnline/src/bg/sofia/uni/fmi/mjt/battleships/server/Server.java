@@ -185,9 +185,12 @@ public class Server {
 
             int readBytes = clientChannel.read(buffer);
 
-            if (readBytes <= 0) {
-//                clientChannel.close();
-//                return null;
+            if (readBytes < 0) {
+                clientChannel.close();
+                return null;
+            }
+
+            if (readBytes == 0) {
                 break;
             }
 

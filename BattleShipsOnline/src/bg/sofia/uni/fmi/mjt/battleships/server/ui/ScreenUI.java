@@ -2,6 +2,7 @@ package bg.sofia.uni.fmi.mjt.battleships.server.ui;
 
 import bg.sofia.uni.fmi.mjt.battleships.common.cookie.ClientState;
 import bg.sofia.uni.fmi.mjt.battleships.common.cookie.PlayerCookie;
+import bg.sofia.uni.fmi.mjt.battleships.common.request.ClientRequest;
 import bg.sofia.uni.fmi.mjt.battleships.common.screen.ScreenInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.command.CommandInfo;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.models.game.Game;
@@ -195,6 +196,23 @@ public class ScreenUI {
         }
     );
 
+    public static String invalidScreenPromptDefault(String screen, ClientState expectedCookies) {
+        return ScreenUI.invalidWithHelp(ScreenUI.INVALID_COMMAND) + ScreenUI.getScreenPrompt(screen, expectedCookies);
+    }
+
+    public static String invalidScreenPrompt(String invalidMessage, String screen, ClientState expectedCookies) {
+        return invalidMessage + ScreenUI.getScreenPrompt(screen, expectedCookies);
+    }
+
+    public static String helpScreenPrompt(ClientRequest request, String... commands) {
+        return ScreenUI.getAvailableCommands(commands) + ScreenUI.getScreenPrompt(request.cookies().session.currentScreen, request.cookies());
+    }
+
+    public static String getScreenPrompt(String screen, ClientState cookies) {
+        var screenPrompt = ScreenUI.SCREENS_PROMPTS.get(screen).apply(cookies);
+        return "-".repeat(100) + (screenPrompt == null ? "" : screenPrompt);
+    }
+
     public static String opponentJoinedGame(String opponentName) {
         return String.format(ScreenUI.GAME_JOINED_OPPONENT, opponentName);
     }
@@ -291,7 +309,7 @@ public class ScreenUI {
 
     public static StringBuilder witnessMessage(String attacker, String defender, String tilePos,
                                                boolean hasHitShip, boolean hasSunkShip, boolean defenderIsDead) {
-        //TODO: Right now, if the game has more than 2 players, player A will be able to tell on which tiles player B has hit player C.
+
         StringBuilder message = new StringBuilder(String.format(ScreenUI.GAME_WITNESS_ATTACK_TEMPLATE, attacker, defender));
 
         if (!hasHitShip) {

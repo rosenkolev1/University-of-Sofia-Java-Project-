@@ -96,8 +96,6 @@ public class GameController extends Controller implements IGameController {
             return serverResponse;
         }
 
-        //Validate that the game can be quit (meaning that no other player has already )
-
         //Validate that the quit command is valid for the quitStatus
         if (quitStatus != null &&
             quitStatus != QuitStatus.NONE &&
@@ -325,7 +323,6 @@ public class GameController extends Controller implements IGameController {
             serverResponse = redirectResponse(ScreenInfo.HOME_SCREEN, request, message.toString(), signals);
         }
         else {
-            //TODO: Right now, if the game has more than 2 players, player A will be able to tell on which tiles player B has hit player C.
             var enemyBoardWithFogOfWar = enemyBoard.boardWithFogOfWar();
 
             var curPlayerBoard = curPlayer.board;

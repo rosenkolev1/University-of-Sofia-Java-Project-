@@ -1,8 +1,12 @@
 package bg.sofia.uni.fmi.mjt.battleships.common.response;
 
 import bg.sofia.uni.fmi.mjt.battleships.common.cookie.ClientState;
+import bg.sofia.uni.fmi.mjt.battleships.common.cookie.GameCookie;
+import bg.sofia.uni.fmi.mjt.battleships.common.list.ListUtil;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 public class ServerResponse {
 
@@ -28,6 +32,22 @@ public class ServerResponse {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        }
+
+        if (!(other instanceof ServerResponse castOther)) {
+            return false;
+        }
+
+        return Objects.equals(this.message, castOther.message) &&
+            this.status == castOther.status &&
+            Objects.equals(this.cookies, castOther.cookies) &&
+            ListUtil.haveSameElements(this.signals, castOther.signals);
     }
 
     public static class Builder {

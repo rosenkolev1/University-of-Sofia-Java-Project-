@@ -1,7 +1,10 @@
 package bg.sofia.uni.fmi.mjt.battleships.common.cookie;
 
+import bg.sofia.uni.fmi.mjt.battleships.common.list.ListUtil;
+
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 public class GameCookie {
     public final String name;
@@ -43,10 +46,9 @@ public class GameCookie {
             return false;
         }
 
-        return this.name.equals(castOther.name) &&
+        return Objects.equals(this.name, castOther.name) &&
             this.turn == castOther.turn &&
-            new HashSet<>(this.playersInfo).containsAll(castOther.playersInfo) &&
-            new HashSet<>(castOther.playersInfo).containsAll(this.playersInfo) &&
-            this.quitPlayer.equals(castOther.quitPlayer);
+            Objects.equals(this.quitPlayer, castOther.quitPlayer) &&
+            ListUtil.haveSameElements(this.playersInfo, castOther.playersInfo);
     }
 }

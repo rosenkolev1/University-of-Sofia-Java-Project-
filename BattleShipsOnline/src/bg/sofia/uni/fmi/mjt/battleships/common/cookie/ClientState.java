@@ -1,5 +1,7 @@
 package bg.sofia.uni.fmi.mjt.battleships.common.cookie;
 
+import java.util.Objects;
+
 public class ClientState {
     public SessionCookie session;
     public PlayerCookie player;
@@ -25,8 +27,8 @@ public class ClientState {
             return false;
         }
 
-        return this.session.equals(castOther.session) &&
-            this.player.equals(castOther.player) &&
-            this.game.equals(castOther.game);
+        return Objects.equals(this.session, castOther.session) &&
+            Objects.equals(this.player, castOther.player) &&
+            Objects.equals(this.game, castOther.game);
     }
 }

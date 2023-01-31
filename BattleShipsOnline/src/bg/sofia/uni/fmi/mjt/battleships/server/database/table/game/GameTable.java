@@ -9,6 +9,7 @@ import bg.sofia.uni.fmi.mjt.battleships.server.database.table.entry.TableEntryIn
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,11 @@ public class GameTable extends Table<Game> implements IGameTable {
     @Override
     public List<Game> entries() {
         return this.games;
+    }
+
+    public GameTable(Path tablePath, String entrySeparator, String fieldSeparator) {
+        super(tablePath, entrySeparator, fieldSeparator);
+        initialiseGames();
     }
 
     public GameTable(String tablePath, String entrySeparator, String fieldSeparator) {

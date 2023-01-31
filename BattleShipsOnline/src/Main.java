@@ -31,7 +31,6 @@ public class Main {
             .addController(HomeController.class)
             .addController(GameController.class);
 
-
         var server = new Server(serverOptions);
 
         server.start();

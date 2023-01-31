@@ -49,10 +49,6 @@ public class Server {
     private Selector selector;
 
     private final IDatabase db;
-//    private final IGuestHomeController guestHomeController;
-//    private final IUserController userController;
-//    private final IHomeController homeController;
-//    private final IGameController gameController;
 
     private Map<String, Function<ControllerRespondArgs, ServerResponse>> screenToHandlerMap;
 
@@ -69,12 +65,6 @@ public class Server {
 
         screenToHandlerMap = new HashMap<>();
 
-//        IGuestHomeController tempGuestHomeController = null;
-//        IUserController tempUserController = null;
-//        IHomeController tempHomeController = null;
-//        IGameController tempGameController = null;
-
-        //TODO: Change to be more generic
         for (var controller : options.controllers()) {
             var respondMethods = Arrays.stream(controller.getClass().getMethods())
                 .filter(x -> x.isAnnotationPresent(Screen.class)).toList();
@@ -107,11 +97,6 @@ public class Server {
                 screenToHandlerMap.put(methodScreen, functionScreenHandler);
             }
         }
-//
-//        this.guestHomeController = tempGuestHomeController;
-//        this.userController = tempUserController;
-//        this.homeController = tempHomeController;
-//        this.gameController = tempGameController;
     }
 
     public void start() throws Exception {
@@ -175,8 +160,6 @@ public class Server {
                                         }
                                     }
                                 }
-                                //Print the server response for debug purposes
-//                                System.out.println(serverResponse);
 
                                 var serverResponseJson = gson.toJson(serverResponse);
 
@@ -235,37 +218,6 @@ public class Server {
         var serverResponse = screenToHandlerMap.get(clientRequest.cookies().session.currentScreen).apply(controllerRespondArgs);
 
         return serverResponse;
-//        if (clientRequest.cookies().session == null) {
-//            return guestHomeController.initialResponse(clientRequest, channelNotEmptyString);
-//        }
-//        else if (clientRequest.cookies().session.currentScreen.equals(ScreenInfo.GUEST_HOME_SCREEN)) {
-//            return guestHomeController.respond(clientRequest);
-//        }
-//        else if (clientRequest.cookies().session.currentScreen.equals(ScreenInfo.LOGIN_SCREEN)) {
-//            List<SessionCookie> sessions = new ArrayList<>();
-//
-//            //Get all the currently logged users' cookies
-//            for (var selectionKey : selector.keys()) {
-//                var cookies = (ClientState)selectionKey.attachment();
-//
-//                if (cookies != null) {
-//                    sessions.add(cookies.session);
-//                }
-//            }
-//
-//            return userController.loginRespond(sessions, clientRequest);
-//        }
-//        else if (clientRequest.cookies().session.currentScreen.equals(ScreenInfo.REGISTER_SCREEN)) {
-//            return userController.registerRespond(clientRequest);
-//        }
-//        else if (clientRequest.cookies().session.currentScreen.equals(ScreenInfo.HOME_SCREEN)) {
-//            return homeController.respond(clientRequest);
-//        }
-//        else if (clientRequest.cookies().session.currentScreen.equals(ScreenInfo.GAME_SCREEN)) {
-//            return gameController.respond(clientRequest);
-//        }
-
-//        throw new RuntimeException("An fatal error has occurred! The client's current screen does not exist!");
     }
 
     private void configureServerSocketChannel(ServerSocketChannel channel, Selector selector) throws IOException {

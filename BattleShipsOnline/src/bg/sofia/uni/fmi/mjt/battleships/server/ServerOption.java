@@ -41,10 +41,6 @@ public class ServerOption {
     private Gson gson;
 
     private IDatabase db;
-//    private IGuestHomeController guestHomeController;
-//    private IUserController userController;
-//    private IHomeController homeController;
-//    private IGameController gameController;
 
     private List<IController> controllerList;
 

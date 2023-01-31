@@ -1,8 +1,8 @@
 package bg.sofia.uni.fmi.mjt.battleships.common.cookie;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import bg.sofia.uni.fmi.mjt.battleships.common.list.ListUtil;
+
+import java.util.*;
 
 public class PlayerCookie {
     public String name;
@@ -42,11 +42,10 @@ public class PlayerCookie {
             return false;
         }
 
-        return this.name.equals(castOther.name) &&
+        return Objects.equals(this.name, castOther.name) &&
             this.myTurn == castOther.myTurn &&
             this.playerStatusCode == castOther.playerStatusCode &&
             this.quitStatusCode == castOther.quitStatusCode &&
-            new HashSet<>(this.moves).containsAll(castOther.moves) &&
-            new HashSet<>(castOther.moves).containsAll(this.moves);
+            ListUtil.haveSameElements(this.moves, castOther.moves);
     }
 }

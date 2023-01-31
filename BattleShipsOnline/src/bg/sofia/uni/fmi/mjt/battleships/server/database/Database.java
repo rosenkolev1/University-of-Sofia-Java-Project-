@@ -4,8 +4,6 @@ import bg.sofia.uni.fmi.mjt.battleships.server.database.table.game.IGameTable;
 import bg.sofia.uni.fmi.mjt.battleships.server.database.table.user.IUserTable;
 
 public class Database implements IDatabase {
-//    private static final String defaultEntrySeparator = "\n";
-//    private static final String defaultFieldSeparator = " ";
     private IUserTable userTable;
 
     private IGameTable gameTable;
@@ -24,15 +22,5 @@ public class Database implements IDatabase {
     public IGameTable gameTable() {
         return this.gameTable;
     }
-
-//    public Database(IUserTable userTable, IGameTable gameTable, String usersPath, String gamesPath, String entrySeparator, String fieldSeparator) {
-////        this.userTable = new UserTable(usersPath, entrySeparator, fieldSeparator);
-////        this.gameTable = new GameTable(gamesPath, entrySeparator, fieldSeparator);
-//
-//    }
-
-//    public Database(String usersPath, String gamesPath) {
-//        this(usersPath, gamesPath, defaultEntrySeparator, defaultFieldSeparator);
-//    }
 
 }

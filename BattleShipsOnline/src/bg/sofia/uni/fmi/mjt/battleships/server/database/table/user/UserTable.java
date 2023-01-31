@@ -5,6 +5,7 @@ import bg.sofia.uni.fmi.mjt.battleships.server.database.table.Table;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,11 @@ public class UserTable extends Table<User> implements IUserTable {
     @Override
     public List<User> entries() {
         return this.users;
+    }
+
+    public UserTable(Path tablePath, String entrySeparator, String fieldSeparator) {
+        super(tablePath, entrySeparator, fieldSeparator);
+        initialiseUsers();
     }
 
     public UserTable(String tablePath, String entrySeparator, String fieldSeparator) {

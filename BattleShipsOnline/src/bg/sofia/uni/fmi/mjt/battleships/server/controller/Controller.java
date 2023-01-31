@@ -18,12 +18,8 @@ public abstract class Controller implements IController {
         this.db = db;
     }
 
-    public IDatabase db() {
-        return db;
-    }
-
     protected ServerResponse messageResponse(ServerResponse response) {
-        response.message += getScreenPrompt(response.cookies.session.currentScreen, response.cookies);
+        response.message += ScreenUI.getScreenPrompt(response.cookies.session.currentScreen, response.cookies);
         return response;
     }
 
@@ -32,14 +28,8 @@ public abstract class Controller implements IController {
         return messageResponse(response);
     }
 
-    protected String getScreenPrompt(String screen, ClientState cookies) {
-        var screenPrompt = ScreenUI.SCREENS_PROMPTS.get(screen).apply(cookies);
-        return "-".repeat(100) + (screenPrompt == null ? "" : screenPrompt);
-    }
-
     protected ServerResponse helpResponse(ClientRequest request, String... commands) {
-        return new ServerResponse(ResponseStatus.OK,
-            ScreenUI.getAvailableCommands(commands) + getScreenPrompt(request.cookies().session.currentScreen, request.cookies()),
+        return new ServerResponse(ResponseStatus.OK, ScreenUI.helpScreenPrompt(request, commands),
             request.cookies());
     }
 
@@ -47,7 +37,7 @@ public abstract class Controller implements IController {
         if (response.message == null) response.message = "";
 
         response.cookies.session.currentScreen = screen;
-        response.message += getScreenPrompt(screen, response.cookies);
+        response.message += ScreenUI.getScreenPrompt(screen, response.cookies);
 
         return response;
     }
@@ -85,7 +75,6 @@ public abstract class Controller implements IController {
     }
 
     protected ServerResponse invalidCommandResponse(ServerResponse response) {
-        response.message += getScreenPrompt(response.cookies.session.currentScreen, response.cookies);
         response.status = ResponseStatus.INVALID_COMMAND;
         return response;
     }
@@ -106,7 +95,7 @@ public abstract class Controller implements IController {
         return invalidCommandResponse(
             ServerResponse
                 .builder()
-                .setMessage(message)
+                .setMessage(ScreenUI.invalidScreenPrompt(message, cookies.session.currentScreen, cookies))
                 .setCookies(cookies)
         );
     }

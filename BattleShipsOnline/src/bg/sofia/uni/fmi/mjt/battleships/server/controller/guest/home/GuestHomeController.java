@@ -57,7 +57,7 @@ public class GuestHomeController extends Controller implements IGuestHomeControl
         request.cookies().session.currentScreen = ScreenInfo.GUEST_HOME_SCREEN;
 
         //The message of this response is the string which indicates to the client that the channel is not empty after reading chars from it
-        //If the server buffer is not large enough to send all of the data at once
+        //If the server buffer is not large enough to send all the data at once
         return ServerResponse
             .builder()
             .setCookies(request.cookies())

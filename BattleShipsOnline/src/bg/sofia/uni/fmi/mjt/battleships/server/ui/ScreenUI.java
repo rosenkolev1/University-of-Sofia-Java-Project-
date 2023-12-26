@@ -315,11 +315,11 @@ public class ScreenUI {
         if (!hasHitShip) {
             message.append(String.format(ScreenUI.GAME_WITNESS_HIT_MISSED_TEMPLATE, attacker, tilePos));
         }
-        else if (hasHitShip) {
-            message.append(String.format(ScreenUI.GAME_WITNESS_SHIP_HIT_TEMPLATE, attacker, tilePos));
-        }
         else if (hasSunkShip) {
             message.append(String.format(ScreenUI.GAME_WITNESS_SHIP_SUNK_TEMPLATE, attacker, tilePos));
+        }
+        else if (hasHitShip) {
+            message.append(String.format(ScreenUI.GAME_WITNESS_SHIP_HIT_TEMPLATE, attacker, tilePos));
         }
         if (defenderIsDead) {
             message.append(String.format(ScreenUI.GAME_WITNESS_PLAYER_DEAD_TEMPLATE, attacker, defender));

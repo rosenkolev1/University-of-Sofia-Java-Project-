@@ -15,7 +15,7 @@ public class Main {
     public static void main(String[] args)
         throws Exception {
 
-        IUserTable userTable = new UserTable("users.txt", "\n", " ");
+        IUserTable userTable = new UserTable("users.txt",  "\n", " ");
         IGameTable gameTable = new GameTable("games.txt", "\n", " ");
         var database = new Database(userTable, gameTable);
 

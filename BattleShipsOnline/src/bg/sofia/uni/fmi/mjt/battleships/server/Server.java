@@ -329,8 +329,8 @@ public class Server {
 
                 writer.append("\n");
 
-                System.out.println("Successfully saved the error to a log file!\n");
-                System.out.println("Contact administrator by providing the logs in \"logs.txt\"");
+                System.out.println("Successfully saved the error to a server_errors_log file!\n");
+//                System.out.println("Contact administrator by providing the logs in \"logs.txt\"");
             }
             catch (Exception ex) {
                 System.out.println("Could not save the error to a log file because an unknown error has occurred!");

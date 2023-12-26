@@ -368,7 +368,6 @@ public class UserControllerTest extends ControllerTest {
         when(userTable.userExistWithPassword(any()))
             .thenReturn(true);
 
-
         controller = new UserController(db);
 
         var clientRequest = new ClientRequest("roskata hahahahaha", new ClientState(

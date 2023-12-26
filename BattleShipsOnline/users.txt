@@ -1,5 +1,7 @@
 {"username":"roskata","password":"12345678"}
 {"username":"stefan","password":"abcdefgh"}
-{"username":"kur","password":"kurkurkur"}
+{"username":"rosen","password":"123456789"}
+{"username":"kris","password":"lollolol"}
 {"username":"nov","password":"novnovnov"}
-{"username":"new","password":"newnewnew"}
+{"username":"roskata_pi4","password":"pi4aga123"}
+{"username":"someone","password":"something"}

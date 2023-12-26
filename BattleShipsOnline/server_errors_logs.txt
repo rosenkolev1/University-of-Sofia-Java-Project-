@@ -215,3 +215,24 @@ java.lang.IllegalArgumentException: wrong number of arguments: 1 expected: 2
 	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:153)
 	at Main.main(Main.java:37)
 
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:401)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:434)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.getClientInput(Server.java:235)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:125)
+	at Main.main(Main.java:36)
+
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:401)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:434)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.getClientInput(Server.java:235)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:125)
+	at Main.main(Main.java:36)
+
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:401)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:434)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.getClientInput(Server.java:235)
+	at bg.sofia.uni.fmi.mjt.battleships.server.Server.start(Server.java:125)
+	at Main.main(Main.java:36)
+
